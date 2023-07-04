@@ -4,8 +4,8 @@ import com.topper.scengine.ScriptCommand;
 
 public final class ExecutionState extends CommandState {
 
-	public ExecutionState(final ExecutionDriver driver) {
-		super(driver);
+	public ExecutionState(final ScriptContext context) {
+		super(context);
 	}
 
 	@Override

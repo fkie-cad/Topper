@@ -11,12 +11,13 @@ import com.topper.exceptions.IllegalCommandException;
 import com.topper.scengine.ScriptCommand;
 import com.topper.scengine.ScriptCommandParser;
 import com.topper.scengine.ScriptParser;
+import com.topper.sstate.ScriptContext;
 
 public class TestScriptParser {
 	
 	private static class TestCommand implements ScriptCommand {
 		@Override
-		public void execute() {
+		public void execute(ScriptContext context) {
 			
 		}
 	}
@@ -24,13 +25,19 @@ public class TestScriptParser {
 	private static class TestCommandParser implements ScriptCommandParser {
 		@Override
 		public ScriptCommand parse(final String[] tokens) {
-			return new TestCommand();
+			throw new UnsupportedOperationException("TODO: Add tests for new parser/command interface");
+			//return new TestCommand();
+		}
+
+		@Override
+		public String usage() {
+			return null;
 		}
 	}
 	
 	private static class OtherCommand implements ScriptCommand {
 		@Override
-		public void execute() {
+		public void execute(ScriptContext context) {
 			
 		}
 	}
@@ -39,6 +46,11 @@ public class TestScriptParser {
 		@Override
 		public ScriptCommand parse(final String[] tokens) {
 			return new OtherCommand();
+		}
+
+		@Override
+		public String usage() {
+			return null;
 		}
 	}
 	

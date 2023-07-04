@@ -57,7 +57,7 @@ public final class ScriptParser {
 	 * trimming to identify the tokens of a command. The first token of each command
 	 * dictates the subclass of <code>ScriptCommand</code> used to hold the data.
 	 * 
-	 * All commands in <code>script</code> must be valid in order to execute the
+	 * All commands in <code>script</code> must be valid in order to execute any
 	 * commands. This is <b>not</b> an interpreter, which executes all commands
 	 * up to an invalid command.
 	 * 
@@ -83,7 +83,7 @@ public final class ScriptParser {
 		for (int i = 0; i < commands.length; i++) {
 			
 			// Commands might contain noisy whitespaces
-			command = commands[i].replace(" +", " ").trim();
+			command = commands[i].trim().replace(" +", " ");
 			
 			// Grab actual command tokens
 			tokens = command.split(" ");

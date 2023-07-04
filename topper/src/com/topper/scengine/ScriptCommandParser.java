@@ -1,5 +1,7 @@
 package com.topper.scengine;
 
+import com.topper.exceptions.IllegalCommandException;
+
 /**
  * 
  * 
@@ -17,8 +19,6 @@ public interface ScriptCommandParser {
 	 * Constructs a <code>ScriptCommand</code> object from an
 	 * array of <code>String</code>s.
 	 * 
-	 * 
-	 * 
 	 * @param tokens Tokens of a command to be
 	 * 				  interpreted as this command.
 	 * @return Object representation of <code>tokens</code>.
@@ -26,5 +26,13 @@ public interface ScriptCommandParser {
 	 * 	fails, because <code>tokens</code> violates some use-case
 	 * 	rules.
 	 */
-	ScriptCommand parse(final String[] tokens);
+	ScriptCommand parse(final String[] tokens) throws IllegalCommandException;
+	
+	/**
+	 * Fixes a user - readable format of the command that this
+	 * parser parses.
+	 * 
+	 * @return Human - readable command format.
+	 * */
+	String usage();
 }

@@ -5,15 +5,15 @@ import com.topper.scengine.ScriptCommand;
 
 public abstract class CommandState {
 	
-	private final ExecutionDriver driver;
+	private final ScriptContext context;
 	
-	public CommandState(final ExecutionDriver driver) {
-		this.driver = driver;
+	public CommandState(final ScriptContext context) {
+		this.context = context;
 	}
 
 	public abstract void execute(final ScriptCommand command) throws InvalidStateTransitionException;
 	
-	public final ExecutionDriver getContext() {
-		return this.driver;
+	public final ScriptContext getContext() {
+		return this.context;
 	}
 }

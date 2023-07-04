@@ -5,8 +5,8 @@ import com.topper.scengine.ScriptCommand;
 
 public final class TerminationState extends CommandState {
 
-	public TerminationState(final ExecutionDriver driver) {
-		super(driver);
+	public TerminationState(final ScriptContext context) {
+		super(context);
 	}
 
 	@Override

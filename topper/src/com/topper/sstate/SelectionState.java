@@ -6,8 +6,8 @@ import com.topper.scengine.ScriptCommand;
 
 public final class SelectionState extends CommandState {
 
-	public SelectionState(final ExecutionDriver driver) {
-		super(driver);
+	public SelectionState(final ScriptContext context) {
+		super(context);
 	}
 
 	@Override
@@ -18,7 +18,7 @@ public final class SelectionState extends CommandState {
 		}
 		
 		// Only allowed command at the beginning is "file".
-		command.execute();
+		command.execute(this.getContext());
 		
 		this.getContext().changeState(new ExecutionState(this.getContext()));
 	}
