@@ -7,6 +7,8 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.exceptions.IllegalCommandException;
+import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.ScriptCommandParser;
 
 public final class ScriptParser {
 
@@ -40,7 +42,7 @@ public final class ScriptParser {
 	 * 	<code>null</code>.
 	 * @see ScriptCommand
 	 * */
-	private final ScriptCommandParser findParserByString(final String command) {
+	public final ScriptCommandParser findParserByString(final String command) {
 		
 		if (!this.parserMap.containsKey(command.toUpperCase())) {
 			return null;

@@ -8,9 +8,9 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.exceptions.IllegalCommandException;
-import com.topper.scengine.ScriptCommand;
-import com.topper.scengine.ScriptCommandParser;
 import com.topper.scengine.ScriptParser;
+import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.ScriptCommandParser;
 import com.topper.sstate.ScriptContext;
 
 public class TestScriptParser {

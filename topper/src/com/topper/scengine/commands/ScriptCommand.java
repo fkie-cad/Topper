@@ -1,5 +1,8 @@
-package com.topper.scengine;
+package com.topper.scengine.commands;
 
+import java.io.IOException;
+
+import com.topper.exceptions.CommandException;
 import com.topper.sstate.ScriptContext;
 
 public interface ScriptCommand {
@@ -9,6 +12,8 @@ public interface ScriptCommand {
 	 * the implementing subclass and the <code>context</code>.
 	 * 
 	 * @param context Execution context of this command.
+	 * @throws CommandException If execution fails.
+	 * @throws IOException 
 	 * */
-	void execute(final ScriptContext context);
+	void execute(final ScriptContext context) throws CommandException, IOException;
 }

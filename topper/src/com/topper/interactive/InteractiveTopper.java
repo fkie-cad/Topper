@@ -5,11 +5,13 @@ import java.io.IOException;
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.TopperConfig;
 import com.topper.exceptions.CommandException;
-import com.topper.scengine.ExitCommandParser;
-import com.topper.scengine.FileCommandParser;
-import com.topper.scengine.ScriptCommand;
+import com.topper.exceptions.StateException;
 import com.topper.scengine.ScriptExecutor;
 import com.topper.scengine.ScriptParser;
+import com.topper.scengine.commands.ExitCommandParser;
+import com.topper.scengine.commands.FileCommandParser;
+import com.topper.scengine.commands.HelpCommandParser;
+import com.topper.scengine.commands.ScriptCommand;
 import com.topper.sstate.ScriptContext;
 
 public final class InteractiveTopper {
@@ -36,47 +38,54 @@ public final class InteractiveTopper {
 		
 		// Set up IO
 		final IOManager io = new IOManager();
-		
-		// Create command parser and executor
-		final ScriptParser parser = new ScriptParser();
-		final ScriptExecutor executor = new ScriptExecutor();
-		
-		// Register commands with parser
-		parser.registerParser("file", new FileCommandParser());
-		parser.registerParser("exit", new ExitCommandParser());
-		
-		// Prepare execution context
-		final ScriptContext context = new ScriptContext(this.config, io);
-		
-		// Loop
-		String command;
-		ImmutableList<ScriptCommand> commands;
-		while (!context.isTerminationState()) {
+		try {
 			
 			
-			// TODO: If context has loaded file, then print file name. Otherwise empty string
-			io.output(String.format(LINE_PREFIX, ""));
+			// Create command parser.
+			final ScriptParser parser = new ScriptParser();
 			
-			// Get input line
-			command = io.inputLine();
+			// Create context and executor
+			final ScriptContext context = new ScriptContext(this.config, io, parser);
+			final ScriptExecutor executor = new ScriptExecutor(context);
 			
-			try {
+			// Register commands with parser
+			parser.registerParser("file", new FileCommandParser());
+			parser.registerParser("exit", new ExitCommandParser());
+			parser.registerParser("help", new HelpCommandParser());
+			
+			// Loop
+			String command;
+			ImmutableList<ScriptCommand> commands;
+			while (!context.isTerminationState()) {
 				
-				// Parse command. Treat each line as a one - line script.
-				commands = parser.parse(command);
+				// TODO: If context has loaded file, then print file name. Otherwise empty string
+				io.output(String.format(LINE_PREFIX, ""));
 				
-				// Execute commands. Results are made visible through io
-				// and changes in the context.
-				executor.execute(context, commands);
+				// Get input line
+				command = io.inputLine();
 				
-			} catch (final CommandException e) {
-				// Distinguishing between output and error allows for
-				// discarding error messages in scripts etc.
-				io.error(e.getMessage() + System.lineSeparator());
+				try {
+					
+					// Parse command. Treat each line as a one - line script.
+					commands = parser.parse(command);
+					
+					// Execute commands. Results are made visible through io
+					// and changes in the context.
+					executor.execute(context, commands);
+					
+				} catch (final CommandException | StateException e) {
+					// Distinguishing between output and error allows for
+					// discarding error messages in scripts etc.
+					io.error(e.getMessage() + System.lineSeparator());
+				}
 			}
-		}
 		
-		// Clean up
-		io.close();
+		} catch (final Exception e) {
+			// Unrecoverable exception. Hopefully stderr still works
+			System.err.println("Fatal error occurred: " + e.getMessage());
+		} finally {
+			// Clean up
+			io.close();
+		}
 	}
 }

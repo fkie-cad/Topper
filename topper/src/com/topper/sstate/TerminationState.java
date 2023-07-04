@@ -1,7 +1,11 @@
 package com.topper.sstate;
 
+import java.io.IOException;
+
+import com.google.common.collect.ImmutableList;
+import com.topper.exceptions.CommandException;
 import com.topper.exceptions.InvalidStateTransitionException;
-import com.topper.scengine.ScriptCommand;
+import com.topper.scengine.commands.ScriptCommand;
 
 public final class TerminationState extends CommandState {
 
@@ -10,7 +14,14 @@ public final class TerminationState extends CommandState {
 	}
 
 	@Override
-	public final void execute(final ScriptCommand command) throws InvalidStateTransitionException {
+	public final ImmutableList<Class<? extends ScriptCommand>> getAvailableCommands() {
+		return ImmutableList.of();
+	}
+
+	@Override
+	public final void executeCommand(ScriptCommand command)
+			throws InvalidStateTransitionException, CommandException, IOException {
+		// Should be unreachable...
 		throw new InvalidStateTransitionException("Cannot execute command in termination state.");
 	}
 }

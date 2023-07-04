@@ -1,13 +1,19 @@
 package com.topper.scengine;
 
+import java.io.IOException;
+
 import com.google.common.collect.ImmutableList;
+import com.topper.exceptions.CommandException;
+import com.topper.exceptions.InvalidStateTransitionException;
+import com.topper.scengine.commands.ScriptCommand;
 import com.topper.sstate.ScriptContext;
 
 public final class ScriptExecutor {
 
-
-	public ScriptExecutor() {
-		
+	private final ScriptContext context;
+	
+	public ScriptExecutor(final ScriptContext context) {
+		this.context = context;
 	}
 
 	/**
@@ -22,12 +28,14 @@ public final class ScriptExecutor {
 	 * @param context Context of the script engine before executing
 	 * 	<code>commands</code>.
 	 * @param commands List of <code>ScriptCommand</code>s to execute.
+	 * @throws CommandException, IOException 
+	 * @throws InvalidStateTransitionException 
 	 * */
-	public final void execute(final ScriptContext context, final ImmutableList<ScriptCommand> commands) {
+	public final void execute(final ScriptContext context, final ImmutableList<ScriptCommand> commands) throws CommandException, IOException, InvalidStateTransitionException {
 		
 		// Naively execute each command
 		for (final ScriptCommand command : commands) {
-			command.execute(context);
+			this.context.getCurrentState().execute(command);
 		}
 	}
 }
