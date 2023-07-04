@@ -54,7 +54,7 @@ public final class FileCommandParser implements ScriptCommandParser {
 			return new FileCommand(file);
 			
 		} catch (final IOException e) {
-			throw new IllegalCommandException("Verification of " + fileName + " failed.", e);
+			throw new IllegalCommandException("Verification of file " + fileName + " failed.", e);
 		}
 	}
 	

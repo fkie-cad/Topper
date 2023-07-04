@@ -16,4 +16,8 @@ public abstract class CommandState {
 	public final ScriptContext getContext() {
 		return this.context;
 	}
+	
+	public final void terminate() {
+		this.context.changeState(new TerminationState(this.context));
+	}
 }

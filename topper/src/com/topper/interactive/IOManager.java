@@ -129,6 +129,30 @@ public final class IOManager {
 	}
 	
 	/**
+	 * Closes any stream that is neither stdin, stdout nor stderr.
+	 * */
+	public final void close() {
+		
+		if (!this.inputStream.equals(System.in)) {
+			try {
+				this.inputStream.close();
+			} catch (IOException ignored) {}
+		}
+		
+		if (!this.outputStream.equals(System.out)) {
+			try {
+				this.outputStream.close();
+			} catch (IOException ignored) {}
+		}
+		
+		if (!this.errorStream.equals(System.err)) {
+			try {
+				this.errorStream.close();
+			} catch (IOException ignored) {}
+		}
+	}
+	
+	/**
 	 * Set the <code>inputStream</code> of this manager.
 	 * 
 	 * This can be useful, if a command wants to obtain
