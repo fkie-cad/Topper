@@ -1,5 +1,6 @@
 package com.topper.tests.scengine;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
@@ -25,18 +26,18 @@ public class TestScriptParser {
 	private static class TestCommandParser implements ScriptCommandParser {
 		@Override
 		public ScriptCommand parse(final String[] tokens) {
-			throw new UnsupportedOperationException("TODO: Add tests for new parser/command interface");
-			//return new TestCommand();
+			//throw new UnsupportedOperationException("TODO: Add tests for new parser/command interface");
+			return new TestCommand();
 		}
 
 		@Override
 		public String usage() {
-			return null;
+			return this.command();
 		}
 
 		@Override
 		public String command() {
-			return null;
+			return "test";
 		}
 	}
 	
@@ -55,12 +56,12 @@ public class TestScriptParser {
 
 		@Override
 		public String usage() {
-			return null;
+			return this.command();
 		}
 
 		@Override
 		public String command() {
-			return null;
+			return "other";
 		}
 	}
 	
@@ -236,5 +237,58 @@ public class TestScriptParser {
 		assertInstanceOf(TestCommand.class, commands.get(2));
 		assertInstanceOf(OtherCommand.class, commands.get(1));
 		assertInstanceOf(OtherCommand.class, commands.get(3));
+	}
+	
+	// Method: registerParser(parser : ScriptCommandParser) : void
+	@Test
+	public void Given_EmptyParser_When_RegisterNull_Then_NullPointerException() {
+		
+		final ScriptParser parser = createEmptyParser();
+		
+		assertThrowsExactly(NullPointerException.class, () -> parser.registerParser(null));
+	}
+	
+	@Test
+	public void Given_EmptyParser_When_RegisterTestParser_Then_Success() {
+		
+		final ScriptParser parser = createEmptyParser();
+		final TestCommandParser testParser = new TestCommandParser();
+		
+		parser.registerParser(testParser);
+		
+		assertEquals(testParser, parser.findParserByString(testParser.command()));
+	}
+	
+	@Test
+	public void Given_EmptyParser_When_ReregisterTestParser_Then_InvalidArgumentException() {
+		
+		final ScriptParser parser = createEmptyParser();
+		final TestCommandParser testParser = new TestCommandParser();
+		
+		parser.registerParser(testParser);
+		assertThrowsExactly(IllegalArgumentException.class, () -> parser.registerParser(testParser));
+	}
+	
+	// Method: findParserByString(command : String) : ScriptCommandParser
+	@Test
+	public void Given_MultiParser_When_FindAll_Then_Success() {
+		
+		final ScriptParser parser = createMultiParser();
+		assertInstanceOf(TestCommandParser.class, parser.findParserByString(new TestCommandParser().command()));
+		assertInstanceOf(OtherCommandParser.class, parser.findParserByString(new OtherCommandParser().command()));
+	}
+	
+	@Test
+	public void Given_MultiParser_When_FindNull_Then_NullPointerException() {
+		
+		final ScriptParser parser = createMultiParser();
+		assertThrowsExactly(NullPointerException.class, () -> parser.findParserByString(null));
+	}
+	
+	@Test
+	public void Given_MultiParser_When_FindNotRegistered_Then_Null() {
+		
+		final ScriptParser parser = createMultiParser();
+		assertNull(parser.findParserByString("1234"));
 	}
 }
