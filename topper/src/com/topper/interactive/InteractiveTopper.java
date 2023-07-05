@@ -49,9 +49,9 @@ public final class InteractiveTopper {
 			final ScriptExecutor executor = new ScriptExecutor(context);
 			
 			// Register commands with parser
-			parser.registerParser("file", new FileCommandParser());
-			parser.registerParser("exit", new ExitCommandParser());
-			parser.registerParser("help", new HelpCommandParser());
+			parser.registerParser(new FileCommandParser());
+			parser.registerParser(new ExitCommandParser());
+			parser.registerParser(new HelpCommandParser());
 			
 			// Loop
 			String command;

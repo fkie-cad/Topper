@@ -16,6 +16,11 @@ public final class HelpCommandParser implements ScriptCommandParser {
 
 	@Override
 	public final String usage() {
-		return "help [command]";
+		return this.command() + " [command]";
+	}
+
+	@Override
+	public String command() {
+		return "help";
 	}
 }

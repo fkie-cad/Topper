@@ -58,14 +58,17 @@ public final class ScriptParser {
 	 * from an assigned line, that starts with the registered command string,
 	 * after thorough error checking.
 	 * 
-	 * @param command String representation of a <code>ScriptCommand</code>.
+	 * The command string is implicitly determined by the parser.
+	 * 
 	 * @param parser A <code>ScriptCommandParser</code> to register with the
 	 * 	string command.
 	 * @throws IllegalArgumentException If there is already a <code>ScriptCommandParser</code>
 	 * 	registered with <code>command</code>.
 	 * @see ScriptCommandParser
 	 * */
-	public final void registerParser(final String command, final ScriptCommandParser parser) {
+	public final void registerParser(final ScriptCommandParser parser) {
+		
+		final String command = parser.command();
 		
 		if (this.parserMap.containsKey(command.toUpperCase())) {
 			throw new IllegalArgumentException(String.format("%s is already registered.", command));

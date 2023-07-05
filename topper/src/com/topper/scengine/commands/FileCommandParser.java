@@ -65,6 +65,11 @@ public final class FileCommandParser implements ScriptCommandParser {
 	 * */
 	@Override
 	public final String usage() {
-		return "file [path to file]";
+		return this.command() + " [path to file]";
+	}
+
+	@Override
+	public String command() {
+		return "file";
 	}
 }

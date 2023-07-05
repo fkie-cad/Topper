@@ -11,6 +11,11 @@ public final class ExitCommandParser implements ScriptCommandParser {
 
 	@Override
 	public final String usage() {
+		return this.command();
+	}
+
+	@Override
+	public String command() {
 		return "exit";
 	}
 }

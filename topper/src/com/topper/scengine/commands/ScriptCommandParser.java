@@ -35,4 +35,13 @@ public interface ScriptCommandParser {
 	 * @return Human - readable command format.
 	 * */
 	String usage();
+	
+	/**
+	 * Fixed a user - readable (and writable) string representation
+	 * of the <code>ScriptCommand</code> parsed by this parser. 
+	 * 
+	 * @return String representation of <code>ScriptCommand</code> linked
+	 * 	to this parser.
+	 * */
+	String command();
 }

@@ -33,6 +33,11 @@ public class TestScriptParser {
 		public String usage() {
 			return null;
 		}
+
+		@Override
+		public String command() {
+			return null;
+		}
 	}
 	
 	private static class OtherCommand implements ScriptCommand {
@@ -50,6 +55,11 @@ public class TestScriptParser {
 
 		@Override
 		public String usage() {
+			return null;
+		}
+
+		@Override
+		public String command() {
 			return null;
 		}
 	}
@@ -72,14 +82,14 @@ public class TestScriptParser {
 	
 	private static final ScriptParser createSingleOnlyParser() {
 		final ScriptParser parser = new ScriptParser();
-		parser.registerParser("test", new TestCommandParser());
+		parser.registerParser(new TestCommandParser());
 		return parser;
 	}
 
 	private static final ScriptParser createMultiParser() {
 		final ScriptParser parser = new ScriptParser();
-		parser.registerParser("test", new TestCommandParser());
-		parser.registerParser("other", new OtherCommandParser());
+		parser.registerParser(new TestCommandParser());
+		parser.registerParser(new OtherCommandParser());
 		return parser;
 	}
 	
