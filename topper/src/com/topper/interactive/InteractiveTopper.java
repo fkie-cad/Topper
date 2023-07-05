@@ -64,20 +64,27 @@ public final class InteractiveTopper {
 				// Get input line
 				command = io.inputLine();
 				
-				try {
-					
-					// Parse command. Treat each line as a one - line script.
-					commands = parser.parse(command);
-					
-					// Execute commands. Results are made visible through io
-					// and changes in the context.
-					executor.execute(context, commands);
-					
-				} catch (final CommandException | StateException e) {
-					// Distinguishing between output and error allows for
-					// discarding error messages in scripts etc.
-					io.error(e.getMessage() + System.lineSeparator());
+				// Ignore a user spamming enter
+				if (command.length() > 0) {
+				
+					try {
+						// Parse command. Treat each line as a one - line script.
+						commands = parser.parse(command);
+						
+						// Execute commands. Results are made visible through io
+						// and changes in the context.
+						executor.execute(context, commands);
+						
+					} catch (final CommandException | StateException e) {
+						// Distinguishing between output and error allows for
+						// discarding error messages in scripts etc.
+						io.error(e.getMessage() + System.lineSeparator());
+					}
+				
 				}
+				
+				// Eventually flush all output streams (output and error)
+				io.flushAll();
 			}
 		
 		} catch (final Exception e) {

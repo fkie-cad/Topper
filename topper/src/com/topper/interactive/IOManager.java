@@ -129,6 +129,17 @@ public final class IOManager {
 	}
 	
 	/**
+	 * Flushes <code>outputStream</code> and <code>errorStream</code>.
+	 * */
+	public final void flushAll() {
+		
+		try {
+			this.outputStream.flush();
+			this.errorStream.flush();
+		} catch (IOException ignored) {}
+	}
+	
+	/**
 	 * Closes any stream that is neither stdin, stdout nor stderr.
 	 * */
 	public final void close() {
