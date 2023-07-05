@@ -10,19 +10,61 @@ import com.topper.exceptions.IllegalCommandException;
 import com.topper.scengine.commands.ScriptCommand;
 import com.topper.scengine.commands.ScriptCommandParser;
 
+
+/**
+ * Parser for scripts consisting of the commands as registered
+ * with <code>registerParser</code>.
+ * 
+ * A script consists of multiple lines. Each line represents
+ * a single command and arguments. Lines are separated by
+ * <code>System.lineSeparator()</code>. Tokens in a line are
+ * separated by spaces (0x20). The first token in a line
+ * represents the command to run. It is linked to an instance
+ * of <code>ScriptCommandParser</code> by <code>registerParser</code>.
+ * 
+ * If the first token of a line does not match any of the
+ * registered commands, then parsing fails for the entire
+ * script. This holds for any other parsing error as well.
+ * 
+ * The string representations of commands are stored in
+ * uppercase. Therefore, it is <b>not</b> possible to register
+ * <code>"test1"</code> and <code>TEST1</code>, because they
+ * are the same after applying <code>String.toUpperCase()</code>.
+ * 
+ * @author Pascal Kühnemann
+ * @see ScriptCommand
+ * @see ScriptCommandParser
+ * */
 public final class ScriptParser {
 
-	
+	/**
+	 * Maps the string representation of a command to a
+	 * <code>ScriptCommandParser</code>.
+	 * */
 	private final Map<String, ScriptCommandParser> parserMap;
 	
 	/**
-	 * 
+	 * Creates a <code>ScriptParser</code> and its command to
+	 * <code>ScriptCommandParser</code> mapping.
 	 * */
 	public ScriptParser() {
-		
 		this.parserMap = new HashMap<String, ScriptCommandParser>();
 	}
 	
+	/**
+	 * Registers a string representation of a <code>ScriptCommand</code>
+	 * with a corresponding <code>ScriptCommandParser</code>. The latter
+	 * is used to construct a corresponding <code>ScriptCommand</code>
+	 * from an assigned line, that starts with the registered command string,
+	 * after thorough error checking.
+	 * 
+	 * @param command String representation of a <code>ScriptCommand</code>.
+	 * @param parser A <code>ScriptCommandParser</code> to register with the
+	 * 	string command.
+	 * @throws IllegalArgumentException If there is already a <code>ScriptCommandParser</code>
+	 * 	registered with <code>command</code>.
+	 * @see ScriptCommandParser
+	 * */
 	public final void registerParser(final String command, final ScriptCommandParser parser) {
 		
 		if (this.parserMap.containsKey(command.toUpperCase())) {
@@ -50,7 +92,6 @@ public final class ScriptParser {
 		
 		return this.parserMap.get(command.toUpperCase());
 	}
-	
 	
 	/**
 	 * Parses <code>script</code> into a list of <code>ScriptCommand</code> objects.

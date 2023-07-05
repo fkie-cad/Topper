@@ -13,7 +13,7 @@ public interface ScriptCommand {
 	 * 
 	 * @param context Execution context of this command.
 	 * @throws CommandException If execution fails.
-	 * @throws IOException 
+	 * @throws IOException If IO - related errors occur.
 	 * */
 	void execute(final ScriptContext context) throws CommandException, IOException;
 }
