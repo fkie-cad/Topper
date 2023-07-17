@@ -1,6 +1,7 @@
 package com.topper.dex.decompiler.instructions;
 
 import org.jf.dexlib2.Opcode;
+import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBuffer;
 import org.jf.dexlib2.iface.instruction.formats.Instruction4rcc;
 import org.jf.dexlib2.iface.reference.Reference;
@@ -16,16 +17,16 @@ public class BufferedInstruction4rcc extends BufferedInstruction implements Inst
 	private final Reference reference2;
 	private final int referenceType2;
 	
-	public BufferedInstruction4rcc(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset) {
+	public BufferedInstruction4rcc(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset, final DexBackedDexFile file) {
 		super(opcode);
 		
 		this.registerCount = buffer.readUbyte(instructionStartOffset + 1);
 		this.startRegister = buffer.readUshort(instructionStartOffset + 4);
 		this.reference = BufferedReference.makeReference(buffer, this.getOpcode().referenceType,
-                buffer.readUshort(instructionStartOffset + 2));
+                buffer.readUshort(instructionStartOffset + 2), file);
 		this.referenceType = this.getOpcode().referenceType;
 		this.reference2 = BufferedReference.makeReference(buffer, this.getOpcode().referenceType2,
-                buffer.readUshort(instructionStartOffset + 6));
+                buffer.readUshort(instructionStartOffset + 6), file);
 		this.referenceType2 = this.getOpcode().referenceType2;
 	}
 	

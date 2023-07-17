@@ -1,6 +1,5 @@
 package com.topper.dex.decompiler.references;
 
-import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.ReferenceType;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBuffer;
@@ -9,15 +8,11 @@ import org.jf.util.ExceptionWithContext;
 
 public class BufferedReference {
 	
-    public static Reference makeReference(final DexBuffer buffer, final int referenceType, final int referenceIndex) {
-    	
-    	// Temporarily create file backed by buffer
-    	DexBackedDexFile file;
-    	try {
-    		file = new DexBackedDexFile(Opcodes.getDefault(), buffer);
-    	} catch (final RuntimeException e) {
-    		file = null;
-    	}
+    public static Reference makeReference(
+    		final DexBuffer buffer,
+    		final int referenceType,
+    		final int referenceIndex,
+    		final DexBackedDexFile file) {
     	
         switch (referenceType) {
             case ReferenceType.STRING:

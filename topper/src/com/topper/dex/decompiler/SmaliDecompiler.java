@@ -2,6 +2,8 @@ package com.topper.dex.decompiler;
 
 import java.util.Iterator;
 
+import org.jf.dexlib2.Opcodes;
+import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBuffer;
 import org.jf.dexlib2.dexbacked.DexReader;
 import org.jf.dexlib2.dexbacked.util.VariableSizeLookaheadIterator;
@@ -30,6 +32,16 @@ public final class SmaliDecompiler {
         final int instructionsStartOffset = 0; //codeOffset + CodeItem.INSTRUCTION_START_OFFSET;
         final int endOffset = instructionsStartOffset + (instructionsSize*2);
         
+        // Construct dex file from buffer, if possible. This prevents running the constructor
+        // of DexBackedDexFile for each instruction.
+        DexBackedDexFile dexFile;
+        try {
+        	dexFile = new DexBackedDexFile(Opcodes.getDefault(), buffer); 
+        } catch (final Exception e) {
+        	dexFile = null;
+        }
+        final DexBackedDexFile file = dexFile;
+        
         return new Iterable<BufferedInstruction>() {
             @Override
             public Iterator<BufferedInstruction> iterator() {
@@ -40,10 +52,10 @@ public final class SmaliDecompiler {
                             return endOfData();
                         }
 
-                        BufferedInstruction instruction = BufferedInstruction.readFrom(reader);
+                        final BufferedInstruction instruction = BufferedInstruction.readFrom(reader, file);
 
                         // Does the instruction extend past the end of the method?
-                        int offset = reader.getOffset();
+                        final int offset = reader.getOffset();
                         if (offset > endOffset || offset < 0) {
                             return endOfData();
                             //throw new ExceptionWithContext("The last instruction is truncated");
