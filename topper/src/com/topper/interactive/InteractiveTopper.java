@@ -14,18 +14,31 @@ import com.topper.scengine.commands.HelpCommandParser;
 import com.topper.scengine.commands.ScriptCommand;
 import com.topper.sstate.ScriptContext;
 
+/**
+ * Manager that will run the main loop, if Topper is
+ * started in interactive mode.
+ * 
+ * @author Pascal Kühnemann
+ * */
 public final class InteractiveTopper {
 
+	/**
+	 * Format string to write before requesting user input.
+	 * */
 	private static final String LINE_PREFIX = "%s> ";
 	
+	/**
+	 * Configuration assigned to this application run.
+	 * */
 	private final TopperConfig config;
 	
+	/**
+	 * Initialize interactive session manager.
+	 * 
+	 * @param config Configuration assigned to this session/run.
+	 * */
 	public InteractiveTopper(final TopperConfig config) {
 		this.config = config;
-	}
-	
-	public final TopperConfig getConfig() {
-		return this.config;
 	}
 	
 	/**
@@ -39,7 +52,6 @@ public final class InteractiveTopper {
 		// Set up IO
 		final IOManager io = new IOManager();
 		try {
-			
 			
 			// Create command parser.
 			final ScriptParser parser = new ScriptParser();
@@ -94,5 +106,13 @@ public final class InteractiveTopper {
 			// Clean up
 			io.close();
 		}
+	}
+	
+	/**
+	 * Gets configuration.
+	 * @see TopperConfiguration
+	 * */
+	public final TopperConfig getConfig() {
+		return this.config;
 	}
 }
