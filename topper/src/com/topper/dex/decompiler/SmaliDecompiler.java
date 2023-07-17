@@ -12,12 +12,24 @@ import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompiler.instructions.BufferedInstruction;
 
 /**
- * Problem: Given an array of bytes, interpret these bytes as Smali instructions
- * 			and decompile them into Smali.
+ * 
+ * Decompiler for dex bytecode. It aims to solve the following problem:
+ * <blockquote>Given an array of bytes, interpret these bytes as dex bytecode and decompile them into Smali.</blockquote>
+ * 
+ * Its implementation is based on <a href="https://cs.android.com/android/platform/superproject/+/master:external/google-smali/dexlib2/src/main/java/com/android/tools/smali/dexlib2/dexbacked/DexBackedMethodImplementation.java;l=76;drc=e6b4ff2c19b7138f9db078234049194ce663d5b2">AOSP's dexlib2</a>
+ * 
+ * @author Pascal Kühnemann
  * 
  * */
 public final class SmaliDecompiler {
 	
+	/**
+	 * Decompiles a given byte array into smali instructions.
+	 * 
+	 * @param bytecode Byte array to interpret as bytecode and to decompile.
+	 * @return Wrapper holding information on the decompilation. Among other things, it holds
+	 * 	the decompiled instructions.
+	 * */
 	public final DecompilationResult decompile(final byte[] bytecode) {
 		
 		final DexBuffer buffer = new DexBuffer(bytecode);
@@ -25,6 +37,12 @@ public final class SmaliDecompiler {
 		return new DecompilationResult(buffer, instructions);
 	}
 
+	/**
+	 * Retrieves instructions from a given <code>buffer</code>.
+	 * 
+	 * @param buffer Byte buffer, from which to extract smali instructions.
+	 * @return List of extracted instructions.
+	 * */
     private Iterable<? extends BufferedInstruction> getInstructions(final DexBuffer buffer) {
         // instructionsSize is the number of 16-bit code units in the instruction list, not the number of instructions
         int instructionsSize = buffer.getBuf().length / 2; // dexFile.readSmallUint(codeOffset + CodeItem.INSTRUCTION_COUNT_OFFSET);

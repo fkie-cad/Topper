@@ -13,6 +13,8 @@ import org.jf.util.ExceptionWithContext;
  * because all subclasses store their bytecode into fields. This aims
  * to support storing instructions to file.
  * 
+ * Its implementation is based on <a href="https://cs.android.com/android/platform/superproject/+/master:external/google-smali/dexlib2/src/main/java/com/android/tools/smali/dexlib2/dexbacked/instruction/DexBackedInstruction.java;l=42;drc=3713aeddd5faa8ba395999d1ee32c3fb3e68e3f4">AOSP's dexlib2</a>.
+ * 
  * @author Pascal Kühnemann
  * @see Opcode
  * @see Instruction
@@ -52,6 +54,8 @@ public class BufferedInstruction implements Instruction {
      * Optionally, <code>file</code> is set to allow for reference resolution
      * in case the underlying buffer represents an entire .dex file.
      * 
+     * Its implementation is based on <a href="https://cs.android.com/android/platform/superproject/+/master:external/google-smali/dexlib2/src/main/java/com/android/tools/smali/dexlib2/dexbacked/instruction/DexBackedInstruction.java;l=59;drc=3713aeddd5faa8ba395999d1ee32c3fb3e68e3f4">AOSP's dexlib2</a>.
+     * 
      * @param reader Reader, from which to fetch the next instruction.
      * @param file If not <code>null</code>, it will represent the underlying
      * 	buffer of <code>reader</code> as a dex file.
@@ -76,6 +80,8 @@ public class BufferedInstruction implements Instruction {
      * 
      * Optionally, <code>file</code> is an alternative, but parallel, view on
      * <code>buffer</code> that enables reference resolution.
+     * 
+     * Its implementation is based on <a href="https://cs.android.com/android/platform/superproject/+/master:external/google-smali/dexlib2/src/main/java/com/android/tools/smali/dexlib2/dexbacked/instruction/DexBackedInstruction.java;l=75;drc=3713aeddd5faa8ba395999d1ee32c3fb3e68e3f4">AOSP's dexlib2</a>.
      * 
      * @param buffer Buffer, from which to fetch the next instruction.
      * @param opcode Opcode of the next instruction. This e.g. determines the format.
