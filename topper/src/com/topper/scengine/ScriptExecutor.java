@@ -31,7 +31,7 @@ public final class ScriptExecutor {
 	 * */
 	public final void execute(final ScriptContext context, final ImmutableList<ScriptCommand> commands) throws CommandException, IOException, InvalidStateTransitionException {
 		
-		// Naively execute each command
+		// Naively execute each command in given context
 		for (final ScriptCommand command : commands) {
 			context.getCurrentState().execute(command);
 		}
