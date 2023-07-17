@@ -68,9 +68,9 @@ public class BufferedInstruction implements Instruction {
             opcodeValue = reader.peekUshort();
         }
 
-        Opcode opcode = Opcodes.getDefault().getOpcodeByValue(opcodeValue);
+        final Opcode opcode = Opcodes.getDefault().getOpcodeByValue(opcodeValue);
 
-        BufferedInstruction instruction = buildInstruction(reader.dexBuf, opcode, reader.getOffset(), file);
+        final BufferedInstruction instruction = buildInstruction(reader.dexBuf, opcode, reader.getOffset(), file);
         reader.moveRelative(instruction.getCodeUnits()*2);
         return instruction;
     }

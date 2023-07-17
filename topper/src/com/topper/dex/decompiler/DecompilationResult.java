@@ -3,15 +3,15 @@ package com.topper.dex.decompiler;
 import org.jf.dexlib2.dexbacked.DexBuffer;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.dex.decompiler.instructions.BufferedInstruction;
+import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
 public class DecompilationResult {
 	
 	private final DexBuffer buffer;
 	
-	private final ImmutableList<BufferedInstruction> instructions;
+	private final ImmutableList<DecompiledInstruction> instructions;
 
-	public DecompilationResult(final DexBuffer buffer, final ImmutableList<BufferedInstruction> instructions) {
+	public DecompilationResult(final DexBuffer buffer, final ImmutableList<DecompiledInstruction> instructions) {
 		this.buffer = buffer;
 		this.instructions = instructions;
 	}
@@ -20,7 +20,7 @@ public class DecompilationResult {
 		return this.buffer;
 	}
 	
-	public final ImmutableList<BufferedInstruction> getInstructions() {
+	public final ImmutableList<DecompiledInstruction> getInstructions() {
 		return this.instructions;
 	}
 }

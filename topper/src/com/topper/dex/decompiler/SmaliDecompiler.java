@@ -1,6 +1,8 @@
 package com.topper.dex.decompiler;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
@@ -10,6 +12,7 @@ import org.jf.dexlib2.dexbacked.util.VariableSizeLookaheadIterator;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompiler.instructions.BufferedInstruction;
+import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
 /**
  * 
@@ -19,7 +22,6 @@ import com.topper.dex.decompiler.instructions.BufferedInstruction;
  * Its implementation is based on <a href="https://cs.android.com/android/platform/superproject/+/master:external/google-smali/dexlib2/src/main/java/com/android/tools/smali/dexlib2/dexbacked/DexBackedMethodImplementation.java;l=76;drc=e6b4ff2c19b7138f9db078234049194ce663d5b2">AOSP's dexlib2</a>
  * 
  * @author Pascal Kühnemann
- * 
  * */
 public final class SmaliDecompiler {
 	
@@ -33,8 +35,22 @@ public final class SmaliDecompiler {
 	public final DecompilationResult decompile(final byte[] bytecode) {
 		
 		final DexBuffer buffer = new DexBuffer(bytecode);
-		final ImmutableList<BufferedInstruction> instructions = ImmutableList.copyOf(this.getInstructions(buffer));
-		return new DecompilationResult(buffer, instructions);
+		
+		int offset = 0;
+		int size;
+		final List<DecompiledInstruction> decompiledInstructions = new LinkedList<DecompiledInstruction>();
+		byte[] buf;
+		for (final BufferedInstruction instruction : this.getInstructions(buffer)) {
+			
+			size = instruction.getCodeUnits() * 2;
+			buf = new byte[size];
+			System.arraycopy(bytecode, offset, buf, 0, size);
+			decompiledInstructions.add(new DecompiledInstruction(instruction, buf));
+			
+			offset += size;
+		}
+		
+		return new DecompilationResult(buffer, ImmutableList.copyOf(decompiledInstructions));
 	}
 
 	/**
@@ -43,7 +59,7 @@ public final class SmaliDecompiler {
 	 * @param buffer Byte buffer, from which to extract smali instructions.
 	 * @return List of extracted instructions.
 	 * */
-    private Iterable<? extends BufferedInstruction> getInstructions(final DexBuffer buffer) {
+    private final Iterable<? extends BufferedInstruction> getInstructions(final DexBuffer buffer) {
         // instructionsSize is the number of 16-bit code units in the instruction list, not the number of instructions
         int instructionsSize = buffer.getBuf().length / 2; // dexFile.readSmallUint(codeOffset + CodeItem.INSTRUCTION_COUNT_OFFSET);
 
