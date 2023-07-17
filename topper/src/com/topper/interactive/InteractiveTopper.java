@@ -46,7 +46,7 @@ public final class InteractiveTopper {
 			
 			// Create context and executor
 			final ScriptContext context = new ScriptContext(this.config, io, parser);
-			final ScriptExecutor executor = new ScriptExecutor(context);
+			final ScriptExecutor executor = new ScriptExecutor();
 			
 			// Register commands with parser
 			parser.registerParser(new FileCommandParser());

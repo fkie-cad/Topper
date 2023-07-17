@@ -10,10 +10,8 @@ import com.topper.sstate.ScriptContext;
 
 public final class ScriptExecutor {
 
-	private final ScriptContext context;
-	
-	public ScriptExecutor(final ScriptContext context) {
-		this.context = context;
+	public ScriptExecutor() {
+		
 	}
 
 	/**
@@ -35,7 +33,7 @@ public final class ScriptExecutor {
 		
 		// Naively execute each command
 		for (final ScriptCommand command : commands) {
-			this.context.getCurrentState().execute(command);
+			context.getCurrentState().execute(command);
 		}
 	}
 }
