@@ -8,20 +8,55 @@ import org.jf.dexlib2.dexbacked.DexReader;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.util.ExceptionWithContext;
 
+/**
+ * Buffered version of an <code>Instruction</code>. It is "buffered",
+ * because all subclasses store their bytecode into fields. This aims
+ * to support storing instructions to file.
+ * 
+ * @author Pascal Kühnemann
+ * @see Opcode
+ * @see Instruction
+ * */
 public class BufferedInstruction implements Instruction {
 
+	/**
+	 * Opcode of this instruction.
+	 * */
 	private final Opcode opcode;
+	
 	public BufferedInstruction(final Opcode opcode) {
-		
 		this.opcode = opcode;
 	}
 	
-    @Override public int getCodeUnits() { return opcode.format.size / 2; }
+	/**
+	 * Determines the number of code units required to encode
+	 * this instruction.
+	 * 
+	 * A code unit consists of two bytes.
+	 * */
+    @Override
+    public int getCodeUnits() {
+    	return opcode.format.size / 2;
+    }
 
+    /**
+     * Get the opcode of this instruction
+     * */
     public final Opcode getOpcode() {
     	return opcode;
     }
 	
+    /**
+     * Reads from <code>reader</code> the next <code>BufferedInstruction</code>.
+     * 
+     * Optionally, <code>file</code> is set to allow for reference resolution
+     * in case the underlying buffer represents an entire .dex file.
+     * 
+     * @param reader Reader, from which to fetch the next instruction.
+     * @param file If not <code>null</code>, it will represent the underlying
+     * 	buffer of <code>reader</code> as a dex file.
+     * @return The next instruction in <code>reader</code>.
+     * */
     public static BufferedInstruction readFrom(final DexReader<?> reader, final DexBackedDexFile file) {
         int opcodeValue = reader.peekUbyte();
 
@@ -36,6 +71,22 @@ public class BufferedInstruction implements Instruction {
         return instruction;
     }
     
+    /**
+     * Constructs an instruction from a fixed position in <code>buffer</code>.
+     * 
+     * Optionally, <code>file</code> is an alternative, but parallel, view on
+     * <code>buffer</code> that enables reference resolution.
+     * 
+     * @param buffer Buffer, from which to fetch the next instruction.
+     * @param opcode Opcode of the next instruction. This e.g. determines the format.
+     * @param instructionStartOffset Offset into <code>buffer</code>, from which to
+     * 	start fetching the next instruction.
+     * @param file Alternative view on <code>buffer</code> for reference resolution.
+     * 	Can be <code>null</code>.
+     * @return Next instruction in <code>buffer</code> at offset <code>instructionStartOffset</code>.
+     * 	The instruction may be annotated with additional reference information, if
+     * 	<code>file</code> is not <code>null</code>.
+     * */
     private static BufferedInstruction buildInstruction(
     		final DexBuffer buffer,
     		final Opcode opcode,
