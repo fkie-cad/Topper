@@ -94,6 +94,7 @@ public class TestScriptParser {
 		return parser;
 	}
 	
+	// Method: parse(script : String) : ImmutableList<ScriptCommand>
 	@Test
 	public void Given_TestParserRegistered_When_CommandIsTestOnly_Then_CorrectParsing() throws IllegalCommandException {
 		
