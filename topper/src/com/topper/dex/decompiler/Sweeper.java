@@ -13,6 +13,11 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
  * @author Pascal Kühnemann
  * */
 public abstract class Sweeper {
+	
+	/**
+	 * Size of a code item.
+	 * */
+	public static final int CODE_ITEM_SIZE = 2;
 
 	/**
 	 * Configuration used by this sweeper. E.g. it may determine an upper bound
