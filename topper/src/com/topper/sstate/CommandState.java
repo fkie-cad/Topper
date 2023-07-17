@@ -9,35 +9,20 @@ import com.topper.scengine.commands.ScriptCommand;
 
 public abstract class CommandState {
 	
+	/**
+	 * Execution context of this state. It may be changed by commands.
+	 * */
 	private final ScriptContext context;
 	
+	/**
+	 * Initialize this state.
+	 * 
+	 * @param context Execution context to assign to this state.
+	 * */
 	public CommandState(final ScriptContext context) {
 		this.context = context;
 	}
 
-	/**
-	 * Describes what commands are available in this state. Therefore
-	 * this is command whitelist. In this state, if <code>execute</code>
-	 * is used to run a command, the command is only executed if its
-	 * class is part of this whitelist.
-	 * 
-	 * This somewhat represents the transitions/edges in this finite
-	 * state machine without the need of implementing a method for
-	 * each possible subclass of <code>ScriptCommand</code>.
-	 * 
-	 * @return List of subclasses of <code>ScriptCommand</code> that are
-	 * 	allowed to be executed in this state.
-	 * */
-	public abstract ImmutableList<Class<? extends ScriptCommand>> getAvailableCommands();
-	
-	/**
-	 * Actual execution of <code>command</code>. Its semantics
-	 * depend on the state.
-	 * 
-	 * @param command Command to execute in this state.
-	 * */
-	public abstract void executeCommand(final ScriptCommand command) throws InvalidStateTransitionException, CommandException, IOException;
-	
 	/**
 	 * Template method that precedes each command execution attempt
 	 * with a white-list check to determine whether executing the
@@ -67,7 +52,34 @@ public abstract class CommandState {
 		throw new InvalidStateTransitionException("Cannot execute command.");
 	}
 	
+	/**
+	 * Gets execution context assigned to this state.
+	 * @see ScriptContext
+	 * */
 	public final ScriptContext getContext() {
 		return this.context;
 	}
+	
+	/**
+	 * Describes what commands are available in this state. Therefore
+	 * this is command whitelist. In this state, if <code>execute</code>
+	 * is used to run a command, the command is only executed if its
+	 * class is part of this whitelist.
+	 * 
+	 * This somewhat represents the transitions/edges in this finite
+	 * state machine without the need of implementing a method for
+	 * each possible subclass of <code>ScriptCommand</code>.
+	 * 
+	 * @return List of subclasses of <code>ScriptCommand</code> that are
+	 * 	allowed to be executed in this state.
+	 * */
+	public abstract ImmutableList<Class<? extends ScriptCommand>> getAvailableCommands();
+	
+	/**
+	 * Actual execution of <code>command</code>. Its semantics
+	 * depend on the state.
+	 * 
+	 * @param command Command to execute in this state.
+	 * */
+	public abstract void executeCommand(final ScriptCommand command) throws InvalidStateTransitionException, CommandException, IOException;
 }
