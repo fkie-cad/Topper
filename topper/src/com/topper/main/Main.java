@@ -10,7 +10,7 @@ public class Main {
 
 	public static void main2(String[] args) throws IOException {
 
-		final InteractiveTopper interactive = new InteractiveTopper(null);
+		final InteractiveTopper interactive = new InteractiveTopper();
 		interactive.mainLoop();
 	}
 	

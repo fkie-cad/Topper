@@ -3,6 +3,7 @@ package com.topper.interactive;
 import java.io.IOException;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.configuration.ConfigManager;
 import com.topper.configuration.TopperConfig;
 import com.topper.exceptions.CommandException;
 import com.topper.exceptions.StateException;
@@ -28,20 +29,6 @@ public final class InteractiveTopper {
 	private static final String LINE_PREFIX = "%s> ";
 	
 	/**
-	 * Configuration assigned to this application run.
-	 * */
-	private final TopperConfig config;
-	
-	/**
-	 * Initialize interactive session manager.
-	 * 
-	 * @param config Configuration assigned to this session/run.
-	 * */
-	public InteractiveTopper(final TopperConfig config) {
-		this.config = config;
-	}
-	
-	/**
 	 * Main loop for an interactive session. It manages
 	 * IO as well as command parsing and execution.
 	 * @throws IOException If IO in interactive mode fails.
@@ -57,7 +44,7 @@ public final class InteractiveTopper {
 			final ScriptParser parser = new ScriptParser();
 			
 			// Create context and executor
-			final ScriptContext context = new ScriptContext(this.config, io, parser);
+			final ScriptContext context = new ScriptContext(ConfigManager.getInstance().getConfig(), io, parser);
 			final ScriptExecutor executor = new ScriptExecutor();
 			
 			// Register commands with parser
@@ -106,13 +93,5 @@ public final class InteractiveTopper {
 			// Clean up
 			io.close();
 		}
-	}
-	
-	/**
-	 * Gets configuration.
-	 * @see TopperConfiguration
-	 * */
-	public final TopperConfig getConfig() {
-		return this.config;
 	}
 }

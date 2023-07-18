@@ -6,12 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.jf.dexlib2.Opcode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.TopperConfig;
 import com.topper.exceptions.CommandException;
+import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.InvalidStateTransitionException;
 import com.topper.interactive.IOManager;
 import com.topper.scengine.ScriptExecutor;
@@ -37,14 +39,14 @@ public class TestScriptExecutor {
 	}
 	
 	@BeforeEach
-	public void init() throws FileNotFoundException {
+	public void init() throws FileNotFoundException, InvalidConfigException {
 		
 		final ScriptParser parser = new ScriptParser();
 		parser.registerParser(new HelpCommandParser());
 		parser.registerParser(new ExitCommandParser());
 		
 		VALID_CONTEXT = new ScriptContext(
-			new TopperConfig(),
+			new TopperConfig(10, Opcode.THROW),
 			new IOManager(),
 			parser
 		);
