@@ -3,6 +3,8 @@ package com.topper.dex.decompilation.pipeline;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompilation.Gadget;
 import com.topper.dex.decompilation.semanticanalyser.DefaultSemanticAnalyser;
@@ -109,7 +111,8 @@ public final class DecompilationPipeline {
 	 * @return List of gadgets extracted from <code>bytes</code>
 	 * 	by applying above mentioned stages.
 	 * */
-	public final ImmutableList<Gadget> decompile(final byte[] bytes, final int offset) {
+	@NonNull
+	public final ImmutableList<Gadget> decompile(final byte @NonNull [] bytes, final int offset) {
 		
 		// Extract instructions from bytes
 		final ImmutableList<ImmutableList<DecompiledInstruction>> instructionSequences = this.sweeper.sweep(bytes, offset);
@@ -135,34 +138,22 @@ public final class DecompilationPipeline {
 	
 	/**
 	 * Replace current sweeper with a new sweeper.
-	 * @throws IllegalArgumentException If <code>sweeper</code> is <code>null</code>.
 	 * */
-	public final void setSweeper(final Sweeper sweeper) {
-		if (sweeper == null) {
-			throw new IllegalArgumentException("sweeper must not be null.");
-		}
+	public final void setSweeper(@NonNull final Sweeper sweeper) {
 		this.sweeper = sweeper;
 	}
 	
 	/**
 	 * Replace current static analyser with a new static analyser.
-	 * @throws IllegalArgumentException If <code>sweeper</code> is <code>null</code>.
 	 * */
-	public final void setStaticAnalyser(final StaticAnalyser sa) {
-		if (sa == null) {
-			throw new IllegalArgumentException("static analyser must not be null.");
-		}
+	public final void setStaticAnalyser(@NonNull final StaticAnalyser sa) {
 		this.staticAnalyser = sa;
 	}
 	
 	/**
 	 * Replace current semantic analyser with a new semantic analyser.
-	 * @throws IllegalArgumentException If <code>sweeper</code> is <code>null</code>.
 	 * */
-	public final void setSemanticAnalyser(final SemanticAnalyser sa) {
-		if (sa == null) {
-			throw new IllegalArgumentException("semantic analyser must not be null.");
-		}
+	public final void setSemanticAnalyser(@NonNull final SemanticAnalyser sa) {
 		this.semanticAnalyser = sa;
 	}
 }

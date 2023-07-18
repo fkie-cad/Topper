@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBuffer;
@@ -32,6 +33,7 @@ public final class SmaliDecompiler {
 	 * @return Wrapper holding information on the decompilation. Among other things, it holds
 	 * 	the decompiled instructions.
 	 * */
+	@NonNull
 	public final DecompilationResult decompile(final byte[] bytecode) {
 		
 		final DexBuffer buffer = new DexBuffer(bytecode);
@@ -40,7 +42,7 @@ public final class SmaliDecompiler {
 		int size;
 		final List<DecompiledInstruction> decompiledInstructions = new LinkedList<DecompiledInstruction>();
 		byte[] buf;
-		for (final BufferedInstruction instruction : this.getInstructions(buffer)) {
+		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer)) {
 			
 			size = instruction.getCodeUnits() * 2;
 			buf = new byte[size];
@@ -59,7 +61,8 @@ public final class SmaliDecompiler {
 	 * @param buffer Byte buffer, from which to extract smali instructions.
 	 * @return List of extracted instructions.
 	 * */
-    private final Iterable<? extends BufferedInstruction> getInstructions(final DexBuffer buffer) {
+	@NonNull
+    private final Iterable<? extends BufferedInstruction> getInstructions(@NonNull final DexBuffer buffer) {
         // instructionsSize is the number of 16-bit code units in the instruction list, not the number of instructions
         int instructionsSize = buffer.getBuf().length / 2; // dexFile.readSmallUint(codeOffset + CodeItem.INSTRUCTION_COUNT_OFFSET);
 

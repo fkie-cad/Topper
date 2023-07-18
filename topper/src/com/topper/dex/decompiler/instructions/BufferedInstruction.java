@@ -1,5 +1,7 @@
 package com.topper.dex.decompiler.instructions;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
@@ -61,7 +63,9 @@ public class BufferedInstruction implements Instruction {
      * 	buffer of <code>reader</code> as a dex file.
      * @return The next instruction in <code>reader</code>.
      * */
-    public static BufferedInstruction readFrom(final DexReader<?> reader, final DexBackedDexFile file) {
+    @NonNull
+    public static BufferedInstruction readFrom(@NonNull final DexReader<?> reader, @Nullable final DexBackedDexFile file) {
+    	
         int opcodeValue = reader.peekUbyte();
 
         if (opcodeValue == 0) {
@@ -93,11 +97,12 @@ public class BufferedInstruction implements Instruction {
      * 	The instruction may be annotated with additional reference information, if
      * 	<code>file</code> is not <code>null</code>.
      * */
+    @NonNull
     private static BufferedInstruction buildInstruction(
-    		final DexBuffer buffer,
-    		final Opcode opcode,
+    		@NonNull final DexBuffer buffer,
+    		@Nullable final Opcode opcode,
     		final int instructionStartOffset,
-    		final DexBackedDexFile file) {
+    		@Nullable final DexBackedDexFile file) {
     	
     	if (opcode == null) {
     		return new BufferedUnknownInstruction(buffer, instructionStartOffset);

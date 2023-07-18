@@ -13,5 +13,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="lib" path="jars/gson-2.10.1.jar"/>
 	<classpathentry kind="lib" path="jars/commons-cli-1.5.0.jar"/>
+	<classpathentry kind="lib" path="jars/org.eclipse.jdt.annotation_2.2.700.v20220826-1026.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
