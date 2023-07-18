@@ -104,13 +104,15 @@ public final class DecompilationPipeline {
 	 * empty list.
 	 * 
 	 * @param bytes Byte array, from which to extract gadgets.
+	 * @param offset Offset relative to the beginning of <code>bytes</code>.
+	 * 	It represents the starting point of decompilation.
 	 * @return List of gadgets extracted from <code>bytes</code>
 	 * 	by applying above mentioned stages.
 	 * */
-	public final ImmutableList<Gadget> decompile(final byte[] bytes) {
+	public final ImmutableList<Gadget> decompile(final byte[] bytes, final int offset) {
 		
 		// Extract instructions from bytes
-		final ImmutableList<ImmutableList<DecompiledInstruction>> instructionSequences = this.sweeper.sweep(bytes, 0);
+		final ImmutableList<ImmutableList<DecompiledInstruction>> instructionSequences = this.sweeper.sweep(bytes, offset);
 		
 		// Apply static analysis to obtain initial gadgets
 		final List<Gadget> gadgets = new LinkedList<Gadget>();
