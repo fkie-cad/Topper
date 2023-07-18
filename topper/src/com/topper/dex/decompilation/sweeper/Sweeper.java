@@ -4,6 +4,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.exceptions.SweeperException;
 
 /**
  * Abstract decompiler that operates on a buffer. Given a starting
@@ -28,7 +29,8 @@ public interface Sweeper {
 	 * 	multiple solutions. To put it in other words, this method returns a list
 	 * 	of instruction sequences obtained from linear backward sweeping. If not
 	 * 	instruction sequences are found, then the returned list must be empty.
+	 * @throws SweeperException If sweeping fails.
 	 * */
 	@NonNull
-	public abstract ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sweep(final byte @NonNull [] buffer, final int offset);
+	public abstract ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sweep(final byte @NonNull [] buffer, final int offset) throws SweeperException;
 }

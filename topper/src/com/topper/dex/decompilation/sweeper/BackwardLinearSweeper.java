@@ -1,11 +1,13 @@
 package com.topper.dex.decompilation.sweeper;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Format;
+import org.jf.util.ExceptionWithContext;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.ConfigManager;
@@ -13,6 +15,7 @@ import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.DecompilationResult;
 import com.topper.dex.decompilation.SmaliDecompiler;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.exceptions.SweeperException;
 
 /**
  * Decompiler built on top of <code>SmaliDecompiler</code>, which
@@ -52,20 +55,48 @@ public class BackwardLinearSweeper implements Sweeper {
 	 * @return List of lists of decompiled instructions preceding the instruction
 	 * 	located at <code>offset</code> in <code>buffer</code>. The instruction
 	 * 	pointer to by <code>offset</code> is also part of this list.
+	 * @throws SweeperException If pivot instruction
 	 * */
 	@Override
-	public ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sweep(final byte[] buffer, final int offset) {
+	public ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sweep(final byte[] buffer, final int offset) throws SweeperException {
+		
+		final int currentSize = ConfigManager.getInstance().getConfig().getPivotInstruction().format.size;
+		if (offset + currentSize >= buffer.length) {
+			throw new SweeperException("buffer is too small to hold pivot instruction at " + offset + ".");
+		}
 		
 		final SmaliDecompiler decompiler = new SmaliDecompiler();
-		@SuppressWarnings("null")	// ByteBuffer.wrap should not return null...
-		@NonNull final ByteBuffer wrappedBuffer = ByteBuffer.wrap(buffer);
-		final int currentSize = ConfigManager.getInstance().getConfig().getPivotInstruction().format.size;
 		final int maxSizes = ConfigManager.getInstance().getConfig().getSweeperMaxNumberInstructions();
 		final List<Integer> checkedGadgetSizes = new ArrayList<Integer>(maxSizes);
 		checkedGadgetSizes.add(currentSize);
 		final int depth = 1;
 		
-		return this.recursiveSweepImpl(decompiler, wrappedBuffer, offset, currentSize, checkedGadgetSizes, depth);
+		try {
+			final DecompilationResult result = decompiler.decompile(Arrays.copyOfRange(buffer, offset, offset+  currentSize));
+			final ImmutableList<DecompiledInstruction> instructions = result.getInstructions();
+			final DecompiledInstruction instruction = instructions.get(0);
+			
+			if (instructions.size() != 1 || instruction.getByteCode().length != currentSize ||
+					!instruction.getInstruction().getOpcode().equals(ConfigManager.getInstance().getConfig().getPivotInstruction())) {
+				throw new SweeperException(
+						"Pivot instruction (" + instruction.getInstructionString() + " at offset " + offset + " is invalid."
+				);
+			}
+			
+			return this.recursiveSweepImpl(
+					decompiler,
+					buffer,
+					offset,
+					currentSize,
+					instructions,
+					checkedGadgetSizes,
+					depth
+			);
+			
+		} catch (final ExceptionWithContext e) {
+			// TODO: Catch only decompilation exceptions
+			throw new SweeperException("Failed to decompile pivot instruction.");
+		}
 	}
 	
 	/**
@@ -101,11 +132,13 @@ public class BackwardLinearSweeper implements Sweeper {
 	 * */
 	@SuppressWarnings("null")	// ImmutableList.of() or ByteBuffer.slice are not expected to be null...
 	@NonNull
+	// TODO: Check correctness of this algorithm
 	private final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> recursiveSweepImpl(
 			@NonNull final SmaliDecompiler decompiler,
-			@NonNull final ByteBuffer buffer,
+			final byte @NonNull [] buffer,
 			final int offset,
 			final int currentSize,
+			@NonNull final List<DecompiledInstruction> previousInstructions,
 			@NonNull final List<Integer> checkedGadgetSizes,
 			final int depth) {
 		
@@ -115,12 +148,12 @@ public class BackwardLinearSweeper implements Sweeper {
 		
 		// Check if maximum number of instructions is reached.
 		final TopperConfig config = ConfigManager.getInstance().getConfig();
-		if (depth == config.getSweeperMaxNumberInstructions()) {
+		if (depth >= config.getSweeperMaxNumberInstructions()) {
 			return ImmutableList.of();
 		}
 		
 		// Check buffer bounds.
-		if (offset < 0 || offset + currentSize - 1 >= buffer.flip().remaining()) {
+		if (offset < 0 || offset >= buffer.length) {
 			return ImmutableList.of();
 		}
 		
@@ -133,21 +166,24 @@ public class BackwardLinearSweeper implements Sweeper {
 		// the i must not be checked, because it will be invalid.
 		//List<ImmutableList<DecompiledInstruction>> sequences = new LinkedList<ImmutableList<DecompiledInstruction>>();
 		
-		ImmutableList.Builder<ImmutableList<DecompiledInstruction>> sequences
+		final ImmutableList.Builder<ImmutableList<DecompiledInstruction>> sequences
 			= new ImmutableList.Builder<ImmutableList<DecompiledInstruction>>();
+		final List<DecompiledInstruction> path = new LinkedList<DecompiledInstruction>();
+		List<DecompiledInstruction> totalPath;
 		
 		int instructionSize;
 		int totalSize;
 		DecompilationResult result;
 		ImmutableList<DecompiledInstruction> instructions;
-		for (int i = 0; i < this.getMaxInstructionSize() / CODE_UNIT_SIZE; i++) {
+		ImmutableList<ImmutableList<DecompiledInstruction>> subPaths;
+		for (int i = 1; i <= this.getMaxInstructionSize() / CODE_UNIT_SIZE; i++) {
 			
 			instructionSize = CODE_UNIT_SIZE * i;
 			totalSize = currentSize + instructionSize;
 			
 			// Perform bounds check. If it fails, any future iteration will as well.
 			if (offset - instructionSize < 0) {
-				return ImmutableList.of();
+				break;
 			}
 			
 			// Skip checked size.
@@ -159,7 +195,9 @@ public class BackwardLinearSweeper implements Sweeper {
 			try {
 				
 				// Using a ByteBuffer to avoid unnecessary copying of the buffer.
-				result = decompiler.decompile(buffer.slice(offset - instructionSize, instructionSize).array());
+				result = decompiler.decompile(Arrays.copyOfRange(buffer, offset - instructionSize, offset));
+				
+				//result = decompiler.decompile(buffer.slice(offset - instructionSize, instructionSize).order(ByteOrder.LITTLE_ENDIAN).array());
 				instructions = result.getInstructions();
 				
 				// Check instructions. If invalid, then this instruction size can be ignored/is not valid.
@@ -170,15 +208,40 @@ public class BackwardLinearSweeper implements Sweeper {
 					// starting at the same offset can be valid
 					checkedGadgetSizes.add(totalSize);
 					
+					// Add current instruction to list.
+					//sequences.add(instructions);
+					
 					// Good instructions can be used as base for next instruction
-					sequences.addAll(recursiveSweepImpl(
-							decompiler, 
-							buffer.slice(0, offset - instructionSize),
+					path.clear();
+					path.addAll(previousInstructions);
+					path.addAll(instructions);
+					sequences.add(ImmutableList.copyOf(path));
+					
+					subPaths = recursiveSweepImpl(
+							decompiler,
+							Arrays.copyOfRange(buffer, 0, offset - instructionSize + 1),
+							//buffer.slice(0, offset - instructionSize),
 							offset - instructionSize,
 							totalSize,
+							path,
 							checkedGadgetSizes,
 							depth + 1
-					));
+					);
+					
+					// Add all follow - up paths to this path
+					for (final ImmutableList<DecompiledInstruction> subPath : subPaths) {
+						totalPath = new LinkedList<DecompiledInstruction>(path);
+						totalPath.addAll(subPath);
+						sequences.add(ImmutableList.copyOf(totalPath));
+						
+						
+					System.out.println("TotalPath: ");
+					for (final DecompiledInstruction insn : totalPath) {
+						System.out.println(insn.getInstructionString());
+					}
+					System.out.println();
+					
+					}
 				}
 				
 				

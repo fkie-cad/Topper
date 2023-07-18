@@ -44,7 +44,11 @@ public final class DecompilationResult {
 		final StringBuilder builder = new StringBuilder();
 		int padding;
 		int i;
+		int offset = 0;
 		for (final DecompiledInstruction instruction : this.getInstructions()) {
+			
+			builder.append(String.format("%04x: ", offset));
+			offset += instruction.getByteCode().length;
 			
 			if (instruction.getInstruction().getOpcode().format != Format.ArrayPayload &&
 						instruction.getInstruction().getOpcode().format != Format.PackedSwitchPayload && 

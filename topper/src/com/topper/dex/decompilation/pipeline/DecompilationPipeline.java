@@ -13,6 +13,7 @@ import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
 import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.exceptions.SweeperException;
 
 /**
  * Pipeline that processes raw bytes into a list of gadgets.
@@ -110,12 +111,14 @@ public final class DecompilationPipeline {
 	 * 	It represents the starting point of decompilation.
 	 * @return List of gadgets extracted from <code>bytes</code>
 	 * 	by applying above mentioned stages.
+	 * @throws SweeperException If sweeping fails.
 	 * */
 	@NonNull
-	public final ImmutableList<@NonNull Gadget> decompile(final byte @NonNull [] bytes, final int offset) {
+	public final ImmutableList<@NonNull Gadget> decompile(final byte @NonNull [] bytes, final int offset) throws SweeperException {
 		
 		// Extract instructions from bytes
-		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> instructionSequences = this.sweeper.sweep(bytes, offset);
+		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> instructionSequences
+			= this.sweeper.sweep(bytes, offset);
 		
 		// Apply static analysis to obtain initial gadgets
 		final List<@NonNull Gadget> gadgets = new LinkedList<@NonNull Gadget>();
