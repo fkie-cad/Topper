@@ -2,8 +2,8 @@ package com.topper.main;
 
 import java.io.IOException;
 
-import com.topper.dex.decompiler.DecompilationResult;
-import com.topper.dex.decompiler.SmaliDecompiler;
+import com.topper.dex.decompilation.DecompilationResult;
+import com.topper.dex.decompilation.SmaliDecompiler;
 import com.topper.interactive.InteractiveTopper;
 
 public class Main {

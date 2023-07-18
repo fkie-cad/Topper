@@ -1,4 +1,4 @@
-package com.topper.dex.decompiler;
+package com.topper.dex.decompilation;
 
 import java.util.Iterator;
 import java.util.LinkedList;

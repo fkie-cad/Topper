@@ -1,4 +1,4 @@
-package com.topper.dex.decompiler;
+package com.topper.dex.decompilation;
 
 import org.jf.dexlib2.Format;
 import org.jf.dexlib2.dexbacked.DexBuffer;

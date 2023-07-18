@@ -4,7 +4,7 @@ import org.jf.dexlib2.Opcode;
 
 import com.topper.exceptions.InvalidConfigException;
 
-public abstract class TopperConfig {
+public class TopperConfig {
 
 	/**
 	 * Upper bound on the number of instructions that

@@ -1,12 +1,15 @@
-package com.topper.dex.decompiler;
+package com.topper.dex.decompilation.sweeper;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jf.dexlib2.Format;
 import org.jf.dexlib2.dexbacked.DexBuffer;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.configuration.TopperConfig;
+import com.topper.configuration.ConfigManager;
+import com.topper.dex.decompilation.DecompilationResult;
+import com.topper.dex.decompilation.SmaliDecompiler;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
 /**
@@ -17,11 +20,9 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
  * 
  * @author Pascal Kühnemann
  * */
-public class BackwardLinearSweeper extends Sweeper {
-
-	public BackwardLinearSweeper(final TopperConfig config) {
-		super(config);
-	}
+public class BackwardLinearSweeper implements Sweeper {
+	
+	private static final int CODE_ITEM_SIZE = 2;
 
 	/**
 	 * Performs a linear backward sweep on <code>buffer</code>.
@@ -46,13 +47,12 @@ public class BackwardLinearSweeper extends Sweeper {
 	 * @param buffer Buffer, from which to extract instructions.
 	 * @param offset Starting point of the sweep relative to the beginning of the
 	 * 	buffer. It must point to a valid instruction.
-	 * @return List of decompiled instructions preceding the instruction
+	 * @return List of lists of decompiled instructions preceding the instruction
 	 * 	located at <code>offset</code> in <code>buffer</code>. The instruction
 	 * 	pointer to by <code>offset</code> is also part of this list.
-	 * @throws 
 	 * */
 	@Override
-	public ImmutableList<DecompiledInstruction> sweep(final DexBuffer buffer, final int offset) {
+	public ImmutableList<ImmutableList<DecompiledInstruction>> sweep(final byte[] buffer, final int offset) {
 		
 		// TODO: Perform thorough tests! This must work correctly and efficiently!
 		
@@ -61,11 +61,11 @@ public class BackwardLinearSweeper extends Sweeper {
 		
 		// Extract upper - bound on number of instructions to find
 		// from config. This includes the pivot instruction.
-		final int maxNumberInstructions = this.getConfig().getSweeperMaxNumberInstructions();
+		final int maxNumberInstructions = ConfigManager.getInstance().getConfig().getSweeperMaxNumberInstructions();
 		
 		// If only a single instruction is requested, sweeping is obsolete.
 		if (maxNumberInstructions == 1) {
-			return decompiler.decompile(buffer.readByteRange(offset, this.getConfig().getPivotInstruction().format.size)).getInstructions();
+			return decompiler.decompile(buffer.readByteRange(offset, ConfigManager.getInstance().getConfig().getPivotInstruction().format.size)).getInstructions();
 		}
 		
 		// Need at least one additional instruction that precedes the
@@ -74,7 +74,7 @@ public class BackwardLinearSweeper extends Sweeper {
 		// Either buffer is exhausted or maximum number of instructions is reached.
 		final LinkedList<DecompiledInstruction> instructions = new LinkedList<DecompiledInstruction>();
 		int i = 1;
-		int size = Sweeper.CODE_ITEM_SIZE * i;
+		int size = CODE_ITEM_SIZE * i;
 		int currentOffset = offset;
 		DecompilationResult result;
 		while (currentOffset - size >= 0 && instructions.size() < maxNumberInstructions) {
@@ -105,9 +105,77 @@ public class BackwardLinearSweeper extends Sweeper {
 			}
 			
 			// Update size
-			size = Sweeper.CODE_ITEM_SIZE * i;
+			size = CODE_ITEM_SIZE * i;
 		}
 		
 		return ImmutableList.copyOf(instructions);
+	}
+	
+	/**
+	 * Recursive algorithm to extract instructions starting at a given
+	 * <code>offset</code> from <code>buffer</code>. The recursion
+	 * stops in either of the following cases:
+	 * 1. <code>depth</code> exceeds the configured upper bound on
+	 * 	the number of instructions allowed in a gadget.
+	 * 2. Regardless of what gadget size is used, all result in
+	 * 	decompilation errors.
+	 * 
+	 * The <code>checkedGadgetSizes</code> is used to keep track of
+	 * what gadget sizes have been checked so far. E.g. it must be
+	 * impossible to first find a 4 - byte instruction followed by
+	 * a 6 - byte instruction, if this algorithm already finds a
+	 * 6 - byte instruction followed by a 4 - byte instruction. If
+	 * this was possible, then the resulting gadgets would both
+	 * start at the same offset within <code>buffer</code>, but their
+	 * starting opcodes would have to differ. Assuming that <code>buffer</code>
+	 * remains unmodified, this is a contradiction.
+	 * 
+	 * @param buffer Buffer, in which to search for gadgets.
+	 * @param offset Starting point relative to the beginning of
+	 * 	<code>buffer</code> determining the pivot instruction
+	 * 	that signals the end of a gadget.
+	 * @param checkedGadgetSizes List of sums of instruction sizes
+	 * 	already checked. As it is impossible to find two gadgets
+	 * 	with the same starting point, i.e. the same size, further
+	 * 	decompilations can be avoided.
+	 * @param depth Depth of the recursion used to compare against
+	 * 	the upper bound on the number of instructions allowed in
+	 * 	a gadget.
+	 * */
+	private final List<DecompiledInstruction> recursiveSweepImpl(
+			final DexBuffer buffer,
+			final int offset,
+			final List<Integer> checkedGadgetSizes,
+			final int depth) {
+		
+		// Extract next instruction(s) and recursively
+		// continue extraction until enough instructions
+		// were found.
+		
+		//if (depth)
+		
+		return null;
+	}
+	
+	/**
+	 * Computes the largest amount of bytes required to encode a
+	 * non - payload opcode. The size of payload instructions
+	 * in the <code>Format</code> enum is set to <code>-1</code>
+	 * and can therefore not be a valid maximum.
+	 * 
+	 * @return Larget amount of bytes required to encode a non-payload
+	 * 	instruction.
+	 * */
+	private final int getMaxInstructionSize() {
+		
+		int max = Format.values()[0].size;
+		
+		for (int i = 1; i < Format.values().length; i++) {
+			if (max < Format.values()[i].size) {
+				max = Format.values()[i].size;
+			}
+		}
+		
+		return max;
 	}
 }
