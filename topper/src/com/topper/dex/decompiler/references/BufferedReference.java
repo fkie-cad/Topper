@@ -1,5 +1,7 @@
 package com.topper.dex.decompiler.references;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jf.dexlib2.ReferenceType;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBuffer;
@@ -28,11 +30,12 @@ public class BufferedReference {
 	 * @return Reference matching <code>referenceType</code>.
 	 * @throws ExceptionWithContext If <code>referenceType</code> is unknown.
 	 * */
+	@NonNull
     public static Reference makeReference(
-    		final DexBuffer buffer,
+    		@NonNull final DexBuffer buffer,
     		final int referenceType,
     		final int referenceIndex,
-    		final DexBackedDexFile file) {
+    		@Nullable final DexBackedDexFile file) {
     	
         switch (referenceType) {
             case ReferenceType.STRING:

@@ -112,21 +112,22 @@ public final class DecompilationPipeline {
 	 * 	by applying above mentioned stages.
 	 * */
 	@NonNull
-	public final ImmutableList<Gadget> decompile(final byte @NonNull [] bytes, final int offset) {
+	public final ImmutableList<@NonNull Gadget> decompile(final byte @NonNull [] bytes, final int offset) {
 		
 		// Extract instructions from bytes
-		final ImmutableList<ImmutableList<DecompiledInstruction>> instructionSequences = this.sweeper.sweep(bytes, offset);
+		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> instructionSequences = this.sweeper.sweep(bytes, offset);
 		
 		// Apply static analysis to obtain initial gadgets
-		final List<Gadget> gadgets = new LinkedList<Gadget>();
-		for (final ImmutableList<DecompiledInstruction> sequence : instructionSequences) {
+		final List<@NonNull Gadget> gadgets = new LinkedList<@NonNull Gadget>();
+		for (final ImmutableList<@NonNull DecompiledInstruction> sequence : instructionSequences) {
 			gadgets.add(this.staticAnalyser.analyse(sequence));
 		}
 		
 		// Apply semantic analysis to obtain annotated gadgets.
 		// Also functions as filter.
 		Gadget gadget;
-		for (final Gadget candidate : gadgets) {
+		for (@NonNull final Gadget candidate : gadgets) {
+			
 			gadget = this.semanticAnalyser.analyse(candidate);
 			if (gadget == null) {
 				gadgets.remove(candidate);

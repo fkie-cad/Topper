@@ -30,5 +30,5 @@ public interface Sweeper {
 	 * 	instruction sequences are found, then the returned list must be empty.
 	 * */
 	@NonNull
-	public abstract ImmutableList<ImmutableList<DecompiledInstruction>> sweep(final byte @NonNull [] buffer, final int offset);
+	public abstract ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sweep(final byte @NonNull [] buffer, final int offset);
 }

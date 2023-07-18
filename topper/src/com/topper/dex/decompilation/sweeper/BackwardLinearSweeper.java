@@ -142,9 +142,11 @@ public class BackwardLinearSweeper implements Sweeper {
 	 * 	the upper bound on the number of instructions allowed in
 	 * 	a gadget.
 	 * */
+	@SuppressWarnings("unused")
 	private final List<DecompiledInstruction> recursiveSweepImpl(
 			final DexBuffer buffer,
 			final int offset,
+			final int currentSize,
 			final List<Integer> checkedGadgetSizes,
 			final int depth) {
 		

@@ -64,7 +64,7 @@ public class BufferedInstruction implements Instruction {
      * @return The next instruction in <code>reader</code>.
      * */
     @NonNull
-    public static BufferedInstruction readFrom(@NonNull final DexReader<?> reader, @Nullable final DexBackedDexFile file) {
+    public static BufferedInstruction readFrom(@NonNull final DexReader<@NonNull ?> reader, @Nullable final DexBackedDexFile file) {
     	
         int opcodeValue = reader.peekUbyte();
 

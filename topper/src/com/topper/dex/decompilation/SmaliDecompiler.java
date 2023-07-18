@@ -33,6 +33,7 @@ public final class SmaliDecompiler {
 	 * @return Wrapper holding information on the decompilation. Among other things, it holds
 	 * 	the decompiled instructions.
 	 * */
+	@SuppressWarnings("null")	// endOfData() returns null, but this is accounted for in for-each
 	@NonNull
 	public final DecompilationResult decompile(final byte[] bytecode) {
 		

@@ -1,10 +1,11 @@
 package com.topper.configuration;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcode;
 
 import com.topper.exceptions.InvalidConfigException;
 
-public class TopperConfig {
+public final class TopperConfig {
 
 	/**
 	 * Upper bound on the number of instructions that
@@ -18,9 +19,10 @@ public class TopperConfig {
 	/**
 	 * Instruction that signals the end of a gadget.
 	 * */
+	@NonNull
 	private Opcode pivotInstruction;
 	
-	public TopperConfig(final int sweeperMaxNumberInstructions, final Opcode pivotOpcode) throws InvalidConfigException {
+	public TopperConfig(final int sweeperMaxNumberInstructions, @NonNull final Opcode pivotOpcode) throws InvalidConfigException {
 		
 		if (sweeperMaxNumberInstructions <= 0) {
 			throw new InvalidConfigException("sweeperMaxNumberInstructions must be >= 1.");
@@ -50,6 +52,7 @@ public class TopperConfig {
 	 * Gets current pivot instruction that signals the
 	 * end of a gadget.
 	 * */
+	@NonNull
 	public Opcode getPivotInstruction() {
 		return pivotInstruction;
 	}
@@ -58,7 +61,7 @@ public class TopperConfig {
 	 * Sets the pivot instruction that signals
 	 * the end of a gadget.
 	 * */
-	public void setPivotInstruction(Opcode pivotInstruction) {
+	public void setPivotInstruction(@NonNull final Opcode pivotInstruction) {
 		this.pivotInstruction = pivotInstruction;
 	}
 }

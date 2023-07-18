@@ -1,7 +1,6 @@
 package com.topper.dex.decompiler.instructions;
 
-import java.util.Arrays;
-
+import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.ReferenceType;
 import org.jf.dexlib2.iface.instruction.SwitchElement;
@@ -18,21 +17,24 @@ import com.topper.dex.decompiler.references.TypeReference;
 
 public final class DecompiledInstruction {
 
+	@NonNull
 	private final BufferedInstruction instruction;
 
-	private byte[] byteCode;
+	private byte @NonNull [] byteCode;
 
-	public DecompiledInstruction(final BufferedInstruction instruction, final byte[] byteCode) {
+	public DecompiledInstruction(@NonNull final BufferedInstruction instruction, final byte @NonNull [] byteCode) {
 
 		this.instruction = instruction;
-		this.byteCode = Arrays.copyOf(byteCode, byteCode.length);
+		this.byteCode = new byte[byteCode.length];
+		System.arraycopy(byteCode, 0, this.byteCode, 0, this.byteCode.length);
 	}
 
+	@NonNull
 	public final BufferedInstruction getInstruction() {
 		return this.instruction;
 	}
 
-	public final byte[] getByteCode() {
+	public final byte @NonNull [] getByteCode() {
 		return this.byteCode;
 	}
 
@@ -46,10 +48,12 @@ public final class DecompiledInstruction {
 		return s.toString();
 	}
 
-	public String getInstructionString() {
+	@NonNull
+	public final String getInstructionString() {
 		return this.instructionToString(this.instruction);
 	}
 
+	@NonNull
 	private final String instructionToString(final BufferedInstruction instruction) {
 		
 		Reference ref;

@@ -2,9 +2,10 @@ package com.topper.interactive;
 
 import java.io.IOException;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.ConfigManager;
-import com.topper.configuration.TopperConfig;
 import com.topper.exceptions.CommandException;
 import com.topper.exceptions.StateException;
 import com.topper.scengine.ScriptExecutor;
@@ -26,6 +27,7 @@ public final class InteractiveTopper {
 	/**
 	 * Format string to write before requesting user input.
 	 * */
+	@NonNull
 	private static final String LINE_PREFIX = "%s> ";
 	
 	/**

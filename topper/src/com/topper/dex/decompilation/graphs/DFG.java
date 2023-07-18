@@ -1,17 +1,22 @@
 package com.topper.dex.decompilation.graphs;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
 
 public final class DFG {
 
-	private final MutableGraph<DFG.DFGNode> graph;
+	@NonNull
+	private final MutableGraph<DFG.@NonNull DFGNode> graph;
 	
+	@SuppressWarnings("null")
 	public DFG() {
 		this.graph = GraphBuilder.directed().build();
 	}
 	
-	public final MutableGraph<DFG.DFGNode> getGraph() {
+	@NonNull
+	public final MutableGraph<DFG.@NonNull DFGNode> getGraph() {
 		return this.graph;
 	}
 	

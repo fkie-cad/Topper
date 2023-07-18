@@ -10,7 +10,10 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
 public final class StaticAnalyser {
 
+	@NonNull
 	private CFGAnalyser cfgAnalyser;
+	
+	@NonNull
 	private DFGAnalyser dfgAnalyser;
 	
 	public StaticAnalyser() {
@@ -19,7 +22,7 @@ public final class StaticAnalyser {
 	}
 	
 	@NonNull
-	public final Gadget analyse(@NonNull final ImmutableList<DecompiledInstruction> instructions) {
+	public final Gadget analyse(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions) {
 		
 		// Extract CFG
 		final CFG cfg = this.cfgAnalyser.extractCFG(instructions);
