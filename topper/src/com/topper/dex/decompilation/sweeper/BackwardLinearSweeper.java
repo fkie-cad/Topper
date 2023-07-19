@@ -52,10 +52,9 @@ public class BackwardLinearSweeper extends Sweeper {
 	 * @param offset Starting point of the sweep relative to the beginning of the
 	 *               buffer. It must point to a valid instruction. It should point
 	 *               to a pivot instruction.
-	 * @return List of lists of instructions sequences preceding the instruction
-	 *         located at <code>offset</code> in <code>buffer</code>. The
-	 *         instruction pointed to by <code>offset</code> is also part of this
-	 *         list.
+	 * @return List of instruction sequences preceding the instruction located at
+	 *         <code>offset</code> in <code>buffer</code>. The instruction pointed
+	 *         to by <code>offset</code> is also part of this list.
 	 * @throws SweeperException If <code>offset</code> does not point to a pivot
 	 *                          instruction, or is out of bounds wrt.
 	 *                          <code>buffer</code>.
@@ -64,6 +63,7 @@ public class BackwardLinearSweeper extends Sweeper {
 	public ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sweep(final byte[] buffer,
 			final int offset) throws SweeperException {
 
+		// Perform bound checks on buffer and offset.
 		final int currentSize = ConfigManager.getInstance().getConfig().getPivotInstruction().format.size;
 		if (offset + currentSize > buffer.length) {
 			throw new SweeperException("buffer is too small to hold pivot instruction at " + offset + ".");
@@ -77,12 +77,14 @@ public class BackwardLinearSweeper extends Sweeper {
 		checkedGadgetSizes.add(currentSize);
 		final int depth = 1;
 
+		// Try to decompile pivot instruction pointed to by offset.
 		try {
 			final DecompilationResult result = decompiler
 					.decompile(Arrays.copyOfRange(buffer, offset, offset + currentSize));
 			final ImmutableList<DecompiledInstruction> instructions = result.getInstructions();
 			final DecompiledInstruction instruction = instructions.get(0);
 
+			// Thoroughly check pivot instruction, because its format is known in advance.
 			if (instructions.size() != 1 || instruction.getByteCode().length != currentSize
 					|| !instruction.getInstruction().getOpcode()
 							.equals(ConfigManager.getInstance().getConfig().getPivotInstruction())) {
@@ -90,6 +92,7 @@ public class BackwardLinearSweeper extends Sweeper {
 						+ offset + " is invalid.");
 			}
 
+			// Use pivot instruction as base for recursive sweep.
 			return this.recursiveSweepImpl(decompiler, buffer, offset, currentSize, instructions, checkedGadgetSizes,
 					depth);
 
