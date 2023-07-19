@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompilation.Gadget;
 import com.topper.dex.decompilation.semanticanalyser.DefaultSemanticAnalyser;
 import com.topper.dex.decompilation.semanticanalyser.SemanticAnalyser;
+import com.topper.dex.decompilation.staticanalyser.DefaultStaticAnalyser;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
 import com.topper.dex.decompilation.sweeper.Sweeper;
@@ -62,19 +63,19 @@ public final class DecompilationPipeline {
 	 * Initializes this pipeline with default stages. Currently
 	 * the default stages are:
 	 * - <code>BackwardLinearSweeper</code>
-	 * - <code>StaticAnalyser</code>
+	 * - <code>DefaultStaticAnalyser</code>
 	 * - <code>DefaultSemanticAnalysr</code>
 	 * 
 	 * The default values can be overwritten by calling their
 	 * respective setters.
 	 * 
 	 * @see BackwardLinearSweeper
-	 * @see StaticAnalyser
+	 * @see DefaultStaticAnalyser
 	 * @see DefaultSemanticAnalyser
 	 * */
 	public DecompilationPipeline() {
 		this.sweeper = new BackwardLinearSweeper();
-		this.staticAnalyser = new StaticAnalyser();
+		this.staticAnalyser = new DefaultStaticAnalyser();
 		this.semanticAnalyser = new DefaultSemanticAnalyser();
 	}
 	
