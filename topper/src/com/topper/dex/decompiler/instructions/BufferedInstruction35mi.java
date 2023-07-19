@@ -15,16 +15,16 @@ public class BufferedInstruction35mi extends BufferedInstruction implements Inst
 	private final int registerG;
 	private final int inlineIndex;
 	
-	public BufferedInstruction35mi(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset) {
-		super(opcode);
+	public BufferedInstruction35mi(final DexBuffer buffer, final Opcode opcode, final int instructionStart) {
+		super(opcode, instructionStart);
 
-		this.registerCount = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStartOffset + 1));
-		this.registerC = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStartOffset + 4));
-		this.registerD = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStartOffset + 4));
-		this.registerE = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStartOffset + 5));
-		this.registerF = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStartOffset + 5));
-		this.registerG = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStartOffset + 1));
-		this.inlineIndex = buffer.readUshort(instructionStartOffset + 2);
+		this.registerCount = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStart + 1));
+		this.registerC = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStart + 4));
+		this.registerD = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStart + 4));
+		this.registerE = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStart + 5));
+		this.registerF = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStart + 5));
+		this.registerG = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStart + 1));
+		this.inlineIndex = buffer.readUshort(instructionStart + 2);
 	}
 
     @Override public int getRegisterCount() {

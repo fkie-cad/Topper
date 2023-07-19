@@ -9,11 +9,11 @@ public class BufferedInstruction21s extends BufferedInstruction implements Instr
 	private final int registerA;
 	private final int narrowLiteral;
 	
-	public BufferedInstruction21s(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset) {
-		super(opcode);
+	public BufferedInstruction21s(final DexBuffer buffer, final Opcode opcode, final int instructionStart) {
+		super(opcode, instructionStart);
 		
-		this.registerA = buffer.readUbyte(instructionStartOffset + 1);
-		this.narrowLiteral = buffer.readShort(instructionStartOffset + 2);
+		this.registerA = buffer.readUbyte(instructionStart + 1);
+		this.narrowLiteral = buffer.readShort(instructionStart + 2);
 	}
 
     @Override public int getRegisterA() { return this.registerA; }

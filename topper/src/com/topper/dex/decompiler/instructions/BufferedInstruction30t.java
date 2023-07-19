@@ -8,10 +8,10 @@ public class BufferedInstruction30t extends BufferedInstruction implements Instr
 
 	private final int offset;
 	
-	public BufferedInstruction30t(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset) {
-		super(opcode);
+	public BufferedInstruction30t(final DexBuffer buffer, final Opcode opcode, final int instructionStart) {
+		super(opcode, instructionStart);
 		
-		this.offset = buffer.readInt(instructionStartOffset + 2);
+		this.offset = buffer.readInt(instructionStart + 2);
 	}
 
     @Override public int getCodeOffset() { return this.offset; }

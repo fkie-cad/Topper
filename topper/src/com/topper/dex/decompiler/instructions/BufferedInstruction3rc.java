@@ -15,13 +15,13 @@ public class BufferedInstruction3rc extends BufferedInstruction implements Instr
 	private final Reference reference;
 	private final int referenceType;
 
-	public BufferedInstruction3rc(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset, final DexBackedDexFile file) {
-		super(opcode);
+	public BufferedInstruction3rc(final DexBuffer buffer, final Opcode opcode, final int instructionStart, final DexBackedDexFile file) {
+		super(opcode, instructionStart);
 		
-		this.registerCount = buffer.readUbyte(instructionStartOffset + 1);
-		this.startRegister = buffer.readUshort(instructionStartOffset + 4);
+		this.registerCount = buffer.readUbyte(instructionStart + 1);
+		this.startRegister = buffer.readUshort(instructionStart + 4);
 		this.reference = BufferedReference.makeReference(buffer, this.getOpcode().referenceType,
-                buffer.readUshort(instructionStartOffset + 2), file);
+                buffer.readUshort(instructionStart + 2), file);
 		this.referenceType = this.getOpcode().referenceType;
 	}
 	

@@ -9,11 +9,11 @@ public class BufferedInstruction21ih extends BufferedInstruction implements Inst
 	private final int registerA;
 	private final short hatLiteral;
 	
-	public BufferedInstruction21ih(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset) {
-		super(opcode);
+	public BufferedInstruction21ih(final DexBuffer buffer, final Opcode opcode, final int instructionStart) {
+		super(opcode, instructionStart);
 		
-		this.registerA = buffer.readUbyte(instructionStartOffset + 1);
-		this.hatLiteral = (short)buffer.readShort(instructionStartOffset + 2);
+		this.registerA = buffer.readUbyte(instructionStart + 1);
+		this.hatLiteral = (short)buffer.readShort(instructionStart + 2);
 	}
 
 	@Override

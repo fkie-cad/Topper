@@ -9,11 +9,11 @@ public class BufferedInstruction22x extends BufferedInstruction implements Instr
 	private final int registerA;
 	private final int registerB;
 	
-	public BufferedInstruction22x(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset) {
-		super(opcode);
+	public BufferedInstruction22x(final DexBuffer buffer, final Opcode opcode, final int instructionStart) {
+		super(opcode, instructionStart);
 		
-		this.registerA = buffer.readUbyte(instructionStartOffset + 1);
-		this.registerB = buffer.readUshort(instructionStartOffset + 2);
+		this.registerA = buffer.readUbyte(instructionStart + 1);
+		this.registerB = buffer.readUshort(instructionStart + 2);
 	}
 
     @Override public int getRegisterA() { return this.registerA; }

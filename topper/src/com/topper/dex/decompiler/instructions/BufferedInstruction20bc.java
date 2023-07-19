@@ -16,7 +16,7 @@ public class BufferedInstruction20bc extends BufferedInstruction implements Inst
 	private final int referenceType;
 	
 	public BufferedInstruction20bc(DexBuffer buffer, Opcode opcode, int instructionStart, final DexBackedDexFile file) {
-		super(opcode);
+		super(opcode, instructionStart);
 		
 		this.verificationError = buffer.readUbyte(instructionStart + 1) & 0x3f;
 		this.referenceType = (buffer.readUbyte(instructionStart + 1) >>> 6) + 1;

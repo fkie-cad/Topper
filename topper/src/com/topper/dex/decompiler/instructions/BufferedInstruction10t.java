@@ -9,7 +9,7 @@ public class BufferedInstruction10t extends BufferedInstruction implements Instr
 	private final int offset;
 
 	public BufferedInstruction10t(DexBuffer buffer, Opcode opcode, int instructionStart) {
-		super(opcode);
+		super(opcode, instructionStart);
 		
 		this.offset = buffer.readByte(instructionStart + 1);
 	}

@@ -19,7 +19,7 @@ public class BufferedArrayPayload extends BufferedInstruction implements ArrayPa
     private List<Number> arrayElements;
 
 	public BufferedArrayPayload(final DexBuffer buffer, final int instructionStartOffset) {
-		super(Opcode.ARRAY_PAYLOAD);
+		super(Opcode.ARRAY_PAYLOAD, instructionStartOffset);
 		
         this.elementWidth = buffer.readUshort(instructionStartOffset + ELEMENT_WIDTH_OFFSET);
         this.elementCount = buffer.readSmallUint(instructionStartOffset + ELEMENT_COUNT_OFFSET);

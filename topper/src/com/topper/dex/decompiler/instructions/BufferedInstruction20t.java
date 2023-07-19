@@ -9,7 +9,7 @@ public class BufferedInstruction20t extends BufferedInstruction implements Instr
 	private final int offset;
 	
 	public BufferedInstruction20t(final DexBuffer buffer, final Opcode opcode, final int instructionStart) {
-		super(opcode);
+		super(opcode, instructionStart);
 		
 		this.offset = buffer.readShort(instructionStart + 2);
 	}

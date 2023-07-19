@@ -9,11 +9,11 @@ public class BufferedInstruction21t extends BufferedInstruction implements Instr
 	private final int registerA;
 	private final int offset;
 	
-	public BufferedInstruction21t(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset) {
-		super(opcode);
+	public BufferedInstruction21t(final DexBuffer buffer, final Opcode opcode, final int instructionStart) {
+		super(opcode, instructionStart);
 		
-		this.registerA = buffer.readUbyte(instructionStartOffset + 1);
-		this.offset = buffer.readShort(instructionStartOffset + 2);
+		this.registerA = buffer.readUbyte(instructionStart + 1);
+		this.offset = buffer.readShort(instructionStart + 2);
 	}
 
     @Override public int getRegisterA() { return this.registerA; }

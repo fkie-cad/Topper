@@ -11,7 +11,7 @@ public class BufferedInstruction11n extends BufferedInstruction implements Instr
 	private final int narrowLiteral;
 
 	public BufferedInstruction11n(DexBuffer buffer, Opcode opcode, int instructionStart) {
-		super(opcode);
+		super(opcode, instructionStart);
 		
 		this.registerA = NibbleUtils.extractLowUnsignedNibble(buffer.readByte(instructionStart + 1));
 		this.narrowLiteral = NibbleUtils.extractLowUnsignedNibble(buffer.readByte(instructionStart + 1));

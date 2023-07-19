@@ -16,12 +16,12 @@ public class BufferedInstruction22c extends BufferedInstruction implements Instr
 	private final Reference reference;
 	private final int referenceType;
 	
-	public BufferedInstruction22c(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset, final DexBackedDexFile file) {
-		super(opcode);
+	public BufferedInstruction22c(final DexBuffer buffer, final Opcode opcode, final int instructionStart, final DexBackedDexFile file) {
+		super(opcode, instructionStart);
 		
-		this.registerA = NibbleUtils.extractLowUnsignedNibble(buffer.readByte(instructionStartOffset + 1));
-		this.registerB = NibbleUtils.extractHighUnsignedNibble(buffer.readByte(instructionStartOffset + 1));
-		this.reference = BufferedReference.makeReference(buffer, this.getOpcode().referenceType, buffer.readUshort(instructionStartOffset + 2), file);
+		this.registerA = NibbleUtils.extractLowUnsignedNibble(buffer.readByte(instructionStart + 1));
+		this.registerB = NibbleUtils.extractHighUnsignedNibble(buffer.readByte(instructionStart + 1));
+		this.reference = BufferedReference.makeReference(buffer, this.getOpcode().referenceType, buffer.readUshort(instructionStart + 2), file);
 		this.referenceType = this.getOpcode().referenceType;
 	}
 	

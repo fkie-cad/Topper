@@ -17,18 +17,18 @@ public class BufferedPackedSwitchPayload extends BufferedInstruction implements 
     private final List<BufferedSwitchElement> switchElements;
     private final int codeUnits;
 	
-	public BufferedPackedSwitchPayload(final DexBuffer buffer, final int instructionStartOffset) {
-		super(Opcode.PACKED_SWITCH_PAYLOAD);
+	public BufferedPackedSwitchPayload(final DexBuffer buffer, final int instructionStart) {
+		super(Opcode.PACKED_SWITCH_PAYLOAD, instructionStart);
 		
-        this.elementCount = buffer.readUshort(instructionStartOffset + ELEMENT_COUNT_OFFSET);
+        this.elementCount = buffer.readUshort(instructionStart + ELEMENT_COUNT_OFFSET);
         
-        final int firstKey = buffer.readInt(instructionStartOffset + FIRST_KEY_OFFSET);
+        final int firstKey = buffer.readInt(instructionStart + FIRST_KEY_OFFSET);
         
         this.switchElements = new LinkedList<BufferedSwitchElement>();
         for (int index = 0; index < this.elementCount; index++) {
         	this.switchElements.add(new BufferedSwitchElement(
         			firstKey + index,
-        			buffer.readInt(instructionStartOffset + TARGETS_OFFSET + index*4)
+        			buffer.readInt(instructionStart + TARGETS_OFFSET + index*4)
         	));
         }
         

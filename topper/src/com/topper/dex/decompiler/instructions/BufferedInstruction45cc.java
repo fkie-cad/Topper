@@ -22,20 +22,20 @@ public class BufferedInstruction45cc extends BufferedInstruction implements Inst
 	private final Reference reference2;
 	private final int referenceType2;
 	
-	public BufferedInstruction45cc(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset, final DexBackedDexFile file) {
-		super(opcode);
+	public BufferedInstruction45cc(final DexBuffer buffer, final Opcode opcode, final int instructionStart, final DexBackedDexFile file) {
+		super(opcode, instructionStart);
 
-		this.registerCount = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStartOffset + 1));
-		this.registerC = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStartOffset + 4));
-		this.registerD = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStartOffset + 4));
-		this.registerE = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStartOffset + 5));
-		this.registerF = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStartOffset + 5));
-		this.registerG = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStartOffset + 1));
+		this.registerCount = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStart + 1));
+		this.registerC = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStart + 4));
+		this.registerD = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStart + 4));
+		this.registerE = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStart + 5));
+		this.registerF = NibbleUtils.extractHighUnsignedNibble(buffer.readUbyte(instructionStart + 5));
+		this.registerG = NibbleUtils.extractLowUnsignedNibble(buffer.readUbyte(instructionStart + 1));
 		this.reference = BufferedReference.makeReference(buffer, this.getOpcode().referenceType,
-                buffer.readUshort(instructionStartOffset + 2), file);
+                buffer.readUshort(instructionStart + 2), file);
 		this.referenceType = this.getOpcode().referenceType;
 		this.reference2 = BufferedReference.makeReference(buffer, this.getOpcode().referenceType2,
-                buffer.readUshort(instructionStartOffset + 6), file);
+                buffer.readUshort(instructionStart + 6), file);
 		this.referenceType2 = this.getOpcode().referenceType2;
 	}
 

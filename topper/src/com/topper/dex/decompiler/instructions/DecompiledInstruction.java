@@ -37,6 +37,10 @@ public final class DecompiledInstruction {
 	public final byte @NonNull [] getByteCode() {
 		return this.byteCode;
 	}
+	
+	public final int getOffset() {
+		return this.instruction.getOffset();
+	}
 
 	@Override
 	public String toString() {

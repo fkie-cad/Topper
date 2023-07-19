@@ -12,32 +12,37 @@ public class Gadget {
 
 	@NonNull
 	private final ImmutableList<@NonNull DecompiledInstruction> instructions;
-	
+
 	@Nullable
 	private final CFG cfg;
-	
+
 	@Nullable
 	private final DFG dfg;
-	
-	public Gadget(
-			@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions,
-			@Nullable final CFG cfg,
+
+	public Gadget(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions, @Nullable final CFG cfg,
 			@Nullable final DFG dfg) {
+		if (instructions.size() <= 0) {
+			throw new IllegalArgumentException("Gadget must at least contain the pivot instruction.");
+		}
 		this.instructions = instructions;
 		this.cfg = cfg;
 		this.dfg = dfg;
 	}
-	
+
 	@NonNull
 	public final ImmutableList<@NonNull DecompiledInstruction> getInstructions() {
 		return this.instructions;
+	}
+	
+	public final int getOffset() {
+		return this.instructions.get(0).getOffset();
 	}
 	
 	@Nullable
 	public final CFG getCFG() {
 		return this.cfg;
 	}
-	
+
 	@Nullable
 	public final DFG getDFG() {
 		return this.dfg;

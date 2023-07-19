@@ -10,12 +10,12 @@ public class BufferedInstruction3rms extends BufferedInstruction implements Inst
 	private final int startRegister;
 	private final int vtableIndex;
 	
-	public BufferedInstruction3rms(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset) {
-		super(opcode);
+	public BufferedInstruction3rms(final DexBuffer buffer, final Opcode opcode, final int instructionStart) {
+		super(opcode, instructionStart);
 		
-		this.registerCount = buffer.readUbyte(instructionStartOffset + 1);
-		this.startRegister = buffer.readUshort(instructionStartOffset + 4);
-		this.vtableIndex = buffer.readUshort(instructionStartOffset + 2);
+		this.registerCount = buffer.readUbyte(instructionStart + 1);
+		this.startRegister = buffer.readUshort(instructionStart + 4);
+		this.vtableIndex = buffer.readUshort(instructionStart + 2);
 	}
 	
     @Override public int getRegisterCount() {

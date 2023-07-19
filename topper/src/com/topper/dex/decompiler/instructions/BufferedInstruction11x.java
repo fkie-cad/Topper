@@ -9,7 +9,7 @@ public class BufferedInstruction11x extends BufferedInstruction implements Instr
 	private final int registerA;
 	
 	public BufferedInstruction11x(DexBuffer buffer, Opcode opcode, int instructionStart) {
-		super(opcode);
+		super(opcode, instructionStart);
 		
 		this.registerA = buffer.readUbyte(instructionStart + 1);
 	}

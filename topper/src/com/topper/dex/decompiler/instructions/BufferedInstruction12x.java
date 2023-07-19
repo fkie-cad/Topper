@@ -11,7 +11,7 @@ public class BufferedInstruction12x extends BufferedInstruction implements Instr
 	private final int registerB;
 
 	public BufferedInstruction12x(DexBuffer buffer, Opcode opcode, int instructionStart) {
-		super(opcode);
+		super(opcode, instructionStart);
 		
 		this.registerA = NibbleUtils.extractLowUnsignedNibble(buffer.readByte(instructionStart + 1));
 		this.registerB = NibbleUtils.extractHighUnsignedNibble(buffer.readByte(instructionStart + 1));

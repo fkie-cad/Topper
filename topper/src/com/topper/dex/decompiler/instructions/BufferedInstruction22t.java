@@ -11,12 +11,12 @@ public class BufferedInstruction22t extends BufferedInstruction implements Instr
 	private final int registerB;
 	private final int offset;
 	
-	public BufferedInstruction22t(final DexBuffer buffer, final Opcode opcode, final int instructionStartOffset) {
-		super(opcode);
+	public BufferedInstruction22t(final DexBuffer buffer, final Opcode opcode, final int instructionStart) {
+		super(opcode, instructionStart);
 		
-		this.registerA = NibbleUtils.extractLowUnsignedNibble(buffer.readByte(instructionStartOffset + 1));
-		this.registerB = NibbleUtils.extractHighUnsignedNibble(buffer.readByte(instructionStartOffset + 1));
-		this.offset = buffer.readShort(instructionStartOffset + 2);
+		this.registerA = NibbleUtils.extractLowUnsignedNibble(buffer.readByte(instructionStart + 1));
+		this.registerB = NibbleUtils.extractHighUnsignedNibble(buffer.readByte(instructionStart + 1));
+		this.offset = buffer.readShort(instructionStart + 2);
 	}
 
     @Override

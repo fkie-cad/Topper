@@ -7,7 +7,7 @@ import org.jf.dexlib2.iface.instruction.formats.UnknownInstruction;
 public class BufferedUnknownInstruction extends BufferedInstruction implements UnknownInstruction {
 
 	public BufferedUnknownInstruction(final DexBuffer buffer, final int instructionStart) {
-		super(Opcode.NOP);
+		super(Opcode.NOP, instructionStart);
 	}
 
 	@Override

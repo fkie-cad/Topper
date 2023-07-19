@@ -16,17 +16,17 @@ public class BufferedSparseSwitchPayload extends BufferedInstruction implements 
     private final List<BufferedSwitchElement> switchElements;
     private final int codeUnits;
 
-	public BufferedSparseSwitchPayload(final DexBuffer buffer, final int instructionStartOffset) {
-		super(Opcode.SPARSE_SWITCH_PAYLOAD);
+	public BufferedSparseSwitchPayload(final DexBuffer buffer, final int instructionStart) {
+		super(Opcode.SPARSE_SWITCH_PAYLOAD, instructionStart);
 		
-        this.elementCount = buffer.readUshort(instructionStartOffset + ELEMENT_COUNT_OFFSET);
+        this.elementCount = buffer.readUshort(instructionStart + ELEMENT_COUNT_OFFSET);
         
 
         this.switchElements = new LinkedList<BufferedSwitchElement>();
         for (int index = 0; index < this.elementCount; index++) {
         	this.switchElements.add(new BufferedSwitchElement(
-        			buffer.readInt(instructionStartOffset + KEYS_OFFSET + index*4),
-        			buffer.readInt(instructionStartOffset + KEYS_OFFSET + elementCount*4 + index*4)
+        			buffer.readInt(instructionStart + KEYS_OFFSET + index*4),
+        			buffer.readInt(instructionStart + KEYS_OFFSET + elementCount*4 + index*4)
         	));
         }
         

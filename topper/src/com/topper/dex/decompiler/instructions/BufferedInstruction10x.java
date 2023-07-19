@@ -7,6 +7,6 @@ import org.jf.dexlib2.iface.instruction.formats.Instruction10x;
 public class BufferedInstruction10x extends BufferedInstruction implements Instruction10x {
 
 	public BufferedInstruction10x(DexBuffer buffer, Opcode opcode, int instructionStart) {
-		super(opcode);
+		super(opcode, instructionStart);
 	}
 }
