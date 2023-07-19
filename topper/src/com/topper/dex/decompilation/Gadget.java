@@ -8,7 +8,7 @@ import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompilation.graphs.DFG;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
-public final class Gadget {
+public class Gadget {
 
 	@NonNull
 	private final ImmutableList<@NonNull DecompiledInstruction> instructions;
