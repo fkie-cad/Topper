@@ -6,7 +6,7 @@ import org.jf.dexlib2.dexbacked.DexBuffer;
 import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
-public final class DecompilationResult {
+public class DecompilationResult {
 	
 	private final DexBuffer buffer;
 	
