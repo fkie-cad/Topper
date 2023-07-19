@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableList;
 import com.topper.configuration.ConfigManager;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.DecompilationResult;
-import com.topper.dex.decompilation.SmaliDecompiler;
+import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.exceptions.SweeperException;
 
@@ -25,7 +25,7 @@ import com.topper.exceptions.SweeperException;
  * 
  * @author Pascal Kühnemann
  */
-public class BackwardLinearSweeper implements Sweeper {
+public class BackwardLinearSweeper extends Sweeper {
 
 	private static final int CODE_UNIT_SIZE = 2;
 
@@ -71,7 +71,7 @@ public class BackwardLinearSweeper implements Sweeper {
 			throw new SweeperException("offset must not be negative.");
 		}
 
-		final SmaliDecompiler decompiler = new SmaliDecompiler();
+		final Decompiler decompiler = this.getDecompiler();
 		final int maxSizes = ConfigManager.getInstance().getConfig().getSweeperMaxNumberInstructions();
 		final List<Integer> checkedGadgetSizes = new ArrayList<Integer>(maxSizes);
 		checkedGadgetSizes.add(currentSize);
@@ -153,7 +153,7 @@ public class BackwardLinearSweeper implements Sweeper {
 	@SuppressWarnings("null") // ImmutableList.Builder.build() is not expected to be null...
 	@NonNull
 	private final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> recursiveSweepImpl(
-			@NonNull final SmaliDecompiler decompiler, final byte @NonNull [] buffer, final int offset,
+			@NonNull final Decompiler decompiler, final byte @NonNull [] buffer, final int offset,
 			final int currentSize, @NonNull final List<DecompiledInstruction> previousInstructions,
 			@NonNull final List<Integer> checkedGadgetSizes, final int depth) {
 

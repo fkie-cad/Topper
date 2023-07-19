@@ -1,4 +1,4 @@
-package com.topper.dex.decompilation;
+package com.topper.dex.decompilation.decompiler;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,6 +12,7 @@ import org.jf.dexlib2.dexbacked.DexReader;
 import org.jf.dexlib2.dexbacked.util.VariableSizeLookaheadIterator;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.dex.decompilation.DecompilationResult;
 import com.topper.dex.decompiler.instructions.BufferedInstruction;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
@@ -24,7 +25,7 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
  * 
  * @author Pascal Kühnemann
  * */
-public final class SmaliDecompiler {
+public final class SmaliDecompiler implements Decompiler {
 	
 	/**
 	 * Decompiles a given byte array into smali instructions.
@@ -35,6 +36,7 @@ public final class SmaliDecompiler {
 	 * */
 	@SuppressWarnings("null")	// endOfData() returns null, but this is accounted for in for-each
 	@NonNull
+	@Override
 	public final DecompilationResult decompile(final byte[] bytecode) {
 		
 		final DexBuffer buffer = new DexBuffer(bytecode);

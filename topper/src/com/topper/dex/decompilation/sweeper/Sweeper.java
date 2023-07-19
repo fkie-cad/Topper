@@ -3,6 +3,8 @@ package com.topper.dex.decompilation.sweeper;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.dex.decompilation.decompiler.Decompiler;
+import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.exceptions.SweeperException;
 
@@ -12,7 +14,22 @@ import com.topper.exceptions.SweeperException;
  * 
  * @author Pascal Kühnemann
  * */
-public interface Sweeper {
+public abstract class Sweeper {
+	
+	private Decompiler decompiler;
+	
+	public Sweeper() {
+		this.decompiler = new SmaliDecompiler();
+	}
+	
+	@NonNull
+	public final Decompiler getDecompiler() {
+		return this.decompiler;
+	}
+	
+	public final void setDecompiler(@NonNull final Decompiler decompiler) {
+		this.decompiler = decompiler;
+	}
 	
 	/**
 	 * Performs a sweep on <code>buffer</code>, starting at <code>offset</code>.
