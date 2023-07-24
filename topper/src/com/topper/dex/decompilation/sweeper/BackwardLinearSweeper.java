@@ -208,7 +208,6 @@ public class BackwardLinearSweeper extends Sweeper {
 			try {
 
 				// Decompile instruction.
-				// TODO: Create strategy pattern for decompile
 				instructions = decompiler.decompile(Arrays.copyOfRange(buffer, offset - instructionSize, offset))
 						.getInstructions();
 

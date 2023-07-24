@@ -10,6 +10,8 @@ import org.jf.dexlib2.dexbacked.DexReader;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.util.ExceptionWithContext;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * Buffered version of an <code>Instruction</code>. It is "buffered",
  * because all subclasses store their bytecode into fields. This aims
@@ -62,7 +64,7 @@ public class BufferedInstruction implements Instruction {
     public final int getOffset() {
     	return this.offset;
     }
-	
+    
     /**
      * Reads from <code>reader</code> the next <code>BufferedInstruction</code>.
      * 
