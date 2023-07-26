@@ -10,5 +10,5 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 public interface CFGAnalyser {
 
 	@Nullable
-	CFG extractCFG(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions);
+	CFG extractCFG(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions, final int entry);
 }

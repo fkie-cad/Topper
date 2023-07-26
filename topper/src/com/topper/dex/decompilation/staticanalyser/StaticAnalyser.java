@@ -31,7 +31,7 @@ public abstract class StaticAnalyser {
 //		return new Gadget(instructions, cfg, dfg);
 //	}
 	
-	@NonNull public abstract Gadget analyse(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions);
+	@NonNull public abstract Gadget analyse(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions, final int entry);
 	
 	@NonNull
 	public final CFGAnalyser getCFGAnalyser() {

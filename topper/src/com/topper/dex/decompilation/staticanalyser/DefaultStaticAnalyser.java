@@ -11,10 +11,10 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 public final class DefaultStaticAnalyser extends StaticAnalyser {
 
 	@NonNull
-	public final Gadget analyse(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions) {
+	public final Gadget analyse(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions, final int entry) {
 		
 		// Extract CFG
-		final CFG cfg = this.getCFGAnalyser().extractCFG(instructions);
+		final CFG cfg = this.getCFGAnalyser().extractCFG(instructions, entry);
 		
 		// Extract DFG. Maybe this requires CFG as well.
 		final DFG dfg = this.getDFGAnalyser().extractDFG(instructions);

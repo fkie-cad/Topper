@@ -114,7 +114,8 @@ public final class DecompilationPipeline {
 		// Apply static analysis to obtain initial gadgets
 		final List<@NonNull Gadget> gadgets = new LinkedList<@NonNull Gadget>();
 		for (final ImmutableList<@NonNull DecompiledInstruction> sequence : instructionSequences) {
-			gadgets.add(this.staticAnalyser.analyse(sequence));
+			// TODO: Handle entry point
+			gadgets.add(this.staticAnalyser.analyse(sequence, 0));
 		}
 
 		// Apply semantic analysis to obtain annotated gadgets.
