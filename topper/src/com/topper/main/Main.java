@@ -21,13 +21,7 @@ public class Main {
 		final SmaliDecompiler decompiler = new SmaliDecompiler();
 		final DecompilationResult result = decompiler.decompile(bytecode);
 		
-		System.out.println("Number of instructions: " + result.getInstructions().size());
 		
-//		for (final DecompiledInstruction instruction : result.getInstructions()) {
-//			
-//			System.out.println(instruction.getInstructionString());
-//		}
 		
-		System.out.println(result.getPrettyInstructions());
 	}
 }

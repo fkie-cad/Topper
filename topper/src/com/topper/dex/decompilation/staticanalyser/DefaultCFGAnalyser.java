@@ -14,7 +14,6 @@ import org.jf.dexlib2.iface.instruction.SwitchPayload;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompilation.graphs.BasicBlock;
-import com.topper.dex.decompilation.graphs.BasicBlock.BranchInstruction;
 import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
@@ -308,6 +307,7 @@ public final class DefaultCFGAnalyser implements CFGAnalyser {
 		// In parallel construct edges in graph.
 		Optional<@NonNull BranchInfo> info;
 		List<@NonNull BasicBlock> targets;
+		@NonNull
 		BasicBlock candidate;
 		DecompiledInstruction instruction;
 
@@ -333,17 +333,17 @@ public final class DefaultCFGAnalyser implements CFGAnalyser {
 
 					// Perform lookup: O(log(N)^2)
 					// Assumption 2
-					candidate = cfg.getBlock(cfg.getInstruction(target));
-
-					// Ensure that target points to block start
-					if (candidate.getOffset() == target) {
-
-						targets.add(candidate);
-						cfg.getGraph().putEdge(block, candidate);
-					}
+//					candidate = cfg.getBlock(cfg.getInstruction(target));
+//
+//					// Ensure that target points to block start
+//					if (candidate.getOffset() == target) {
+//
+//						targets.add(candidate);
+//						cfg.getGraph().putEdge(block, candidate);
+//					}
 				}
 
-				block.setBranch(new BranchInstruction(last, ImmutableList.copyOf(targets), this.getBranchType(last)));
+//				block.setBranch(new BranchInstruction(last, ImmutableList.copyOf(targets), this.getBranchType(last)));
 			} else {
 				// If there is no info on last instruction, then
 				// it is a splitted block, i.e. the next block is a
@@ -353,13 +353,13 @@ public final class DefaultCFGAnalyser implements CFGAnalyser {
 				// branch target, so double - check (not covered by stripBranches)
 				instruction = cfg.getInstruction(block.getOffset() + block.getSize());
 				if (instruction != null) {
-					candidate = cfg.getBlock(instruction);
-					if (candidate != null) {
-
-						cfg.getGraph().putEdge(block, candidate);
-						block.setBranch(
-								new BranchInstruction(last, ImmutableList.of(candidate), this.getBranchType(last)));
-					}
+//					candidate = cfg.getBlock(instruction);
+//					if (candidate != null) {
+//
+//						cfg.getGraph().putEdge(block, candidate);
+//						block.setBranch(
+//								new BranchInstruction(last, ImmutableList.of(candidate), this.getBranchType(last)));
+//					}
 				}
 			}
 		}

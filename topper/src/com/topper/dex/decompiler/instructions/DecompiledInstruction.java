@@ -15,7 +15,7 @@ import com.topper.dex.decompiler.references.MethodReference;
 import com.topper.dex.decompiler.references.StringReference;
 import com.topper.dex.decompiler.references.TypeReference;
 
-public final class DecompiledInstruction {
+public final class DecompiledInstruction implements Comparable<DecompiledInstruction> {
 
 	@NonNull
 	private final BufferedInstruction instruction;
@@ -55,6 +55,45 @@ public final class DecompiledInstruction {
 	@NonNull
 	public final String getInstructionString() {
 		return this.instructionToString(this.instruction);
+	}
+	
+	/**
+	 * Compares two instructions. Invoking this method only makes sense
+	 * in the context of the same underlying buffer. I.e. if two instructions
+	 * from different buffers are compared, then they will trivially differ.
+	 * However, as instructions do not store the buffer they originate from,
+	 * this is impossible to check. Within the same buffer, two instructions
+	 * are equal iff. their offsets are the same.
+	 * 
+	 * Assumption:
+	 * 1. If <code>other</code> is an instance of <code>DecompiledInstruction</code>,
+	 * 	  then this instruction and <code>other</code> originate from the same buffer.
+	 * */
+	@Override
+	public final boolean equals(final Object other) {
+		if (other == null || !DecompiledInstruction.class.isAssignableFrom(other.getClass())) {
+			return false;
+		}
+		
+		return this.getOffset() == ((DecompiledInstruction) other).getOffset();
+	}
+	
+	/**
+	 * Compares two instructions. See <code>DecompiledInstruction.equals</code>
+	 * for motivation of below assumptions.
+	 * 
+	 * Assumption:
+	 * 1. This instruction and <code>other</code> originate from the same buffer.
+	 * 
+	 * @see DecompiledInstruction.equals
+	 * */
+	@Override
+	public int compareTo(final DecompiledInstruction o) {
+		if (o == null) {
+			throw new NullPointerException();
+		}
+		
+		return this.getOffset() - o.getOffset();
 	}
 
 	@NonNull
@@ -366,4 +405,5 @@ public final class DecompiledInstruction {
 
 		return name;
 	}
+
 }

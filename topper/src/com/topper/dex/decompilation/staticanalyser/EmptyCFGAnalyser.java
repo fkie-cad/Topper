@@ -8,6 +8,6 @@ public class EmptyCFGAnalyser implements CFGAnalyser {
 
 	@Override
 	public CFG extractCFG(ImmutableList<DecompiledInstruction> instructions, final int entry) {
-		return null;
+		return new CFG();
 	}
 }

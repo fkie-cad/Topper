@@ -1,6 +1,7 @@
 package com.topper.dex.decompilation.staticanalyser;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.jf.dexlib2.Opcode;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompilation.Gadget;
@@ -49,5 +50,58 @@ public abstract class StaticAnalyser {
 	
 	public final void setDFGAnalyser(@NonNull final DFGAnalyser da) {
 		this.dfgAnalyser = da;
+	}
+	
+	public static final boolean isIf(@NonNull final Opcode opcode) {
+		switch (opcode) {
+		case IF_EQ:
+		case IF_EQZ:
+		case IF_GE:
+		case IF_GEZ:
+		case IF_GT:
+		case IF_GTZ:
+		case IF_LE:
+		case IF_LEZ:
+		case IF_LT:
+		case IF_LTZ:
+		case IF_NE:
+		case IF_NEZ:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	public static final boolean isReturn(@NonNull final Opcode opcode) {
+		switch (opcode) {
+		case RETURN:
+		case RETURN_OBJECT:
+		case RETURN_VOID:
+		case RETURN_VOID_BARRIER:
+		case RETURN_VOID_NO_BARRIER:
+		case RETURN_WIDE:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	public static final boolean isThrow(@NonNull final Opcode opcode) {
+		return opcode.equals(Opcode.THROW);
+	}
+	
+	public static final boolean isGoto(@NonNull final Opcode opcode) {
+		switch (opcode) {
+		case GOTO:
+		case GOTO_16:
+		case GOTO_32:
+			return true;
+		default:
+			return false;
+		}
+	}
+	
+	public static final boolean isSwitch(@NonNull final Opcode opcode) {
+		return opcode.equals(Opcode.PACKED_SWITCH) || opcode.equals(Opcode.SPARSE_SWITCH);
 	}
 }
