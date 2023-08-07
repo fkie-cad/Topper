@@ -1,6 +1,6 @@
 package com.topper.exceptions;
 
-public class SweeperException extends TopperException {
+public class SweeperException extends StageException {
 
 	private static final String PREFIX = "Sweeping error: ";
 	

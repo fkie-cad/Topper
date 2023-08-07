@@ -1,12 +1,13 @@
 package com.topper.dex.decompilation.sweeper;
 
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
-import com.topper.dex.decompiler.instructions.DecompiledInstruction;
-import com.topper.exceptions.SweeperException;
+import com.topper.dex.decompilation.pipeline.Stage;
+import com.topper.dex.decompilation.pipeline.StageInfo;
 
 /**
  * Abstract decompiler that operates on a buffer. Given a starting point, this
@@ -14,7 +15,7 @@ import com.topper.exceptions.SweeperException;
  * 
  * @author Pascal Kühnemann
  */
-public abstract class Sweeper {
+public abstract class Sweeper<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> implements Stage<T> {
 
 	/**
 	 * Decompiler to use in <code>sweep</code>.
@@ -68,7 +69,10 @@ public abstract class Sweeper {
 	 *         list must be empty.
 	 * @throws SweeperException If sweeping fails.
 	 */
-	@NonNull
-	public abstract ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sweep(
-			final byte @NonNull [] buffer, final int offset) throws SweeperException;
+	
+	
+//	@NonNull
+//	public abstract ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sweep(
+//			final byte @NonNull [] buffer, final int offset) throws SweeperException:w
+//	;
 }

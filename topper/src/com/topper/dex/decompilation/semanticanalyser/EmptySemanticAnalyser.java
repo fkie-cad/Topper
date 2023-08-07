@@ -1,11 +1,17 @@
 package com.topper.dex.decompilation.semanticanalyser;
 
-import com.topper.dex.decompilation.Gadget;
+import java.util.Map;
 
-public class EmptySemanticAnalyser implements SemanticAnalyser {
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.topper.dex.decompilation.pipeline.StageInfo;
+import com.topper.exceptions.StageException;
+
+public class EmptySemanticAnalyser<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> implements SemanticAnalyser<T> {
 
 	@Override
-	public Gadget analyse(Gadget gadget) {
-		return gadget;
+	@NonNull
+	public T execute(@NonNull final T results) throws StageException {
+		return results;
 	}
 }

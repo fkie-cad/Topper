@@ -3,6 +3,7 @@ package com.topper.dex.decompilation.sweeper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Format;
@@ -13,6 +14,9 @@ import com.topper.configuration.ConfigManager;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
+import com.topper.dex.decompilation.pipeline.PipelineArgs;
+import com.topper.dex.decompilation.pipeline.StageInfo;
+import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.exceptions.SweeperException;
 
@@ -25,7 +29,7 @@ import com.topper.exceptions.SweeperException;
  * 
  * @author Pascal Kühnemann
  */
-public class BackwardLinearSweeper extends Sweeper {
+public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> extends Sweeper<T> {
 
 	private static final int CODE_UNIT_SIZE = 2;
 
@@ -60,8 +64,11 @@ public class BackwardLinearSweeper extends Sweeper {
 	 *                          <code>buffer</code>.
 	 */
 	@Override
-	public ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sweep(final byte[] buffer,
-			final int offset) throws SweeperException {
+	public final T execute(@NonNull final T results) throws SweeperException {
+		
+		final PipelineArgs args = (PipelineArgs) results.get(PipelineArgs.class.getSimpleName());
+		final int offset = args.getOffset();
+		final byte[] buffer = args.getBuffer();
 
 		// Perform bound checks on buffer and offset.
 		final int currentSize = ConfigManager.getInstance().getConfig().getPivotInstruction().format.size;
@@ -93,8 +100,10 @@ public class BackwardLinearSweeper extends Sweeper {
 			}
 
 			// Use pivot instruction as base for recursive sweep.
-			return this.recursiveSweepImpl(decompiler, buffer, offset, currentSize, instructions, checkedGadgetSizes,
+			final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = this.recursiveSweepImpl(decompiler, buffer, offset, currentSize, instructions, checkedGadgetSizes,
 					depth);
+			results.put(SweeperInfo.class.getSimpleName(), new SweeperInfo(sequences));
+			return results;
 
 		} catch (final ExceptionWithContext | ArrayIndexOutOfBoundsException e) {
 			throw new SweeperException("Failed to decompile pivot instruction.");

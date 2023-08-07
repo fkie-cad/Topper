@@ -1,12 +1,12 @@
 package com.topper.dex.decompilation.semanticanalyser;
 
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 
-import com.topper.dex.decompilation.Gadget;
+import com.topper.dex.decompilation.pipeline.Stage;
+import com.topper.dex.decompilation.pipeline.StageInfo;
 
-public interface SemanticAnalyser {
+public interface SemanticAnalyser<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> extends Stage<T> {
 
-	@Nullable
-	Gadget analyse(@NonNull final Gadget gadget);
 }

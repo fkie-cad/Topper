@@ -1,12 +1,17 @@
 package com.topper.dex.decompilation.sweeper;
 
-import com.google.common.collect.ImmutableList;
-import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import java.util.Map;
 
-public class EmptySweeper extends Sweeper {
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.topper.dex.decompilation.pipeline.StageInfo;
+import com.topper.exceptions.StageException;
+
+public class EmptySweeper<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> extends Sweeper<T> {
 
 	@Override
-	public ImmutableList<ImmutableList<DecompiledInstruction>> sweep(byte[] buffer, int offset) {
-		return ImmutableList.of();
+	@NonNull
+	public T execute(@NonNull final T results) throws StageException {
+		return results;
 	}
 }

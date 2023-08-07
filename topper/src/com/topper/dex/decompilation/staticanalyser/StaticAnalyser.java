@@ -1,13 +1,14 @@
 package com.topper.dex.decompilation.staticanalyser;
 
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcode;
 
-import com.google.common.collect.ImmutableList;
-import com.topper.dex.decompilation.Gadget;
-import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.dex.decompilation.pipeline.Stage;
+import com.topper.dex.decompilation.pipeline.StageInfo;
 
-public abstract class StaticAnalyser {
+public abstract class StaticAnalyser<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> implements Stage<T> {
 
 	@NonNull
 	private CFGAnalyser cfgAnalyser;
@@ -32,7 +33,7 @@ public abstract class StaticAnalyser {
 //		return new Gadget(instructions, cfg, dfg);
 //	}
 	
-	@NonNull public abstract Gadget analyse(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions, final int entry);
+	// @NonNull public abstract Gadget analyse(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions, final int entry);
 	
 	@NonNull
 	public final CFGAnalyser getCFGAnalyser() {
