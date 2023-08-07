@@ -2,10 +2,12 @@ package com.topper.tests.dex.decompilation.staticanalyser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -15,6 +17,8 @@ import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.dexbacked.DexBackedClassDef;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBackedMethod;
+import org.jf.dexlib2.iface.instruction.OffsetInstruction;
+import org.jf.dexlib2.iface.instruction.SwitchPayload;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -81,14 +85,69 @@ public class TestBFSCFGAnalyser {
 	private static final BFSCFGAnalyser createAnalyser() {
 		return new BFSCFGAnalyser();
 	}
+	
+	private static final int getAmountTargets(@NonNull final CFG cfg, final int target, @NonNull final DecompiledInstruction instruction) {
+		return extractBranchTargets(cfg, target, instruction).size();
+	}
+	
+	@NonNull
+	private static final List<Integer> extractBranchTargets(
+			@NonNull final CFG cfg, final int target,
+			@NonNull final DecompiledInstruction instruction) {
+
+		List<Integer> branchTargets;
+
+		if (cfg.getOffsetInstructionLookup().containsKey(target)) {
+
+			final DecompiledInstruction targetInstruction = cfg.getInstruction(target);
+			if (targetInstruction == null) {
+				return new ArrayList<>();
+			}
+
+			// Ensure that switch and payload match
+			final OffsetInstruction insn = (OffsetInstruction) instruction.getInstruction();
+			if ((insn.getOpcode().equals(Opcode.PACKED_SWITCH)
+					&& targetInstruction.getInstruction().getOpcode().equals(Opcode.PACKED_SWITCH_PAYLOAD))
+					|| (insn.getOpcode().equals(Opcode.SPARSE_SWITCH)
+							&& targetInstruction.getInstruction().getOpcode().equals(Opcode.SPARSE_SWITCH_PAYLOAD))) {
+				// packed-/sparse - switch
+				final SwitchPayload payload = (SwitchPayload) targetInstruction.getInstruction();
+
+				// Iterate over switch elements an compute target offsets
+				// relative to beginning of instructions
+				branchTargets = new ArrayList<Integer>(payload.getSwitchElements().size());
+				payload.getSwitchElements().stream().mapToInt(e -> e.getOffset() * 2 + instruction.getOffset())
+						.forEach(branchTargets::add);
+
+			} else if (StaticAnalyser.isIf(insn.getOpcode())) {
+				// if-<cond> has two outgoing edges
+				branchTargets = new ArrayList<Integer>(2);
+				// Target of if statement (if body)
+				branchTargets.add(target);
+				// Instruction following if statement (else body)
+				branchTargets.add(instruction.getOffset() + instruction.getByteCode().length);
+			} else if (StaticAnalyser.isGoto(insn.getOpcode())) {
+				// goto
+				branchTargets = new ArrayList<>(1);
+				branchTargets.add(target);
+			} else {
+				branchTargets = new ArrayList<>();
+			}
+		} else {
+			branchTargets = new ArrayList<>();
+		}
+		
+		// Check whether targets are correct
+		branchTargets.removeIf(t -> cfg.getInstruction(target) == null);
+
+		return branchTargets;
+	}
 
 	@Test
 	public void Given_ValidBytecode_When_AnalyseValidBytecode_Expect_ValidCFG() {
 
 		final CFGAnalyser analyser = createAnalyser();
 		final CFG cfg = analyser.extractCFG(validInstructions, 0x10);
-
-		System.out.println(cfg);
 	}
 
 	@Test
@@ -122,26 +181,49 @@ public class TestBFSCFGAnalyser {
 		Set<BasicBlock> targets;
 		DecompiledInstruction instruction;
 		Opcode opcode;
+		int target;
 		for (final BasicBlock block : cfg.getGraph().nodes()) {
 
 			targets = cfg.getGraph().successors(block);
-			instruction = block.getInstructions().get(block.getInstructions().size() - 1);
+			instruction = block.getBranchInstruction();
 			
-			opcode = instruction.getInstruction().getOpcode();
-			if (StaticAnalyser.isGoto(opcode)) {
-				assertEquals(1, targets.size(), instruction.toString());
-			} else if (StaticAnalyser.isIf(opcode)) {
-				assertEquals(2, targets.size(), instruction.toString());
-			} else if (StaticAnalyser.isSwitch(opcode)) {
-				assertTrue(targets.size() >= 1, instruction.toString());
+			if (OffsetInstruction.class.isAssignableFrom(instruction.getInstruction().getClass())) {
+				target = instruction.getOffset() + 2 * ((OffsetInstruction)instruction.getInstruction()).getCodeOffset();
+				assertEquals(getAmountTargets(cfg, target, instruction), targets.size(), instruction.toString());
 			} else {
-				if (instruction.getOffset() + instruction.getByteCode().length == largestOffset ||
-						StaticAnalyser.isThrow(opcode) || StaticAnalyser.isReturn(opcode)) {
+				opcode = instruction.getInstruction().getOpcode();
+				if (StaticAnalyser.isThrow(opcode) || StaticAnalyser.isReturn(opcode)) {
 					assertEquals(0, targets.size(), instruction.toString());
 				} else {
-					assertEquals(1, targets.size(), instruction.toString());
+					target = instruction.getOffset() + instruction.getByteCode().length;
+					assertEquals(cfg.getInstruction(target) != null ? 1 : 0, targets.size(), instruction.toString());
 				}
 			}
 		}
+	}
+	
+	@Test
+	public void Given_ValidBytecode_When_OffsetInvalid_Expect_IllegalArgumentException() {
+		
+		final CFGAnalyser analyser = createAnalyser();
+		final DecompiledInstruction insn = validInstructions.get(validInstructions.size() - 1);
+		final int oob = insn.getOffset() + insn.getByteCode().length;
+		assertThrowsExactly(IllegalArgumentException.class, () -> analyser.extractCFG(validInstructions, oob));
+	}
+	
+	@Test
+	public void Given_ValidBytecode_When_OffsetNegative_Expect_IllegalArgumentException() {
+		
+		final CFGAnalyser analyser = createAnalyser();
+		final int oob = -1;
+		assertThrowsExactly(IllegalArgumentException.class, () -> analyser.extractCFG(validInstructions, oob));
+	}
+	
+	@Test
+	public void Given_EmptyBytecode_When_EmptyBytecode_Expect_IllegalArgumentException() {
+		
+		final CFGAnalyser analyser = createAnalyser();
+		final int oob = -1;
+		assertThrowsExactly(IllegalArgumentException.class, () -> analyser.extractCFG(ImmutableList.of(), oob));
 	}
 }

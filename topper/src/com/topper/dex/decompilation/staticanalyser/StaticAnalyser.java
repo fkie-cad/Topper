@@ -16,7 +16,7 @@ public abstract class StaticAnalyser {
 	private DFGAnalyser dfgAnalyser;
 	
 	public StaticAnalyser() {
-		this.cfgAnalyser = new DefaultCFGAnalyser();
+		this.cfgAnalyser = new BFSCFGAnalyser();
 		this.dfgAnalyser = new DefaultDFGAnalyser();
 	}
 	

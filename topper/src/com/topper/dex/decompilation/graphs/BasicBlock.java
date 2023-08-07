@@ -2,15 +2,17 @@ package com.topper.dex.decompilation.graphs;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jf.dexlib2.Opcode;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
 public class BasicBlock implements Comparable<BasicBlock> {
 
 	private ImmutableList<@NonNull DecompiledInstruction> instructions;
 	
-//	private BranchInstruction branch;
+	private final BlockType type;
 	
 	private int offset;
 	
@@ -18,8 +20,10 @@ public class BasicBlock implements Comparable<BasicBlock> {
 	
 	public BasicBlock(
 		@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions) {
-		assert(instructions.size() >= 1);	// at least on instruction
+		assert(instructions.size() >= 1);
+		
 		this.setInstructions(instructions);
+		this.type = BasicBlock.typeFrom(this.getBranchInstruction().getInstruction().getOpcode());
 	}
 	
 	@NonNull
@@ -34,6 +38,11 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		this.instructions = instructions;
 		this.size = instructions.stream().mapToInt(i -> i.getByteCode().length).sum();
 		this.offset = instructions.get(0).getOffset();
+	}
+	
+	@NonNull
+	public final DecompiledInstruction getBranchInstruction() {
+		return this.instructions.get(instructions.size() - 1);
 	}
 	
 	@NonNull
@@ -85,13 +94,11 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		return this.size;
 	}
 	
-//	@Nullable
-//	public final BlockType getType() {
-//		if (this.branch == null) {
-//			return BlockType.UNKNOWN;
-//		}
-//		return this.branch.getType();
-//	}
+	@Nullable
+	public final BlockType getType() {
+		return this.type;
+	}
+	
 	
 	@Override
 	public final boolean equals(final Object other) {
@@ -101,6 +108,22 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		}
 		
 		return this.getOffset() == ((BasicBlock)other).getOffset();
+	}
+	
+	/**
+	 * Compares two basic blocks. Two basic blocks are ordered by
+	 * their offsets.
+	 * 
+	 * Assumptions:
+	 * 1. This basic block and <code>other</code> originate from the same buffer.
+	 * */
+	@Override
+	public int compareTo(final BasicBlock o) {
+		if (o == null) {
+			throw new NullPointerException();
+		}
+		
+		return this.offset - o.offset;
 	}
 	
 	@Override
@@ -120,30 +143,32 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		return b.toString();
 	}
 	
-	/**
-	 * Compares two basic blocks. Two basic blocks are ordered by
-	 * their offsets.
-	 * 
-	 * Assumptions:
-	 * 1. This basic block and <code>other</code> originate from the same buffer.
-	 * */
-	@Override
-	public int compareTo(final BasicBlock o) {
-		if (o == null) {
-			throw new NullPointerException();
-		}
-		
-		return this.offset - o.offset;
-	}
-	
 	public static enum BlockType {
 		IF,
 		SWITCH,
 		GOTO,
 		RETURN,
 		THROW,
-		SPLITTED,
+		INVALID,
 		UNKNOWN,
+		
+	}
+	
+	@NonNull
+	public static final BlockType typeFrom(final @NonNull Opcode opcode) {
+		
+		if (StaticAnalyser.isIf(opcode)) {
+			return BlockType.IF;
+		} else if (StaticAnalyser.isGoto(opcode)) {
+			return BlockType.GOTO;
+		} else if (StaticAnalyser.isSwitch(opcode)) {
+			return BlockType.SWITCH;
+		} else if (StaticAnalyser.isThrow(opcode)) {
+			return BlockType.THROW;
+		} else if (StaticAnalyser.isReturn(opcode)) {
+			return BlockType.RETURN;
+		}
+		return BlockType.UNKNOWN;
 	}
 	
 //	public static class BranchInstruction {
