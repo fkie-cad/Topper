@@ -16,32 +16,37 @@ import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.exceptions.StageException;
 
 /**
- * Pipeline that processes raw bytes into a list of gadgets. It is currently
- * composed of three stages: 1. Sweeping: Detect valid sequences of
- * instructions. 2. Static Analysis: For each instruction sequence extract the
- * CFG and DFG and construct a gadget. 3. Semantic Analysis: For each gadget add
- * further information by conducting e.g. a symbolic analysis. This stage may
- * filter gadgets e.g. in case a gadget is contradictory.
+ * A pipeline consisting of at least three main {@link Stage}s. Its task is to
+ * take in a description of raw bytes, and output a higher level description of
+ * these bytes in terms of {@link Gadget}s.
  * 
- * Adding a stage to this pipeline requires: 1. Adjusting
- * <code>DecompilationPipeline.decompile</code> so that it executes the new
- * stage. 2. Adding an expandable stage class hierarchy that actually does the
- * heavy lifting.
+ * The three mandatory stages include:
+ * <ul>
+ * <li>{@link Sweeper}: Identifies instruction sequences starting from a given
+ * offset.</li>
+ * <li>{@link StaticAnalyser}: Extracts {@link CFG} and {@link DFG} from all
+ * instruction sequences.</li>
+ * <li>{@link SemanticAnalyser}: Performs e.g. reachability analysis, taint
+ * analysis etc. to determine what gadgets are eligible.</li>
+ * </ul>
  * 
- * This pipeline is essentially an extended strategy pattern. I.e. a user may
- * request a different <code>Sweeper</code> at runtime, or reconfigure the
- * <code>StaticAnalyser</code>.
+ * Beyond the three mandatory {@code Stages}, it is possible to add additional
+ * {@code Stage} implementations.
+ * 
+ * Finally, all {@code Stage} results are feed into a {@link Finalizer} that
+ * summarizes those results.
  * 
  * @author Pascal Kühnemann
+ * @since 07.08.2023
  */
 public final class Pipeline<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> {
-	
+
 	@NonNull
 	private final List<Stage<T>> stages;
-	
+
 	@NonNull
 	private Finalizer<T> finalizer;
-	
+
 	private final Pipeline.@NonNull Builder<T> builder;
 
 	/**
@@ -52,25 +57,26 @@ public final class Pipeline<@NonNull T extends Map<@NonNull String, @NonNull Sta
 		this.builder = builder;
 		this.finalizer = new DefaultFinalizer<T>();
 	}
-	
+
 	@NonNull
 	public final PipelineResult<T> execute(@NonNull final PipelineArgs args) throws StageException {
-		
+
 		if (!this.isValid()) {
-			throw new StageException("Pipeline must at least contain a Sweeper, a StaticAnalyser and a SemanticAnalyser.");
+			throw new StageException(
+					"Pipeline must at least contain a Sweeper, a StaticAnalyser and a SemanticAnalyser.");
 		}
-		
+
 		@NonNull
 		T results = this.builder.build();
 		results.put(PipelineArgs.class.getSimpleName(), args);
-		
+
 		for (final Stage<T> stage : this.stages) {
 			results = stage.execute(results);
 		}
-		
+
 		return this.finalizer.finalize(results);
 	}
-	
+
 	/**
 	 * Checks whether this pipeline contains at least
 	 * <ul>
@@ -80,15 +86,15 @@ public final class Pipeline<@NonNull T extends Map<@NonNull String, @NonNull Sta
 	 * </ul>
 	 * 
 	 * Otherwise a pipeline would be useless.
-	 * */
+	 */
 	public final boolean isValid() {
-		
+
 		boolean hasSweeper = false;
 		boolean hasStatic = false;
 		boolean hasSemantic = false;
-		
+
 		for (final Stage<T> stage : this.stages) {
-			
+
 			if (Sweeper.class.isAssignableFrom(stage.getClass())) {
 				hasSweeper = true;
 			} else if (StaticAnalyser.class.isAssignableFrom(stage.getClass())) {
@@ -97,18 +103,18 @@ public final class Pipeline<@NonNull T extends Map<@NonNull String, @NonNull Sta
 				hasSemantic = true;
 			}
 		}
-		
+
 		return hasSweeper && hasStatic && hasSemantic;
 	}
-	
+
 	public final void addStage(@NonNull final Stage<T> stage) {
 		this.stages.add(stage);
 	}
-	
+
 	public final void removeStage(@NonNull final Stage<T> stage) {
 		this.stages.remove(stage);
 	}
-	
+
 	public final void removeStage(final int index) {
 		this.stages.remove(index);
 	}
@@ -116,21 +122,22 @@ public final class Pipeline<@NonNull T extends Map<@NonNull String, @NonNull Sta
 	public final void setFinalizer(@NonNull final Finalizer<T> finalizer) {
 		this.finalizer = finalizer;
 	}
-	
+
 	@NonNull
 	public static final Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> createDefaultPipeline() {
-		
-		final Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> pipeline = new Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>(TreeMap::new);
+
+		final Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> pipeline = new Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>(
+				TreeMap::new);
 		pipeline.addStage(new BackwardLinearSweeper<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
 		pipeline.addStage(new DefaultStaticAnalyser<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
 		pipeline.addStage(new DefaultSemanticAnalyser<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
-		
+
 		// Make sure default finalizer is used
 		pipeline.setFinalizer(new DefaultFinalizer<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
-		
+
 		return pipeline;
 	}
-	
+
 	public static interface Builder<T> {
 		@NonNull
 		T build();

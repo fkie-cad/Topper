@@ -32,7 +32,7 @@ public class BFSCFGAnalyser implements CFGAnalyser {
 			throw new IllegalArgumentException("List of instructions must not be empty.");
 		}
 
-		final CFG cfg = new CFG();
+		final CFG cfg = new CFG(entry);
 
 		// Setup offset -> instruction index lookup (O(log n) lookup using TreeMap)
 		DecompiledInstruction current;
@@ -59,7 +59,7 @@ public class BFSCFGAnalyser implements CFGAnalyser {
 		// Perform actual extraction
 		this.extractCFGBFS(cfg, instructions, offsetToIndex, entry);
 
-		// Finally add instruction -> block lookup
+		// Finally add instruction -> block lookup.
 		for (final BasicBlock block : cfg.getGraph().nodes()) {
 			for (final DecompiledInstruction insn : block.getInstructions()) {
 				cfg.addInstructionBlockLookup(insn, block);

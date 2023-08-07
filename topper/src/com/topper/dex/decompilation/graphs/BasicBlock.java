@@ -8,29 +8,65 @@ import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
+
+/**
+ * Basic block consisting of {@link DecompiledInstruction}s extracted by
+ * applying static analysis on a particular byte buffer. Each block forms
+ * a node in a {@link MutableGraph}, i.e. in a {@link CFG}.
+ * 
+ * @author Pascal Kühnemann
+ * @since 07.08.2023
+ * */
 public class BasicBlock implements Comparable<BasicBlock> {
 
+	/**
+	 * List of instructions covered by this block.
+	 * */
 	private ImmutableList<@NonNull DecompiledInstruction> instructions;
 	
+	/**
+	 * Type of this block. This depends on the type of the last instruction.
+	 * */
 	private final BlockType type;
 	
+	/**
+	 * Offset relative to an underlying buffer.
+	 * */
 	private int offset;
 	
+	/**
+	 * Size of this block, in bytes.
+	 * */
 	private int size;
 	
+	/**
+	 * Create a basic block with an initial list of {@code instructions}.
+	 * 
+	 * It requires at least one instruction in {@code instructions}, as empty
+	 * basic blocks may as well be omitted.
+	 * 
+	 * @param instructions List of instructions that form this basic block.
+	 * */
 	public BasicBlock(
 		@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions) {
-		assert(instructions.size() >= 1);
 		
 		this.setInstructions(instructions);
 		this.type = BasicBlock.typeFrom(this.getBranchInstruction().getInstruction().getOpcode());
 	}
 	
+	/**
+	 * Gives the list of instructions that makes up this basic block.
+	 * */
 	@NonNull
 	public final ImmutableList<@NonNull DecompiledInstruction> getInstructions() {
 		return this.instructions;
 	}
 	
+	/**
+	 * Overwrites the list of instructions that makes up this basic block.
+	 * 
+	 * Its main use is to handle splitting basic blocks due to branch targets.
+	 * */
 	public final void setInstructions(@NonNull ImmutableList<@NonNull DecompiledInstruction> instructions) {
 		if (instructions.size() == 0) {
 			throw new IllegalArgumentException("Basic block must contain at least one instruction.");
@@ -40,49 +76,19 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		this.offset = instructions.get(0).getOffset();
 	}
 	
+	/**
+	 * Gives the last instruction in the list of instructions that make up
+	 * this basic block.
+	 * */
 	@NonNull
 	public final DecompiledInstruction getBranchInstruction() {
 		return this.instructions.get(instructions.size() - 1);
 	}
 	
-	@NonNull
-	public final ImmutableList<@NonNull DecompiledInstruction> subInstructions(final int offsetFrom, final int offsetTo) {
-		assert(offsetFrom < offsetTo);
-		
-		int start = -1;
-		int end = -1;
-		
-		DecompiledInstruction current;
-		
-		for (int i = 0; i < this.instructions.size(); i++) {
-			
-			current = this.instructions.get(i);
-			
-			if (current.getOffset() < offsetFrom) {
-				// Allow >= offsetFrom
-				start = i;
-			} else if (offsetTo > current.getOffset()) {
-				// Allow < offsetTo
-				end = i;
-			}
-		}
-		
-		return this.instructions.subList(start, end);
-	}
-	
-	
-//	public final BranchInstruction getBranch() {
-//		return this.branch;
-//	}
-//	
-//	public final void setBranch(@NonNull final BranchInstruction branch) {
-//		this.branch = branch;
-//	}
-//	
-//	public final boolean hasBranch() {
-//		return this.branch != null;
-//	}
-	
+	/**
+	 * Gives the byte offset of the first instruction relative to the
+	 * underlying buffer, from which the instructions have been fetched.
+	 * */
 	public final int getOffset() {
 		return this.offset;
 	}
@@ -94,12 +100,21 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		return this.size;
 	}
 	
+	/**
+	 * Gives the type of this block, determined by the last instruction.
+	 * In case a basic block has been split and its last instruction is not
+	 * an actual branch instruction (like if, goto etc.), then its type is
+	 * {@code BlockType.UNKNOWN}.
+	 * */
 	@Nullable
 	public final BlockType getType() {
 		return this.type;
 	}
 	
-	
+	/**
+	 * Compare two basic blocks based on their offsets. This assumes that
+	 * those basic blocks originate from the same buffer.
+	 * */
 	@Override
 	public final boolean equals(final Object other) {
 		
@@ -126,6 +141,9 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		return this.offset - o.offset;
 	}
 	
+	/**
+	 * Convert a basic block to a string.
+	 * */
 	@Override
 	public final String toString() {
 		final StringBuilder b = new StringBuilder();
@@ -134,7 +152,6 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		b.append(String.format("%#x", this.getOffset()));
 		b.append(System.lineSeparator() + "Size: ");
 		b.append(String.format("%#x", this.getSize()) + System.lineSeparator());
-//		b.append(System.lineSeparator() + this.getBranch());
 		for (final DecompiledInstruction instruction : this.getInstructions()) {
 			b.append(instruction);
 			b.append(System.lineSeparator());
@@ -149,9 +166,7 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		GOTO,
 		RETURN,
 		THROW,
-		INVALID,
 		UNKNOWN,
-		
 	}
 	
 	@NonNull
@@ -170,54 +185,4 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		}
 		return BlockType.UNKNOWN;
 	}
-	
-//	public static class BranchInstruction {
-//		
-//		@NonNull
-//		private final DecompiledInstruction instruction;
-//		
-//		@NonNull
-//		private final ImmutableList<@NonNull BasicBlock> targets;
-//		
-////		@NonNull
-////		private final BlockType type;
-//		
-//		public BranchInstruction(
-//				@NonNull final DecompiledInstruction instruction,
-//				@NonNull final ImmutableList<@NonNull BasicBlock> targets/*,
-//				@NonNull final BlockType type*/) {
-//			this.instruction = instruction;
-//			this.targets = targets;
-////			this.type = type;
-//		}
-//		
-//		@NonNull
-//		public final DecompiledInstruction getInstruction() {
-//			return this.instruction;
-//		}
-//		
-//		@NonNull
-//		public final ImmutableList<@NonNull BasicBlock> getTargets() {
-//			return this.targets;
-//		}
-//		
-////		@NonNull
-////		public final BlockType getType() {
-////			return this.type;
-////		}
-//		
-//		@Override
-//		public final String toString() {
-//			final StringBuilder b = new StringBuilder();
-//			
-//			b.append("Branch: " + this.getInstruction() + System.lineSeparator());
-//			b.append("Targets:" + System.lineSeparator());
-//			for (final BasicBlock target : this.getTargets()) {
-//				b.append("  To: " + String.format("%#x", target.getOffset()) + System.lineSeparator());
-//			}
-//			
-//			return b.toString();
-//		}
-//	}
-
 }
