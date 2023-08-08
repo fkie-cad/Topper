@@ -1,5 +1,7 @@
 package com.topper.sstate;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.topper.configuration.TopperConfig;
 import com.topper.interactive.IOManager;
 import com.topper.scengine.ScriptParser;
@@ -10,23 +12,27 @@ public final class ScriptContext {
 	 * Configuration assigned to this context. It can be used by
 	 * specific states, whose registered commands can be configured.
 	 * */
+	@NonNull
 	private final TopperConfig config;
 	
 	/**
 	 * Current state of this Deterministic Finite Automaton (DFA).
 	 * */
+	@NonNull
 	private CommandState state;
 	
 	/**
 	 * Input / Output manager providing commands the ability to
 	 * e.g. write to and read from console.
 	 * */
+	@NonNull
 	private final IOManager io;
 	
 	/**
 	 * Parser for multi - line scripts. The <code>HelpCommand</code>
 	 * uses it to extract command information.
 	 * */
+	@NonNull
 	private final ScriptParser parser;
 	
 	/**
@@ -36,7 +42,7 @@ public final class ScriptContext {
 	 * @param io Input/Output manager used by commands to interact with user.
 	 * @param parser Parser used to extract information on commands.
 	 * */
-	public ScriptContext(final TopperConfig config, final IOManager io, final ScriptParser parser) {
+	public ScriptContext(@NonNull final TopperConfig config, @NonNull final IOManager io, @NonNull final ScriptParser parser) {
 		this.config = config;
 		this.io = io;
 		this.parser = parser;
@@ -49,7 +55,7 @@ public final class ScriptContext {
 	 * 
 	 * @param newState New state to transition to.
 	 * */
-	public final void changeState(final CommandState newState) {
+	public final void changeState(@NonNull final CommandState newState) {
 		this.state = newState;
 	}
 	
@@ -57,6 +63,7 @@ public final class ScriptContext {
 	 * Gets the current state of the DFA.
 	 * @see CommandState
 	 * */
+	@NonNull
 	public final CommandState getCurrentState() {
 		return this.state;
 	}
@@ -75,6 +82,7 @@ public final class ScriptContext {
 	 * Gets the config assigned to this context.
 	 * @see TopperConfig
 	 * */
+	@NonNull
 	public final TopperConfig getConfig() {
 		return this.config;
 	}
@@ -84,6 +92,7 @@ public final class ScriptContext {
 	 * with the user.
 	 * @see IOManager
 	 * */
+	@NonNull
 	public final IOManager getIO() {
 		return this.io;
 	}
@@ -92,6 +101,7 @@ public final class ScriptContext {
 	 * Gets the parser used for extracting information on commands.
 	 * @see ScriptParser
 	 * */
+	@NonNull
 	public final ScriptParser getParser() {
 		return this.parser;
 	}

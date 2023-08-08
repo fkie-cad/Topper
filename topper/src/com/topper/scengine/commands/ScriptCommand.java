@@ -2,6 +2,8 @@ package com.topper.scengine.commands;
 
 import java.io.IOException;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.topper.exceptions.CommandException;
 import com.topper.sstate.ScriptContext;
 
@@ -15,5 +17,5 @@ public interface ScriptCommand {
 	 * @throws CommandException If execution fails.
 	 * @throws IOException If IO - related errors occur.
 	 * */
-	void execute(final ScriptContext context) throws CommandException, IOException;
+	void execute(@NonNull final ScriptContext context) throws CommandException, IOException;
 }

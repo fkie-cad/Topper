@@ -1,5 +1,7 @@
 package com.topper.scengine.commands;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.topper.exceptions.IllegalCommandException;
 
 /**
@@ -13,7 +15,6 @@ import com.topper.exceptions.IllegalCommandException;
  * a single class to <code>scengine</code>, if a new command was needed.
  * */
 public interface ScriptCommandParser {
-
 	
 	/**
 	 * Constructs a <code>ScriptCommand</code> object from an
@@ -26,7 +27,8 @@ public interface ScriptCommandParser {
 	 * 	fails, because <code>tokens</code> violates some use-case
 	 * 	rules.
 	 */
-	ScriptCommand parse(final String[] tokens) throws IllegalCommandException;
+	@NonNull
+	ScriptCommand parse(@NonNull final String[] tokens) throws IllegalCommandException;
 	
 	/**
 	 * Fixes a user - readable format of the command that this
@@ -34,6 +36,7 @@ public interface ScriptCommandParser {
 	 * 
 	 * @return Human - readable command format.
 	 * */
+	@NonNull
 	String usage();
 	
 	/**
@@ -43,5 +46,6 @@ public interface ScriptCommandParser {
 	 * @return String representation of <code>ScriptCommand</code> linked
 	 * 	to this parser.
 	 * */
+	@NonNull
 	String command();
 }

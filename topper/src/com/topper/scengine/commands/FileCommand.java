@@ -2,6 +2,8 @@ package com.topper.scengine.commands;
 
 import java.io.File;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.topper.sstate.ScriptContext;
 
 public final class FileCommand implements ScriptCommand {
