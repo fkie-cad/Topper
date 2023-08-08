@@ -53,7 +53,7 @@ public class TestBackwardLinearSweeper {
 	@NonNull
 	private static TreeMap<@NonNull String, @NonNull StageInfo> createInfo(final byte[] bytecode, final int offset) {
 		final TreeMap<@NonNull String, @NonNull StageInfo> results = new TreeMap<>();
-		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(offset, 0, bytecode));
+		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(ConfigManager.getInstance().getConfig(), offset, 0, bytecode));
 		return results;
 	}
 

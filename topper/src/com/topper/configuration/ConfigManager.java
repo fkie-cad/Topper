@@ -25,6 +25,7 @@ public final class ConfigManager {
 		return ConfigManager.instance;
 	}
 	
+	@NonNull
 	public final TopperConfig getConfig() {
 		return this.config;
 	}

@@ -10,7 +10,6 @@ import org.jf.dexlib2.Format;
 import org.jf.util.ExceptionWithContext;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.configuration.ConfigManager;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
@@ -65,13 +64,14 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 	 */
 	@Override
 	public final T execute(@NonNull final T results) throws SweeperException {
-		
+
 		final PipelineArgs args = (PipelineArgs) results.get(PipelineArgs.class.getSimpleName());
 		final int offset = args.getOffset();
 		final byte[] buffer = args.getBuffer();
+		final TopperConfig config = args.getConfig();
 
 		// Perform bound checks on buffer and offset.
-		final int currentSize = ConfigManager.getInstance().getConfig().getPivotInstruction().format.size;
+		final int currentSize = config.getPivotInstruction().format.size;
 		if (offset + currentSize > buffer.length) {
 			throw new SweeperException("buffer is too small to hold pivot instruction at " + offset + ".");
 		} else if (offset < 0) {
@@ -79,7 +79,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		}
 
 		final Decompiler decompiler = this.getDecompiler();
-		final int maxSizes = ConfigManager.getInstance().getConfig().getSweeperMaxNumberInstructions();
+		final int maxSizes = config.getSweeperMaxNumberInstructions();
 		final List<Integer> checkedGadgetSizes = new ArrayList<Integer>(maxSizes);
 		checkedGadgetSizes.add(currentSize);
 		final int depth = 1;
@@ -93,15 +93,15 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 
 			// Thoroughly check pivot instruction, because its format is known in advance.
 			if (instructions.size() != 1 || instruction.getByteCode().length != currentSize
-					|| !instruction.getInstruction().getOpcode()
-							.equals(ConfigManager.getInstance().getConfig().getPivotInstruction())) {
+					|| !instruction.getInstruction().getOpcode().equals(config.getPivotInstruction())) {
 				throw new SweeperException("Pivot instruction (" + instruction.getInstructionString() + " at offset "
 						+ offset + " is invalid.");
 			}
 
 			// Use pivot instruction as base for recursive sweep.
-			final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = this.recursiveSweepImpl(decompiler, buffer, offset, currentSize, instructions, checkedGadgetSizes,
-					depth);
+			final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = this
+					.recursiveSweepImpl(decompiler, buffer, offset, currentSize, instructions, checkedGadgetSizes,
+							depth, config);
 			results.put(SweeperInfo.class.getSimpleName(), new SweeperInfo(sequences));
 			return results;
 
@@ -159,6 +159,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 	 *                             the upper bound on the number of instructions
 	 *                             allowed in a gadget. Initially 1, because it
 	 *                             includes the pivot instruction.
+	 * @param config               Configuration to be used by this sweeper.
 	 * @return List of instruction sequences. In case the upper bound on the
 	 *         instructions is 1, only the pivot instruction is returned.
 	 */
@@ -167,7 +168,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 	private final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> recursiveSweepImpl(
 			@NonNull final Decompiler decompiler, final byte @NonNull [] buffer, final int offset,
 			final int currentSize, @NonNull final List<DecompiledInstruction> previousInstructions,
-			@NonNull final List<Integer> checkedGadgetSizes, final int depth) {
+			@NonNull final List<Integer> checkedGadgetSizes, final int depth, @NonNull final TopperConfig config) {
 
 		final ImmutableList.Builder<ImmutableList<DecompiledInstruction>> sequences = new ImmutableList.Builder<ImmutableList<DecompiledInstruction>>();
 
@@ -177,7 +178,6 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		}
 
 		// Check if maximum number of instructions is reached.
-		final TopperConfig config = ConfigManager.getInstance().getConfig();
 		if (depth >= config.getSweeperMaxNumberInstructions()) {
 			return sequences.build();
 		}
@@ -244,7 +244,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 				// Add resulting paths to this path.
 				sequences.addAll(recursiveSweepImpl(decompiler, Arrays.copyOfRange(buffer, 0, offset - instructionSize),
 						offset - instructionSize, // offset points behind last byte
-						totalSize, path, checkedGadgetSizes, depth + 1));
+						totalSize, path, checkedGadgetSizes, depth + 1, config));
 
 			} catch (final ExceptionWithContext | ArrayIndexOutOfBoundsException e) {
 			}
