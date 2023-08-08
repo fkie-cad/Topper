@@ -1,23 +1,34 @@
 package com.topper.dex.decompilation.decompiler;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.jf.dexlib2.dexbacked.DexBackedDexFile;
+
 import com.topper.dex.decompilation.DecompilationResult;
 
 /**
  * Decompiler interface for dex bytecode.
  * 
- * The default implementation is the <code>SmaliDecompiler</code>.
+ * The default implementation is the {@link SmaliDecompiler}.
  * 
  * @author Pascal Kühnemann
+ * @since 08.08.2023
  * @see SmaliDecompiler
  */
 public interface Decompiler {
 
 	/**
-	 * Decompiles given <code>bytes</code> into <code>DecompiledInstruction</code>s
-	 * wrapped in a <code>DecompilationResult</code>.
+	 * Decompiles given {@code bytes} into {@link DecompiledInstruction}s
+	 * wrapped in a {@link DecompilationResult}.
 	 * 
-	 * @param bytes Raw bytes to decompile into dex instructions.
+	 * If {@code bytes} contains a valid .dex file, then it must be interpreted as a
+	 * {@link DexBackedDexFile} to augment analysis with type names etc.
+	 * 
+	 * @param bytes        Raw bytes to decompile into dex instructions.
+	 * @param augmentation Optional .dex file representation. This allows using type
+	 *                     names and resolving references.
 	 * @return Result wrapping decompiled instructions and further information.
 	 */
-	DecompilationResult decompile(final byte[] bytes);
+	@NonNull
+	DecompilationResult decompile(final byte @NonNull [] bytes, @Nullable final DexBackedDexFile augmentation);
 }

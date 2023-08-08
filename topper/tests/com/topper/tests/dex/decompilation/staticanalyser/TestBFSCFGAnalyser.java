@@ -74,7 +74,7 @@ public class TestBFSCFGAnalyser {
 
 				final Decompiler decompiler = new SmaliDecompiler();
 				final DecompilationResult result = decompiler
-						.decompile(file.getBuffer().readByteRange(offset, method.getSize()));
+						.decompile(file.getBuffer().readByteRange(offset, method.getSize()), null);
 				validInstructions = result.getInstructions();
 			}
 		}

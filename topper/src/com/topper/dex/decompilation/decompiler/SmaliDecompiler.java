@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBuffer;
@@ -40,15 +41,15 @@ public final class SmaliDecompiler implements Decompiler {
 	@SuppressWarnings("null") // endOfData() returns null, but this is accounted for in for-each
 	@NonNull
 	@Override
-	public final DecompilationResult decompile(final byte[] bytecode) {
+	public final DecompilationResult decompile(final byte @NonNull [] bytecode, @Nullable final DexBackedDexFile augmentation) {
 
 		final DexBuffer buffer = new DexBuffer(bytecode);
 
 		int offset = 0;
 		int size;
-		final List<DecompiledInstruction> decompiledInstructions = new LinkedList<DecompiledInstruction>();
+		final List<@NonNull DecompiledInstruction> decompiledInstructions = new LinkedList<DecompiledInstruction>();
 		byte[] buf;
-		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer)) {
+		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer, augmentation)) {
 
 			size = instruction.getCodeUnits() * 2;
 			buf = new byte[size];
@@ -68,7 +69,7 @@ public final class SmaliDecompiler implements Decompiler {
 	 * @return List of extracted instructions.
 	 */
 	@NonNull
-	private final Iterable<? extends BufferedInstruction> getInstructions(@NonNull final DexBuffer buffer) {
+	private final Iterable<? extends BufferedInstruction> getInstructions(@NonNull final DexBuffer buffer, @Nullable final DexBackedDexFile file) {
 		// instructionsSize is the number of 16-bit code units in the instruction list,
 		// not the number of instructions
 		int instructionsSize = buffer.getBuf().length / 2; // dexFile.readSmallUint(codeOffset +
@@ -78,15 +79,17 @@ public final class SmaliDecompiler implements Decompiler {
 		final int endOffset = instructionsStartOffset + (instructionsSize * 2);
 
 		// Construct dex file from buffer, if possible. This prevents running the
-		// constructor
-		// of DexBackedDexFile for each instruction.
-		DexBackedDexFile dexFile;
-		try {
-			dexFile = new DexBackedDexFile(Opcodes.getDefault(), buffer);
-		} catch (final Exception e) {
-			dexFile = null;
+		// constructor of DexBackedDexFile for each instruction.
+		DexBackedDexFile dexFile = file;
+		if (dexFile == null) {
+			
+			try {
+				dexFile = new DexBackedDexFile(Opcodes.getDefault(), buffer);
+			} catch (final Exception e) {
+				dexFile = null;
+			}
 		}
-		final DexBackedDexFile file = dexFile;
+		final DexBackedDexFile augmentation = dexFile;
 
 		return new Iterable<BufferedInstruction>() {
 			@Override
@@ -98,7 +101,7 @@ public final class SmaliDecompiler implements Decompiler {
 							return endOfData();
 						}
 
-						final BufferedInstruction instruction = BufferedInstruction.readFrom(reader, file);
+						final BufferedInstruction instruction = BufferedInstruction.readFrom(reader, augmentation);
 
 						// Does the instruction extend past the end of the method?
 						final int offset = reader.getOffset();

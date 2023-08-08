@@ -1,5 +1,6 @@
 package com.topper.dex.decompilation;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Format;
 import org.jf.dexlib2.dexbacked.DexBuffer;
 
@@ -8,23 +9,28 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
 public class DecompilationResult {
 	
+	@NonNull
 	private final DexBuffer buffer;
 	
-	private final ImmutableList<DecompiledInstruction> instructions;
+	@NonNull
+	private final ImmutableList<@NonNull DecompiledInstruction> instructions;
 
-	public DecompilationResult(final DexBuffer buffer, final ImmutableList<DecompiledInstruction> instructions) {
+	public DecompilationResult(@NonNull final DexBuffer buffer, @NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions) {
 		this.buffer = buffer;
 		this.instructions = instructions;
 	}
 	
+	@NonNull
 	public final DexBuffer getBuffer() {
 		return this.buffer;
 	}
 	
-	public final ImmutableList<DecompiledInstruction> getInstructions() {
+	@NonNull
+	public final ImmutableList<@NonNull DecompiledInstruction> getInstructions() {
 		return this.instructions;
 	}
 	
+	@NonNull
 	public final String getPrettyInstructions() {
 		
 		// Determine largest instruction that is neither array payload nor any switch
