@@ -1,7 +1,5 @@
 package com.topper.tests.utility;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.util.Timer;
 import java.util.TimerTask;
 

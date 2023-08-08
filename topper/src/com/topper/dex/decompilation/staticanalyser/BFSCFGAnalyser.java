@@ -142,6 +142,7 @@ public class BFSCFGAnalyser implements CFGAnalyser {
 		// Eventually strip all dead nodes
 		final List<@NonNull BasicBlock> unreachable = cfg.getGraph().nodes().stream()
 				.filter(block -> cfg.getGraph().inDegree(block) == 0 && cfg.getGraph().outDegree(block) == 0)
+				.filter(block -> block.getOffset() != offset)	// ensure entry block is not stripped
 				.collect(Collectors.toList());
 		for (@NonNull
 		final BasicBlock block : unreachable) {

@@ -24,7 +24,7 @@ public class DexHelper {
 	public static final int getMethodSize(@NonNull final DexBackedMethod method, final int offset) {
 		
 		// Reader points at insns_size in code item
-		final DexReader reader = new DexReader(method.dexFile.getBuffer(), offset + 2);
-		return reader.readUshort() * 2;
+		final DexReader reader = new DexReader(method.dexFile.getBuffer(), offset + 12);
+		return reader.readInt() * 2;
 	}
 }

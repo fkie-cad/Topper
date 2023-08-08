@@ -1,25 +1,28 @@
 package com.topper.file;
 
+import java.io.File;
+
 import org.eclipse.jdt.annotation.NonNull;
+import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 
 import com.google.common.collect.ImmutableList;
 
 public class RawFile implements AugmentedFile {
 
 	@NonNull
-	private final String filePath;
+	private final File file;
 	
 	private final byte @NonNull [] buffer;
 	
-	public RawFile(@NonNull final String filePath, final byte @NonNull [] buffer) {
-		this.filePath = filePath;
+	public RawFile(@NonNull final File file, final byte @NonNull [] buffer) {
+		this.file = file;
 		this.buffer = buffer;
 	}
 	
 	@Override
 	@NonNull
-	public final String getFilePath() {
-		return this.filePath;
+	public final File getFile() {
+		return this.file;
 	}
 	
 	@Override

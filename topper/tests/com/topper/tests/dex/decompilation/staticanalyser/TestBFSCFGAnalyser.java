@@ -3,9 +3,9 @@ package com.topper.tests.dex.decompilation.staticanalyser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -32,24 +32,15 @@ import com.topper.dex.decompilation.staticanalyser.BFSCFGAnalyser;
 import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.file.DexHelper;
 
 public class TestBFSCFGAnalyser {
 
 	private static ImmutableList<@NonNull DecompiledInstruction> validInstructions;
 
-	private static final String FIELD_NAME_CODE_OFFSET = "codeOffset";
 	private static final String dexName = "./tests/resources/classes7.dex";
 	private static final String clsNameCorrect = "Lcom/damnvulnerableapp/networking/messages/PlainMessageParser;";
 	private static final String methodNameCorrect = "parseFromBytes";
-
-	private static int getCodeOffset(final DexBackedMethod method)
-			throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		final Field offsetField = method.getClass().getDeclaredField(FIELD_NAME_CODE_OFFSET);
-		offsetField.setAccessible(true);
-		final int offset = offsetField.getInt(method);
-		offsetField.setAccessible(false);
-		return offset;
-	}
 
 	@BeforeAll
 	public static final void loadInstructions() throws IOException, IllegalArgumentException, IllegalAccessException,
@@ -70,11 +61,13 @@ public class TestBFSCFGAnalyser {
 					continue;
 				}
 
-				final int offset = getCodeOffset(method);
+				final int offset = DexHelper.getMethodOffset(method);
+				final int size = DexHelper.getMethodSize(method, offset);
+				
 
 				final Decompiler decompiler = new SmaliDecompiler();
 				final DecompilationResult result = decompiler
-						.decompile(file.getBuffer().readByteRange(offset, method.getSize()), null);
+						.decompile(file.getBuffer().readByteRange(offset + 0x10, size), null);
 				validInstructions = result.getInstructions();
 			}
 		}
@@ -226,4 +219,25 @@ public class TestBFSCFGAnalyser {
 		final int oob = -1;
 		assertThrowsExactly(IllegalArgumentException.class, () -> analyser.extractCFG(ImmutableList.of(), oob));
 	}
+	
+	@Test
+	public void Given_ValidBytecode_When_AnalyseFromMethodEntry_Expect_ExactlyOneBasicBlockAtEntry() {
+		
+		final int entry = 0x0;
+		final CFGAnalyser analyser = createAnalyser();
+		final CFG cfg = analyser.extractCFG(validInstructions, entry);
+		
+		assertTrue(cfg.getGraph().nodes().stream().anyMatch(bb -> bb.getOffset() == entry));
+	}
+	
+	@Test
+	public void Given_ValidBytecode_When_AnalyseFromMethodMiddle_Expect_ExactlyOneBasicBlockAtEntry() {
+		
+		final int entry = validInstructions.get(validInstructions.size() / 2).getOffset();
+		final CFGAnalyser analyser = createAnalyser();
+		final CFG cfg = analyser.extractCFG(validInstructions, entry);
+		
+		assertTrue(cfg.getGraph().nodes().stream().anyMatch(bb -> bb.getOffset() == entry));
+	}
+
 }

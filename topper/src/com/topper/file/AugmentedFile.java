@@ -1,5 +1,7 @@
 package com.topper.file;
 
+import java.io.File;
+
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
@@ -7,7 +9,7 @@ import com.google.common.collect.ImmutableList;
 public interface AugmentedFile {
 
 	@NonNull
-	String getFilePath();
+	File getFile();
 	
 	byte @NonNull [] getBuffer();
 	

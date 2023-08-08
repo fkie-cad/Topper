@@ -37,11 +37,14 @@ public final class SmaliDecompiler implements Decompiler {
 	 * @param bytecode Byte array to interpret as bytecode and to decompile.
 	 * @return Wrapper holding information on the decompilation. Among other things,
 	 *         it holds the decompiled instructions.
+	 * @throws IndexOutOfBoundsException If an instruction requires an out - of
+	 *                                        - bounds read.
 	 */
 	@SuppressWarnings("null") // endOfData() returns null, but this is accounted for in for-each
 	@NonNull
 	@Override
-	public final DecompilationResult decompile(final byte @NonNull [] bytecode, @Nullable final DexBackedDexFile augmentation) {
+	public final DecompilationResult decompile(final byte @NonNull [] bytecode,
+			@Nullable final DexBackedDexFile augmentation) {
 
 		final DexBuffer buffer = new DexBuffer(bytecode);
 
@@ -69,7 +72,8 @@ public final class SmaliDecompiler implements Decompiler {
 	 * @return List of extracted instructions.
 	 */
 	@NonNull
-	private final Iterable<? extends BufferedInstruction> getInstructions(@NonNull final DexBuffer buffer, @Nullable final DexBackedDexFile file) {
+	private final Iterable<? extends BufferedInstruction> getInstructions(@NonNull final DexBuffer buffer,
+			@Nullable final DexBackedDexFile file) {
 		// instructionsSize is the number of 16-bit code units in the instruction list,
 		// not the number of instructions
 		int instructionsSize = buffer.getBuf().length / 2; // dexFile.readSmallUint(codeOffset +
@@ -82,7 +86,7 @@ public final class SmaliDecompiler implements Decompiler {
 		// constructor of DexBackedDexFile for each instruction.
 		DexBackedDexFile dexFile = file;
 		if (dexFile == null) {
-			
+
 			try {
 				dexFile = new DexBackedDexFile(Opcodes.getDefault(), buffer);
 			} catch (final Exception e) {
