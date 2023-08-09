@@ -13,7 +13,6 @@ import org.jf.dexlib2.dexbacked.DexReader;
 import org.jf.dexlib2.dexbacked.util.VariableSizeLookaheadIterator;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.dex.decompilation.DecompilationResult;
 import com.topper.dex.decompiler.instructions.BufferedInstruction;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 

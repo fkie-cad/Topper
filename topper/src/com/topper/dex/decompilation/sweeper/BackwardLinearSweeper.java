@@ -11,7 +11,7 @@ import org.jf.util.ExceptionWithContext;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.TopperConfig;
-import com.topper.dex.decompilation.DecompilationResult;
+import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
 import com.topper.dex.decompilation.pipeline.StageInfo;

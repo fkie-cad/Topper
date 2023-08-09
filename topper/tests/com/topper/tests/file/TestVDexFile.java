@@ -148,8 +148,8 @@ public class TestVDexFile {
 				// Check if method has been analysed, taking into account abstract or native
 				// methods.
 				// abstract or native <=> cfg == null
-				assertIf(isAbstractOrNative(flags), method.getCFG() == null);
-				assertIf(method.getCFG() == null, isAbstractOrNative(flags));
+				assertIf(isAbstractOrNative(flags), method.getCFG() == null, method.getMethod().toString());
+				assertIf(method.getCFG() == null, isAbstractOrNative(flags), method.getMethod().toString());
 			} else {
 				assertNull(method.getCFG());
 			}

@@ -87,7 +87,9 @@ public class VDexFile implements AugmentedFile {
 	 *                      file. If a .dex exceeds this threshold, then its methods
 	 *                      will not be analysed using {@code decompiler} and
 	 *                      {@code analyser}. This prevents being stuck on large
-	 *                      library .dex files that may be irrelevant.
+	 *                      library .dex files that may be irrelevant. 0 indicates
+	 *                      to perform no analysis. A negative value indicates to
+	 *                      analyse all .dex files regardless of their size.
 	 * @throws IllegalArgumentException If the buffer is empty or does not contain a
 	 *                                  valid .vdex file. Also if the .vdex file
 	 *                                  contains a corrupted .dex file.

@@ -4,8 +4,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 
-import com.topper.dex.decompilation.DecompilationResult;
-
 /**
  * Decompiler interface for dex bytecode.
  * 

@@ -42,6 +42,7 @@ public class BufferedArrayPayload extends BufferedInstruction implements ArrayPa
                         return buffer.readByte(elementsStart + index);
                     }
                 };
+                break;
             case 2:
             	this.arrayElements =  new ReturnedList() {
                     @Override
@@ -49,6 +50,7 @@ public class BufferedArrayPayload extends BufferedInstruction implements ArrayPa
                         return buffer.readShort(elementsStart + index*2);
                     }
                 };
+                break;
             case 4:
             	this.arrayElements =  new ReturnedList() {
                     @Override
@@ -56,6 +58,7 @@ public class BufferedArrayPayload extends BufferedInstruction implements ArrayPa
                         return buffer.readInt(elementsStart + index*4);
                     }
                 };
+                break;
             case 8:
             	this.arrayElements =  new ReturnedList() {
                     @Override
@@ -63,6 +66,7 @@ public class BufferedArrayPayload extends BufferedInstruction implements ArrayPa
                         return buffer.readLong(elementsStart + index*8);
                     }
                 };
+                break;
             default:
                 throw new ExceptionWithContext("Invalid element width: %d", elementWidth);
         }

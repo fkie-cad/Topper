@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.dex.decompilation.DecompilationResult;
+import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.decompilation.graphs.BasicBlock;

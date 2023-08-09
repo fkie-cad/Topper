@@ -1,4 +1,4 @@
-package com.topper.dex.decompilation;
+package com.topper.dex.decompilation.decompiler;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Format;

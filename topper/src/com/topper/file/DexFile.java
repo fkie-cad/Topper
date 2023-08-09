@@ -201,8 +201,7 @@ public class DexFile implements AugmentedFile {
 							}
 						}
 					} catch (NoSuchFieldException | SecurityException | IllegalArgumentException
-							| IllegalAccessException | IndexOutOfBoundsException | ExceptionWithContext ignored) {
-					}
+							| IllegalAccessException | IndexOutOfBoundsException | ExceptionWithContext ignored) {}
 
 					clsMethods.add(new DexMethod(this, method, cfg));
 				}
