@@ -46,7 +46,7 @@ public class TestDexFile {
 
 	@Test
 	public final void Given_ValidDexFileNoCFG_When_GettingMethods_Expect_AllMethods() throws IOException {
-		// Reason: All methods must be covered.
+		// Reason: All methods must be covered exactly once.
 
 		final File f = new File(VALID_DEX_FILE_PATH);
 		final DexFile file = new DexFile(f, getFileContents(f));
@@ -69,7 +69,8 @@ public class TestDexFile {
 				assertTrue(
 						methods.stream()
 							   .map(m -> m.getMethod())
-							   .anyMatch(m -> m.toString().equals(method.toString()))
+							   .filter(m -> m.toString().equals(method.toString()))
+							   .count() == 1
 				);
 			}
 		}
@@ -102,7 +103,8 @@ public class TestDexFile {
 				assertTrue(
 						methods.stream()
 							   .map(m -> m.getMethod())
-							   .anyMatch(m -> m.toString().equals(method.toString()))
+							   .filter(m -> m.toString().equals(method.toString()))
+							   .count() == 1
 				);
 			}
 		}
@@ -156,6 +158,19 @@ public class TestDexFile {
 	}
 	
 	@Test
+	public final void Given_ValidDexFile_When_GettingMethods_Expect_CorrectFileMethodMapping() throws IOException {
+		// Reason: Each method must reference the .dex file it comes from.
+		
+		final File f = new File(VALID_DEX_FILE_PATH);
+		final DexFile file = new DexFile(f, getFileContents(f));
+		final ImmutableList<@NonNull DexMethod> methods = file.getMethods();
+		
+		for (@NonNull final DexMethod method : methods) {
+			assertTrue(method.getDexFile().equals(file));
+		}
+	}
+	
+	@Test
 	public final void Given_ValidDexFile_When_BufferEmpty_Expect_IllegalArgumentException() {
 		
 		final File f = new File(VALID_DEX_FILE_PATH);
@@ -168,5 +183,4 @@ public class TestDexFile {
 		final File f = new File(VALID_VDEX_FILE_PATH);
 		assertThrowsExactly(IllegalArgumentException.class, () -> new DexFile(f, getFileContents(f)));
 	}
-
 }

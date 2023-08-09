@@ -9,6 +9,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.configuration.ConfigManager;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 
@@ -21,27 +22,27 @@ public class VDexFile implements AugmentedFile {
 
 	@NonNull
 	private final ImmutableList<@NonNull DexFile> files;
-	
+
 	public VDexFile(@NonNull final File file, final byte @NonNull [] buffer) {
-		this(file, buffer, null, null);
+		this(file, buffer, null, null, 0);
 	}
 
-	public VDexFile(@NonNull final File file, final byte @NonNull [] buffer,
-			@Nullable final Decompiler decompiler, @Nullable final CFGAnalyser analyser) {
+	public VDexFile(@NonNull final File file, final byte @NonNull [] buffer, @Nullable final Decompiler decompiler,
+			@Nullable final CFGAnalyser analyser, final int vdexThreshold) {
 		if (buffer.length == 0) {
 			throw new IllegalArgumentException("buffer must not be empty.");
 		}
-		
+
 		this.file = file;
 		this.buffer = buffer;
 
 		final VDexFileHeader fileHeader = new VDexFileHeader(buffer, 0);
 
 		if (!fileHeader.isValid()) {
-			this.files = ImmutableList.of();
+			throw new IllegalArgumentException("buffer must contain a valid .vdex file.");
 		} else {
 			// Propagate IllegalArgumentExceptions to caller
-			this.files = this.loadFiles(fileHeader, file, buffer, decompiler, analyser);
+			this.files = this.loadFiles(fileHeader, file, buffer, decompiler, analyser, vdexThreshold);
 		}
 	}
 
@@ -66,16 +67,16 @@ public class VDexFile implements AugmentedFile {
 
 		return methods.build();
 	}
-	
+
 	@NonNull
-	public final ImmutableList<@NonNull DexFile> getFiles() {
+	public final ImmutableList<@NonNull DexFile> getDexFiles() {
 		return this.files;
 	}
-	
+
 	@NonNull
 	private final ImmutableList<@NonNull DexFile> loadFiles(@NonNull final VDexFileHeader fileHeader,
 			@NonNull final File file, final byte @NonNull [] buffer, @Nullable final Decompiler decompiler,
-			@Nullable final CFGAnalyser analyser) {
+			@Nullable final CFGAnalyser analyser, final int vdexThreshold) {
 
 		final ImmutableList.Builder<@NonNull DexFile> builder = new ImmutableList.Builder<>();
 
@@ -93,16 +94,25 @@ public class VDexFile implements AugmentedFile {
 			int dexStart = header.getSectionOffset();
 			PartialDexHeader dexHeader;
 
-			while (dexStart >= header.getSectionOffset() + header.getSectionSize()) {
+			while (dexStart < header.getSectionOffset() + header.getSectionSize()) {
 
 				// Parse partial dex header
 				dexHeader = new PartialDexHeader(buffer, dexStart);
 
-				// Parse dex file and store it into list
-				builder.add(
-						new DexFile(file, Arrays.copyOfRange(buffer, dexStart, dexStart + dexHeader.getFileSize()),
-								decompiler, analyser));
+				// Check if .dex file exceeds configured threshold
+				if (dexHeader.getFileSize() <= vdexThreshold) {
 
+					// Parse dex file and store it into list
+					builder.add(
+							new DexFile(file, Arrays.copyOfRange(buffer, dexStart, dexStart + dexHeader.getFileSize()),
+									decompiler, analyser));
+				} else {
+					// Parse dex file and store it into list, but do not extract CFGs.
+					builder.add(
+							new DexFile(file, Arrays.copyOfRange(buffer, dexStart, dexStart + dexHeader.getFileSize()),
+									null, null));
+				}
+				
 				// Move dexStart by size of current dex file
 				dexStart += dexHeader.getFileSize();
 			}
