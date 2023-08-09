@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.configuration.ConfigManager;
 import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
@@ -34,6 +33,7 @@ import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.file.DexHelper;
+import com.topper.tests.utility.TestConfig;
 
 public class TestBFSCFGAnalyser {
 
@@ -47,7 +47,8 @@ public class TestBFSCFGAnalyser {
 	public static final void loadInstructions() throws IOException, IllegalArgumentException, IllegalAccessException,
 			NoSuchFieldException, SecurityException {
 
-		final Opcodes opcodes = Opcodes.forDexVersion(ConfigManager.getInstance().getConfig().getDexVersion());
+		final Opcodes opcodes = Opcodes.forDexVersion(TestConfig.getDefault().getDexVersion());
+		final boolean nopUnknown = TestConfig.getDefault().shouldNopUnknownInstruction();
 		final DexBackedDexFile file = DexFileFactory.loadDexFile(dexName, Opcodes.getDefault());
 		for (@NonNull
 		final DexBackedClassDef cls : file.getClasses()) {
@@ -69,7 +70,7 @@ public class TestBFSCFGAnalyser {
 
 				final Decompiler decompiler = new SmaliDecompiler();
 				final DecompilationResult result = decompiler
-						.decompile(file.getBuffer().readByteRange(offset + 0x10, size), null, opcodes);
+						.decompile(file.getBuffer().readByteRange(offset + 0x10, size), null, opcodes, nopUnknown);
 				validInstructions = result.getInstructions();
 			}
 		}

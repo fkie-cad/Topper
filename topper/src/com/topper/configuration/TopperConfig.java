@@ -39,9 +39,16 @@ public final class TopperConfig {
 	 * by {@link SmaliDecompiler}.
 	 * */
 	private int dexVersion;
+	
+	/**
+	 * Whether or not to replace unknown opcodes with a NOP in order
+	 * to continue decompilation.
+	 * */
+	private boolean nopUnknownInstruction;
 
 	public TopperConfig(final int sweeperMaxNumberInstructions, @NonNull final Opcode pivotOpcode,
-			final int defaultAmountThreads, final int vdexSkipThreshold, final int dexVersion) throws InvalidConfigException {
+			final int defaultAmountThreads, final int vdexSkipThreshold, final int dexVersion,
+			final boolean nopUnknownInstruction) throws InvalidConfigException {
 
 		if (sweeperMaxNumberInstructions <= 0) {
 			throw new InvalidConfigException("sweeperMaxNumberInstructions must be >= 1.");
@@ -61,8 +68,9 @@ public final class TopperConfig {
 		this.defaultAmountThreads = defaultAmountThreads;
 		this.vdexSkipThreshold = vdexSkipThreshold;
 		this.dexVersion = dexVersion;
+		this.nopUnknownInstruction = nopUnknownInstruction;
 	}
-
+	
 	/**
 	 * Gets current upper bound on the number of instructions to obtain from a
 	 * sweeper.
@@ -149,4 +157,21 @@ public final class TopperConfig {
 	public final void setDexVersion(final int dexVersion) {
 		this.dexVersion = dexVersion;
 	}
+
+	/**
+	 * Determine whether or not unknown opcodes should result in a NOP
+	 * instead of an exception.
+	 * */
+	public final boolean shouldNopUnknownInstruction() {
+		return nopUnknownInstruction;
+	}
+
+	/**
+	 * Sets whether or not unknown opcodes should result in a NOP
+	 * instead of an exception.
+	 * */
+	public final void setNopUnknownInstruction(final boolean nopUnknownInstruction) {
+		this.nopUnknownInstruction = nopUnknownInstruction;
+	}
+
 }

@@ -33,5 +33,5 @@ public interface Decompiler {
 	 */
 	@NonNull
 	DecompilationResult decompile(final byte @NonNull [] bytes, @Nullable final DexBackedDexFile augmentation,
-			@NonNull final Opcodes opcodes);
+			@NonNull final Opcodes opcodes, final boolean nopUnknownInstruction);
 }

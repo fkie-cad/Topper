@@ -19,7 +19,7 @@ import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.configuration.ConfigManager;
+import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.decompilation.staticanalyser.BFSCFGAnalyser;
@@ -27,6 +27,7 @@ import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 import com.topper.file.DexFile;
 import com.topper.file.DexMethod;
 import com.topper.file.VDexFile;
+import com.topper.tests.utility.TestConfig;
 
 public class TestVDexFile {
 
@@ -35,6 +36,8 @@ public class TestVDexFile {
 	private static final String CORRUPTED_VDEX_FILE_PATH = "tests/resources/corrupted.vdex";
 
 	private static final int VALID_VDEX_AMOUNT_DEX_FILES = 11;
+	
+	private static final TopperConfig config = TestConfig.getDefault();
 
 	private static final byte @NonNull [] getFileContents(@NonNull final File file) throws IOException {
 		final FileInputStream input = new FileInputStream(file);
@@ -65,7 +68,7 @@ public class TestVDexFile {
 		final Decompiler decompiler = new SmaliDecompiler();
 		final CFGAnalyser analyser = new BFSCFGAnalyser();
 		final VDexFile vdex = new VDexFile(f, getFileContents(f), decompiler, analyser,
-				ConfigManager.getInstance().getConfig().getVdexSkipThreshold());
+				config.getVdexSkipThreshold());
 
 		assertEquals(VALID_VDEX_AMOUNT_DEX_FILES, vdex.getDexFiles().size());
 	}
@@ -132,7 +135,7 @@ public class TestVDexFile {
 		final File f = new File(VALID_VDEX_FILE_PATH);
 		final Decompiler decompiler = new SmaliDecompiler();
 		final CFGAnalyser analyser = new BFSCFGAnalyser();
-		final int threshold = ConfigManager.getInstance().getConfig().getVdexSkipThreshold();
+		final int threshold = config.getVdexSkipThreshold();
 		final VDexFile vdex = new VDexFile(f, getFileContents(f), decompiler, analyser, threshold);
 		final ImmutableList<@NonNull DexMethod> methods = vdex.getMethods();
 

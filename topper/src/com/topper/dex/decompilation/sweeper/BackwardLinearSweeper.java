@@ -89,7 +89,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		try {
 			final DecompilationResult result = decompiler.decompile(
 					Arrays.copyOfRange(buffer, offset, offset + currentSize), null,
-					Opcodes.forDexVersion(config.getDexVersion()));
+					Opcodes.forDexVersion(config.getDexVersion()), config.shouldNopUnknownInstruction());
 			final ImmutableList<DecompiledInstruction> instructions = result.getInstructions();
 			final DecompiledInstruction instruction = instructions.get(0);
 
@@ -220,7 +220,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 
 				// Decompile instruction.
 				instructions = decompiler.decompile(Arrays.copyOfRange(buffer, offset - instructionSize, offset), null,
-						Opcodes.forDexVersion(config.getDexVersion())).getInstructions();
+						Opcodes.forDexVersion(config.getDexVersion()), config.shouldNopUnknownInstruction()).getInstructions();
 
 				// Check instructions. If invalid, then this instruction can be ignored/is not
 				// valid.
@@ -248,7 +248,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 						offset - instructionSize, // offset points behind last byte
 						totalSize, path, checkedGadgetSizes, depth + 1, config));
 
-			} catch (final ExceptionWithContext | ArrayIndexOutOfBoundsException e) {
+			} catch (final ExceptionWithContext | IndexOutOfBoundsException e) {
 			}
 		}
 

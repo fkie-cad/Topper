@@ -24,6 +24,7 @@ import com.topper.scengine.commands.HelpCommand;
 import com.topper.scengine.commands.HelpCommandParser;
 import com.topper.scengine.commands.ScriptCommand;
 import com.topper.sstate.ScriptContext;
+import com.topper.tests.utility.TestConfig;
 
 public class TestScriptExecutor {
 	
@@ -46,7 +47,7 @@ public class TestScriptExecutor {
 		parser.registerParser(new ExitCommandParser());
 		
 		VALID_CONTEXT = new ScriptContext(
-			new TopperConfig(10, Opcode.THROW, 1, 0, 38),
+			TestConfig.getDefault(), //new TopperConfig(10, Opcode.THROW, 1, 0, 38, false),
 			new IOManager(),
 			parser
 		);

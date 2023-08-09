@@ -20,7 +20,9 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
  * 
  * Decompiler for dex bytecode. It aims to solve the following problem:
  * <blockquote>Given an array of bytes, interpret these bytes as dex bytecode
- * and decompile them into Smali.</blockquote>
+ * and decompile them into Smali.</blockquote> This is a greedy decompiler, i.e.
+ * it continues decompiling bytes into instructions until an error occurs, or
+ * there are no more bytes available.
  * 
  * Its implementation is based on <a href=
  * "https://cs.android.com/android/platform/superproject/+/master:external/google-smali/dexlib2/src/main/java/com/android/tools/smali/dexlib2/dexbacked/DexBackedMethodImplementation.java;l=76;drc=e6b4ff2c19b7138f9db078234049194ce663d5b2">AOSP's
@@ -36,14 +38,15 @@ public final class SmaliDecompiler implements Decompiler {
 	 * @param bytecode Byte array to interpret as bytecode and to decompile.
 	 * @return Wrapper holding information on the decompilation. Among other things,
 	 *         it holds the decompiled instructions.
-	 * @throws IndexOutOfBoundsException If an instruction requires an out - of
-	 *                                        - bounds read.
+	 * @throws IndexOutOfBoundsException If an instruction requires an out - of -
+	 *                                   bounds read.
 	 */
 //	@SuppressWarnings("null") // endOfData() returns null, but this is accounted for in for-each
 	@NonNull
 	@Override
 	public final DecompilationResult decompile(final byte @NonNull [] bytecode,
-			@Nullable final DexBackedDexFile augmentation, @NonNull final Opcodes opcodes) {
+			@Nullable final DexBackedDexFile augmentation, @NonNull final Opcodes opcodes,
+			final boolean nopUnknownInstruction) {
 
 		final DexBuffer buffer = new DexBuffer(bytecode);
 
@@ -51,7 +54,8 @@ public final class SmaliDecompiler implements Decompiler {
 		int size;
 		final List<@NonNull DecompiledInstruction> decompiledInstructions = new LinkedList<DecompiledInstruction>();
 		byte[] buf;
-		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer, augmentation, opcodes)) {
+		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer, augmentation, opcodes,
+				nopUnknownInstruction)) {
 
 			size = instruction.getCodeUnits() * 2;
 			buf = new byte[size];
@@ -72,7 +76,8 @@ public final class SmaliDecompiler implements Decompiler {
 	 */
 	@NonNull
 	private final Iterable<? extends BufferedInstruction> getInstructions(@NonNull final DexBuffer buffer,
-			@Nullable final DexBackedDexFile file, @NonNull final Opcodes opcodes) {
+			@Nullable final DexBackedDexFile file, @NonNull final Opcodes opcodes,
+			final boolean nopUnknownInstruction) {
 		// instructionsSize is the number of 16-bit code units in the instruction list,
 		// not the number of instructions
 		int instructionsSize = buffer.getBuf().length / 2; // dexFile.readSmallUint(codeOffset +
@@ -105,7 +110,8 @@ public final class SmaliDecompiler implements Decompiler {
 							return endOfData();
 						}
 
-						final BufferedInstruction instruction = BufferedInstruction.readFrom(reader, augmentation, opcodes);
+						final BufferedInstruction instruction = BufferedInstruction.readFrom(reader, augmentation,
+								opcodes, nopUnknownInstruction);
 
 						// Does the instruction extend past the end of the method?
 						final int offset = reader.getOffset();

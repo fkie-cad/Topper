@@ -6,12 +6,19 @@ import org.jf.dexlib2.iface.instruction.formats.UnknownInstruction;
 
 public class BufferedUnknownInstruction extends BufferedInstruction implements UnknownInstruction {
 
+	private int opcode;
+	
 	public BufferedUnknownInstruction(final DexBuffer buffer, final int instructionStart) {
 		super(Opcode.NOP, instructionStart);
+		
+		opcode = buffer.readUbyte(instructionStart);
+		if (opcode == 0) {
+			opcode = buffer.readUshort(instructionStart);
+		}
 	}
 
 	@Override
 	public int getOriginalOpcode() {
-		return 0;
+		return opcode;
 	}
 }
