@@ -100,7 +100,7 @@ public class VDexFile implements AugmentedFile {
 				dexHeader = new PartialDexHeader(buffer, dexStart);
 
 				// Check if .dex file exceeds configured threshold
-				if (dexHeader.getFileSize() <= vdexThreshold) {
+				if (dexHeader.getFileSize() <= vdexThreshold || vdexThreshold == 0) {
 
 					// Parse dex file and store it into list
 					builder.add(
