@@ -28,7 +28,8 @@ public final class TopperConfig {
 
 	/**
 	 * Threshold for .dex file sizes in a .vdex file. If this is exceeded, then
-	 * analysis will skip the respective .dex file. 0 indicates no threshold.
+	 * analysis will skip the respective .dex file. Negative value indicates no threshold.
+	 * 0 can be used to disable analysis for all .dex files.
 	 */
 	private int vdexSkipThreshold;
 
@@ -92,7 +93,8 @@ public final class TopperConfig {
 
 	/**
 	 * Gets threshold for .dex file sizes in a .vdex file. If this is exceeded, then
-	 * analysis will skip the respective .dex file. 0 indicates no threshold.
+	 * analysis will skip the respective .dex file. Negative value indicates no threshold.
+	 * 0 can be used to disable analysis for all .dex files.
 	 * */
 	public int getVdexSkipThreshold() {
 		return vdexSkipThreshold;
@@ -100,10 +102,11 @@ public final class TopperConfig {
 
 	/**
 	 * Sets threshold for .dex file sizes in a .vdex file. If this is exceeded, then
-	 * analysis will skip the respective .dex file.
+	 * analysis will skip the respective .dex file. Negative value indicates no threshold.
+	 * 0 can be used to disable analysis for all .dex files.
 	 * 
 	 * @param vdexSkipThreshold New threshold on .dex file sizes in .vdex files. 0
-	 * 	indicates no threshold.
+	 * 	indicates no analysis. Negative value indicates no threshold.
 	 * */
 	public void setVdexSkipThreshold(int vdexSkipThreshold) {
 		this.vdexSkipThreshold = vdexSkipThreshold;
