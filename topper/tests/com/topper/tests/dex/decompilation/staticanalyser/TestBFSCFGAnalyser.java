@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.configuration.ConfigManager;
 import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
@@ -46,6 +47,7 @@ public class TestBFSCFGAnalyser {
 	public static final void loadInstructions() throws IOException, IllegalArgumentException, IllegalAccessException,
 			NoSuchFieldException, SecurityException {
 
+		final Opcodes opcodes = Opcodes.forDexVersion(ConfigManager.getInstance().getConfig().getDexVersion());
 		final DexBackedDexFile file = DexFileFactory.loadDexFile(dexName, Opcodes.getDefault());
 		for (@NonNull
 		final DexBackedClassDef cls : file.getClasses()) {
@@ -67,7 +69,7 @@ public class TestBFSCFGAnalyser {
 
 				final Decompiler decompiler = new SmaliDecompiler();
 				final DecompilationResult result = decompiler
-						.decompile(file.getBuffer().readByteRange(offset + 0x10, size), null);
+						.decompile(file.getBuffer().readByteRange(offset + 0x10, size), null, opcodes);
 				validInstructions = result.getInstructions();
 			}
 		}

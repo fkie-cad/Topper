@@ -39,11 +39,11 @@ public final class SmaliDecompiler implements Decompiler {
 	 * @throws IndexOutOfBoundsException If an instruction requires an out - of
 	 *                                        - bounds read.
 	 */
-	@SuppressWarnings("null") // endOfData() returns null, but this is accounted for in for-each
+//	@SuppressWarnings("null") // endOfData() returns null, but this is accounted for in for-each
 	@NonNull
 	@Override
 	public final DecompilationResult decompile(final byte @NonNull [] bytecode,
-			@Nullable final DexBackedDexFile augmentation) {
+			@Nullable final DexBackedDexFile augmentation, @NonNull final Opcodes opcodes) {
 
 		final DexBuffer buffer = new DexBuffer(bytecode);
 
@@ -51,7 +51,7 @@ public final class SmaliDecompiler implements Decompiler {
 		int size;
 		final List<@NonNull DecompiledInstruction> decompiledInstructions = new LinkedList<DecompiledInstruction>();
 		byte[] buf;
-		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer, augmentation)) {
+		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer, augmentation, opcodes)) {
 
 			size = instruction.getCodeUnits() * 2;
 			buf = new byte[size];
@@ -72,7 +72,7 @@ public final class SmaliDecompiler implements Decompiler {
 	 */
 	@NonNull
 	private final Iterable<? extends BufferedInstruction> getInstructions(@NonNull final DexBuffer buffer,
-			@Nullable final DexBackedDexFile file) {
+			@Nullable final DexBackedDexFile file, @NonNull final Opcodes opcodes) {
 		// instructionsSize is the number of 16-bit code units in the instruction list,
 		// not the number of instructions
 		int instructionsSize = buffer.getBuf().length / 2; // dexFile.readSmallUint(codeOffset +
@@ -87,7 +87,8 @@ public final class SmaliDecompiler implements Decompiler {
 		if (dexFile == null) {
 
 			try {
-				dexFile = new DexBackedDexFile(Opcodes.getDefault(), buffer);
+//				dexFile = new DexBackedDexFile(Opcodes.getDefault(), buffer);
+				dexFile = new DexBackedDexFile(Opcodes.forArtVersion(39), buffer);
 			} catch (final Exception e) {
 				dexFile = null;
 			}
@@ -104,7 +105,7 @@ public final class SmaliDecompiler implements Decompiler {
 							return endOfData();
 						}
 
-						final BufferedInstruction instruction = BufferedInstruction.readFrom(reader, augmentation);
+						final BufferedInstruction instruction = BufferedInstruction.readFrom(reader, augmentation, opcodes);
 
 						// Does the instruction extend past the end of the method?
 						final int offset = reader.getOffset();

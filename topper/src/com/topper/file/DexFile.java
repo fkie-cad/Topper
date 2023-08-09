@@ -160,6 +160,8 @@ public class DexFile implements AugmentedFile {
 		final List<Future<List<@NonNull DexMethod>>> results = new ArrayList<>(file.getClasses().size());
 		final ExecutorService pool = Executors
 				.newFixedThreadPool(ConfigManager.getInstance().getConfig().getDefaultAmountThreads());
+		@NonNull
+		final Opcodes opcodes = Opcodes.forDexVersion(ConfigManager.getInstance().getConfig().getDexVersion());
 
 		// Iterate over methods
 		for (final DexBackedClassDef cls : file.getClasses()) {
@@ -193,7 +195,7 @@ public class DexFile implements AugmentedFile {
 							if (offset != 0) {
 								size = DexHelper.getMethodSize(method, offset);
 								instructions = decompiler.decompile(
-										file.getBuffer().readByteRange(offset + DexHelper.CODE_ITEM_SIZE, size), file)
+										file.getBuffer().readByteRange(offset + DexHelper.CODE_ITEM_SIZE, size), file, opcodes)
 										.getInstructions();
 
 								// Grab control flow graph

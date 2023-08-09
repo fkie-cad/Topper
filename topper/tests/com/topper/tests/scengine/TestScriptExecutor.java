@@ -46,7 +46,7 @@ public class TestScriptExecutor {
 		parser.registerParser(new ExitCommandParser());
 		
 		VALID_CONTEXT = new ScriptContext(
-			new TopperConfig(10, Opcode.THROW, 1, 0),
+			new TopperConfig(10, Opcode.THROW, 1, 0, 38),
 			new IOManager(),
 			parser
 		);

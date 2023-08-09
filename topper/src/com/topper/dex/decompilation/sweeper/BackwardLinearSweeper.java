@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Format;
+import org.jf.dexlib2.Opcodes;
 import org.jf.util.ExceptionWithContext;
 
 import com.google.common.collect.ImmutableList;
@@ -86,8 +87,9 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 
 		// Try to decompile pivot instruction pointed to by offset.
 		try {
-			final DecompilationResult result = decompiler
-					.decompile(Arrays.copyOfRange(buffer, offset, offset + currentSize), null);
+			final DecompilationResult result = decompiler.decompile(
+					Arrays.copyOfRange(buffer, offset, offset + currentSize), null,
+					Opcodes.forDexVersion(config.getDexVersion()));
 			final ImmutableList<DecompiledInstruction> instructions = result.getInstructions();
 			final DecompiledInstruction instruction = instructions.get(0);
 
@@ -217,8 +219,8 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 			try {
 
 				// Decompile instruction.
-				instructions = decompiler.decompile(Arrays.copyOfRange(buffer, offset - instructionSize, offset), null)
-						.getInstructions();
+				instructions = decompiler.decompile(Arrays.copyOfRange(buffer, offset - instructionSize, offset), null,
+						Opcodes.forDexVersion(config.getDexVersion())).getInstructions();
 
 				// Check instructions. If invalid, then this instruction can be ignored/is not
 				// valid.
