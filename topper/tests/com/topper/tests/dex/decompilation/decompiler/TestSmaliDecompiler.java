@@ -49,6 +49,8 @@ public class TestSmaliDecompiler {
 	private static final byte @NonNull [] VALID_BYTECODE_INVALID_END = concatBytes(VALID_BYTECODE, OOB_BYTECODE);
 	private static final byte @NonNull [] INVALID_START_VALID_BYTECODE = concatBytes(INVALID_OPCODE_BYTECODE,
 			VALID_BYTECODE);
+	
+	private static final byte @NonNull [] INCOMPLETE_NOP = new byte [] { 0x0 };
 
 	private static final byte @NonNull [] concatBytes(final byte @NonNull [] first, final byte @NonNull [] second) {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -161,10 +163,22 @@ public class TestSmaliDecompiler {
 
 	@Test
 	public void Given_InvalidStartValidBytecode_When_DecompilingWithNopUnknown_Expect_AllInstructions() {
+		// Reason: Decompiler must replace (first) invalid instruction with a NOP when requested.
 
 		final Decompiler decompiler = new SmaliDecompiler();
 		final DecompilationResult result = decompiler.decompile(INVALID_START_VALID_BYTECODE, null, opcodes, true);
 
 		this.checkResult(result, INVALID_START_VALID_BYTECODE, false);
 	}
+	
+	@Test
+	public void Given_IncompleteNop_When_Decompiling_Expect_EmptyInstructions() {
+		
+		final Decompiler decompiler = new SmaliDecompiler();
+		final DecompilationResult result = decompiler.decompile(INCOMPLETE_NOP, null, opcodes, false);
+		
+		assertEquals(0, result.getInstructions().size());
+	}
+	
+	// TODO: CONTINUE WITH TESTS FOR AUGMENTED DECOMPILATION
 }
