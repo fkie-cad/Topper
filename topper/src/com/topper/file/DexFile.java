@@ -24,23 +24,79 @@ import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
+/**
+ * Dex file representation base on dexlib2. It parses the contents of a given
+ * buffer into a {@link DexBackedDexFile}, extracts {@link DexMethod}s and, if
+ * requested, performs static analysis to elevate the underlying bytecode into
+ * Smali and to obtain a Control Flow Graph for each method.
+ * 
+ * @author Pascal Kühnemann
+ * @since 09.08.2023
+ */
 public class DexFile implements AugmentedFile {
 
+	/**
+	 * File to be augmented. It should refer to the .dex file, whose contents reside
+	 * in {@code buffer}, but it is not mandatory.
+	 */
 	@NonNull
 	private final File file;
 
+	/**
+	 * Contents of this file. They may be based on the contents of {@link file}.
+	 */
 	private final byte @NonNull [] buffer;
 
+	/**
+	 * Parsed .dex file used to extract e.g. method information.
+	 */
 	@NonNull
 	private final DexBackedDexFile dexFile;
 
+	/**
+	 * List of all methods stored in this .dex file.
+	 */
 	@NonNull
 	private final ImmutableList<@NonNull DexMethod> methods;
 
+	/**
+	 * Creates a .dex file using only a {@link File} and a {@code buffer}.
+	 * Internally, methods extracted from {@code buffer} are not decompiled and no
+	 * CFG is constructed.
+	 * 
+	 * @param file   File to be augmented.
+	 * @param buffer Raw bytes that represent a valid .dex file.
+	 * @throws IllegalArgumentException If the buffer is empty or does not contain a
+	 *                                  valid .dex file.
+	 */
 	public DexFile(@NonNull final File file, final byte @NonNull [] buffer) {
 		this(file, buffer, null, null);
 	}
 
+	/**
+	 * Creates a .dex file using a {@link File} and a {@code buffer}. If both
+	 * {@link Decompiler} and {@link CFGAnalyser} are valid, they will be used to
+	 * analyse all methods stored in the .dex file in {@code buffer}.
+	 * 
+	 * If CFG extraction for a given method fails due to an internal error, or the
+	 * method is abstract or native, or either one of {@code decompiler} or
+	 * {@code analyser} is {@code null}, then the method will not be analysed.
+	 * 
+	 * Loading methods of a .dex file uses an {@link ExecutorService} with a
+	 * configurable number of threads to speed up analysis. Adjust the global
+	 * configuration {@link TopperConfig.setDefaultAmountThreads} using
+	 * {@link ConfigManager} to change the number of threads used (at least 1).
+	 * 
+	 * @param file       File to be augmented.
+	 * @param buffer     Raw bytes that represent a valid .dex file.
+	 * @param decompiler A {@code Decompiler} used in conjunction with
+	 *                   {@code analyser} to decompile all methods.
+	 * @param analyser   A {@code CFGAnalyser} used in conjunction with
+	 *                   {@code decompiler} to extract Control Flow Graphs for all
+	 *                   methods.
+	 * @throws IllegalArgumentException If the buffer is empty or does not contain a
+	 *                                  valid .dex file.
+	 */
 	public DexFile(@NonNull final File file, final byte @NonNull [] buffer, @Nullable final Decompiler decompiler,
 			@Nullable final CFGAnalyser analyser) {
 		if (buffer.length == 0) {
@@ -73,6 +129,26 @@ public class DexFile implements AugmentedFile {
 		return this.methods;
 	}
 
+	/**
+	 * Loads methods from a given {@link DexBackedDexFile}. Optionally, a
+	 * {@link Decompiler} and a {@link CFGAnalyser} are used to extract a Control
+	 * Flow Graph(CFG) from each method.
+	 * 
+	 * If CFG extraction for a given method fails due to an internal error, or the
+	 * method is abstract or native, or either one of {@code decompiler} or
+	 * {@code analyser} is {@code null}, then the method will not be analysed.
+	 * 
+	 * Loading methods of a .dex file uses an {@link ExecutorService} with a
+	 * configurable number of threads to speed up analysis. Adjust the global
+	 * configuration {@link TopperConfig.setDefaultAmountThreads} using
+	 * {@link ConfigManager} to change the number of threads used (at least 1).
+	 * 
+	 * @param file       Parsed .dex file used for method enumeration.
+	 * @param decompiler {@code Decompiler} to use for decompiling bytes into Smali.
+	 * @param analyser   {@code CFGAnalyser} to use for constructing CFGs for
+	 *                   decompiled methods.
+	 * @return List of decompiled methods.
+	 */
 	@NonNull
 	private final ImmutableList<@NonNull DexMethod> loadMethods(@NonNull final DexBackedDexFile file,
 			@Nullable final Decompiler decompiler, @Nullable final CFGAnalyser analyser) {
@@ -97,7 +173,7 @@ public class DexFile implements AugmentedFile {
 				int size;
 				CFG cfg;
 				ImmutableList<@NonNull DecompiledInstruction> instructions;
-				
+
 				final List<@NonNull DexMethod> clsMethods = new LinkedList<>();
 				for (final DexBackedMethod method : cls.getMethods()) {
 
@@ -136,12 +212,10 @@ public class DexFile implements AugmentedFile {
 		}
 
 		// Gather all results
-		for (@NonNull
-		final Future<List<@NonNull DexMethod>> result : results) {
+		for (final Future<List<@NonNull DexMethod>> result : results) {
 			try {
 				methods.addAll(result.get());
 			} catch (InterruptedException | ExecutionException ignored) {
-//				e.printStackTrace();
 			}
 		}
 

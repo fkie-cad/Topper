@@ -38,11 +38,14 @@ public final class TopperConfig {
 
 		if (sweeperMaxNumberInstructions <= 0) {
 			throw new InvalidConfigException("sweeperMaxNumberInstructions must be >= 1.");
+		} else if (defaultAmountThreads <= 0) {
+			throw new InvalidConfigException("defaultAmountThreads must be >= 1.");
 		}
 		this.sweeperMaxNumberInstructions = sweeperMaxNumberInstructions;
 
 		this.pivotInstruction = pivotOpcode;
 		this.defaultAmountThreads = defaultAmountThreads;
+		this.vdexSkipThreshold = vdexSkipThreshold;
 	}
 
 	/**
@@ -55,9 +58,12 @@ public final class TopperConfig {
 
 	/**
 	 * Sets the upper bound on the number of instructions to obtain from a sweeper.
+	 * Non - positive numbers are ignored.
 	 */
 	public final void setSweeperMaxNumberInstructions(final int sweeperMaxNumberInstructions) {
-		this.sweeperMaxNumberInstructions = sweeperMaxNumberInstructions;
+		if (sweeperMaxNumberInstructions > 0) {
+			this.sweeperMaxNumberInstructions = sweeperMaxNumberInstructions;
+		}
 	}
 
 	/**
@@ -85,10 +91,12 @@ public final class TopperConfig {
 
 	/**
 	 * Sets default number of threads to create in case multi - threading
-	 * is used to speed things up.
+	 * is used to speed things up. Non - positive numbers are ignored.
 	 * */
 	public final void setDefaultAmountThreads(final int defaultAmountThreads) {
-		this.defaultAmountThreads = defaultAmountThreads;
+		if (defaultAmountThreads > 0) {
+			this.defaultAmountThreads = defaultAmountThreads;
+		}
 	}
 
 	/**
