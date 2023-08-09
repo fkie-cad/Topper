@@ -9,24 +9,89 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.configuration.ConfigManager;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 
+/**
+ * CAUTION: This is an experimental feature. The .vdex file format changes a
+ * lot, so newer versions may render this implementation useless. VDex file
+ * representation based on {@link DexFile}. Its implementation is based on
+ * <a href=
+ * "https://cs.android.com/android/platform/superproject/main/+/main:art/runtime/vdex_file.h;l=45;drc=5b65e02b1cdce48da11a972ab6d75a7fb5c859bd">AOSP</a>.
+ * 
+ * As a .vdex file contains a list of .dex files combined with some addition
+ * information, this class attempts to parse the .vdex file structure to such a
+ * degree that the list of .dex files is parsable. Then {@code DexFile}s are
+ * used to store the .dex files.
+ * 
+ * @author Pascal Kühnemann
+ * @since 09.08.2023
+ */
 public class VDexFile implements AugmentedFile {
 
+	/**
+	 * File to augment. It may be related to {@code buffer}.
+	 */
 	@NonNull
 	private final File file;
 
+	/**
+	 * Raw bytes that contain a valid .vdex file. It is used for parsing. Also it
+	 * may be related to the contents of {@code file}.
+	 */
 	private final byte @NonNull [] buffer;
 
+	/**
+	 * List of {@code DexFile}s stored in the .vdex file parsed from {@code buffer}.
+	 */
 	@NonNull
 	private final ImmutableList<@NonNull DexFile> files;
 
+	/**
+	 * Creates a new .vdex file representation using only a {@link File} and a
+	 * {@code buffer}. It does not perform any static analysis on the resulting .dex
+	 * files.
+	 * 
+	 * @param file   File to augment.
+	 * @param buffer Raw bytes that represent a valid .vdex file.
+	 * @throws IllegalArgumentException If the buffer is empty or does not contain a
+	 *                                  valid .vdex file. Also if the .vdex file
+	 *                                  contains a corrupted .dex file.
+	 */
 	public VDexFile(@NonNull final File file, final byte @NonNull [] buffer) {
-		this(file, buffer, null, null, 0);
+		this(file, buffer, null, null, -1);
 	}
 
+	/**
+	 * Creates a new .vdex file respresentation using a {@link File} and a
+	 * {@buffer}. Optionally, it uses a {@link Decompiler} and a {@link CFGAnalyser}
+	 * to extract Control Flow Graphs(CFG) for all methods of all .dex files.
+	 * 
+	 * If CFG extraction for a given method fails due to an internal error, or the
+	 * method is abstract or native, or either one of {@code decompiler} or
+	 * {@code analyser} is {@code null}, then the method will not be analysed.
+	 * Otherwise all methods are analysed, which may be time consuming.
+	 * 
+	 * Some coarse checks are performed to ensure {@code buffer} contains a .vdex
+	 * file. However, as versions of .vdex files change, mainly the magic bytes
+	 * are verified.
+	 * 
+	 * @param file          File to augment.
+	 * @param buffer        Raw bytes that represent a valid .vdex file.
+	 * @param decompiler    A {@code Decompiler} used in conjunction with
+	 *                      {@code analyser} to decompile all methods.
+	 * @param analyser      A {@code CFGAnalyser} used in conjunction with
+	 *                      {@code decompiler} to extract Control Flow Graphs for
+	 *                      all methods.
+	 * @param vdexThreshold A threshold for file sizes of .dex files in this .vdex
+	 *                      file. If a .dex exceeds this threshold, then its methods
+	 *                      will not be analysed using {@code decompiler} and
+	 *                      {@code analyser}. This prevents being stuck on large
+	 *                      library .dex files that may be irrelevant.
+	 * @throws IllegalArgumentException If the buffer is empty or does not contain a
+	 *                                  valid .vdex file. Also if the .vdex file
+	 *                                  contains a corrupted .dex file.
+	 */
 	public VDexFile(@NonNull final File file, final byte @NonNull [] buffer, @Nullable final Decompiler decompiler,
 			@Nullable final CFGAnalyser analyser, final int vdexThreshold) {
 		if (buffer.length == 0) {
@@ -68,11 +133,36 @@ public class VDexFile implements AugmentedFile {
 		return methods.build();
 	}
 
+	/**
+	 * Gets a list of all identified .dex files in this .vdex file.
+	 * */
 	@NonNull
 	public final ImmutableList<@NonNull DexFile> getDexFiles() {
 		return this.files;
 	}
 
+	/**
+	 * Loads all .dex files from this .vdex file. An underlying assumption
+	 * is that .dex files are adjacent to each other, i.e. offset_1 + size_1 = offset_2.
+	 * 
+	 * Internally, all .dex files are wrapped in a {@link DexFile}, which may
+	 * imply CFG extraction depending on {@code decompiler} and {@code analyser}.
+	 * 
+	 * @param fileHeader Representation of a .vdex file header.
+	 * @param file File to augment. It is forwarded to all {@code DexFile}s.
+	 * @param buffer Raw bytes that contain the valid (and already verified) .vdex file. 
+	 * 	It is sliced to extract .dex files and forwarded to its respective {@code DexFile}.
+	 * @param decompiler {@code Decompiler} to use for decompiling bytes into Smali.
+	 * @param analyser   {@code CFGAnalyser} to use for constructing CFGs for
+	 *                   decompiled methods.
+	 * @param vdexThreshold A threshold for file sizes of .dex files in this .vdex
+	 *                      file. If a .dex exceeds this threshold, then its methods
+	 *                      will not be analysed using {@code decompiler} and
+	 *                      {@code analyser}. This prevents being stuck on large
+	 *                      library .dex files that may be irrelevant.
+	 * @return List of .dex file representations.
+	 * @throws IllegalArgumentException If {@code DexFile} construction fails.
+	 * */
 	@NonNull
 	private final ImmutableList<@NonNull DexFile> loadFiles(@NonNull final VDexFileHeader fileHeader,
 			@NonNull final File file, final byte @NonNull [] buffer, @Nullable final Decompiler decompiler,
@@ -108,11 +198,10 @@ public class VDexFile implements AugmentedFile {
 									decompiler, analyser));
 				} else {
 					// Parse dex file and store it into list, but do not extract CFGs.
-					builder.add(
-							new DexFile(file, Arrays.copyOfRange(buffer, dexStart, dexStart + dexHeader.getFileSize()),
-									null, null));
+					builder.add(new DexFile(file,
+							Arrays.copyOfRange(buffer, dexStart, dexStart + dexHeader.getFileSize()), null, null));
 				}
-				
+
 				// Move dexStart by size of current dex file
 				dexStart += dexHeader.getFileSize();
 			}
