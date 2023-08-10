@@ -1,5 +1,6 @@
 package com.topper.tests.dex.decompilation.decompiler;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
@@ -11,13 +12,19 @@ import java.util.Arrays;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.Opcodes;
+import org.jf.dexlib2.dexbacked.DexBackedDexFile;
+import org.jf.dexlib2.iface.instruction.DualReferenceInstruction;
+import org.jf.dexlib2.iface.instruction.ReferenceInstruction;
+import org.jf.dexlib2.iface.reference.Reference.InvalidReferenceException;
 import org.jf.util.ExceptionWithContext;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.tests.utility.DexLoader;
 import com.topper.tests.utility.TestConfig;
 
 public class TestSmaliDecompiler {
@@ -51,7 +58,17 @@ public class TestSmaliDecompiler {
 			VALID_BYTECODE);
 	
 	private static final byte @NonNull [] INCOMPLETE_NOP = new byte [] { 0x0 };
-
+	
+	private static byte[] DEX_FILE_BYTECODE;
+	private static DexBackedDexFile DEX_FILE;
+	
+	
+	@BeforeAll
+	public static void init() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+		DEX_FILE_BYTECODE = DexLoader.get().getMethodBytes();
+		DEX_FILE = DexLoader.get().getFile();
+	}
+	
 	private static final byte @NonNull [] concatBytes(final byte @NonNull [] first, final byte @NonNull [] second) {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
@@ -172,13 +189,51 @@ public class TestSmaliDecompiler {
 	}
 	
 	@Test
-	public void Given_IncompleteNop_When_Decompiling_Expect_EmptyInstructions() {
+	public void Given_OddAmountBytes_When_Decompiling_Expect_IllegalArgumentException() {
+		// Reason: Decompiler must only consider an even amount of bytes for decompilation.
 		
 		final Decompiler decompiler = new SmaliDecompiler();
-		final DecompilationResult result = decompiler.decompile(INCOMPLETE_NOP, null, opcodes, false);
-		
-		assertEquals(0, result.getInstructions().size());
+		assertThrowsExactly(IllegalArgumentException.class, () -> decompiler.decompile(INCOMPLETE_NOP, null, opcodes, false));
 	}
 	
-	// TODO: CONTINUE WITH TESTS FOR AUGMENTED DECOMPILATION
+	@Test
+	public void Given_ValidBytecode_When_DecompilingAugmented_Expect_AllInstructionsAugmented() throws InvalidReferenceException {
+		// Reason: Decompiler must take into account a given .dex file, if requested.
+		// All references must be valid!
+		
+		final Decompiler decompiler = new SmaliDecompiler();
+		final DecompilationResult result = decompiler.decompile(DEX_FILE_BYTECODE, DEX_FILE, opcodes, false);
+		
+		this.checkResult(result, DEX_FILE_BYTECODE, true);
+		
+		// Check references
+		for (@NonNull final DecompiledInstruction insn : result.getInstructions()) {
+			
+			if (ReferenceInstruction.class.isAssignableFrom(insn.getInstruction().getClass())) {
+				final ReferenceInstruction in = (ReferenceInstruction) insn.getInstruction();
+				assertNotNull(in.getReference());
+				in.getReference().validateReference();
+			} else if (DualReferenceInstruction.class.isAssignableFrom(insn.getInstruction().getClass())) {
+				final DualReferenceInstruction in = (DualReferenceInstruction) insn.getInstruction();
+				assertNotNull(in.getReference());
+				assertNotNull(in.getReference2());
+				in.getReference().validateReference();
+				in.getReference2().validateReference();
+			}
+		}
+	}
+	
+	@Test
+	public void Given_ValidBytecode_When_DecompilingWithNopWrongAugmentation_Expect_AllInstructionsMaybeAugmented() throws IOException {
+		// Reason: Decompiler must resolve as many references as possible given a context (augmentation file).
+		// If resolution does not work, then it may be ignored.
+		// Observe: Nopping unknown instructions should be used here to reflect what is done in practice. I.e.
+		// using different .dex files to see what a gadget does in different contexts.
+		
+		final Decompiler decompiler = new SmaliDecompiler();
+		final DecompilationResult result = decompiler.decompile(DEX_FILE_BYTECODE, DexLoader.get().loadFile("./tests/resources/classes9.dex"), opcodes, true);
+		
+		this.checkResult(result, DEX_FILE_BYTECODE, false);
+		System.out.println(result.getPrettyInstructions());
+	}
 }

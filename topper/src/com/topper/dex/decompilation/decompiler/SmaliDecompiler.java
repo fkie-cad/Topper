@@ -47,6 +47,10 @@ public final class SmaliDecompiler implements Decompiler {
 	public final DecompilationResult decompile(final byte @NonNull [] bytecode,
 			@Nullable final DexBackedDexFile augmentation, @NonNull final Opcodes opcodes,
 			final boolean nopUnknownInstruction) {
+		
+		if ((bytecode.length % 2) != 0) {
+			throw new IllegalArgumentException("bytecode buffer must contain an even amount of bytes.");
+		}
 
 		final DexBuffer buffer = new DexBuffer(bytecode);
 

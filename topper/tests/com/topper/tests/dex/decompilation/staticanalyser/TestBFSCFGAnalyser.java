@@ -11,12 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jf.dexlib2.DexFileFactory;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.Opcodes;
-import org.jf.dexlib2.dexbacked.DexBackedClassDef;
-import org.jf.dexlib2.dexbacked.DexBackedDexFile;
-import org.jf.dexlib2.dexbacked.DexBackedMethod;
 import org.jf.dexlib2.iface.instruction.OffsetInstruction;
 import org.jf.dexlib2.iface.instruction.SwitchPayload;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,63 +28,39 @@ import com.topper.dex.decompilation.staticanalyser.BFSCFGAnalyser;
 import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
-import com.topper.file.DexHelper;
+import com.topper.tests.utility.DexLoader;
 import com.topper.tests.utility.TestConfig;
 
 public class TestBFSCFGAnalyser {
 
 	private static ImmutableList<@NonNull DecompiledInstruction> validInstructions;
 
-	private static final String dexName = "./tests/resources/classes7.dex";
-	private static final String clsNameCorrect = "Lcom/damnvulnerableapp/networking/messages/PlainMessageParser;";
-	private static final String methodNameCorrect = "parseFromBytes";
-
 	@BeforeAll
 	public static final void loadInstructions() throws IOException, IllegalArgumentException, IllegalAccessException,
 			NoSuchFieldException, SecurityException {
 
-		final Opcodes opcodes = Opcodes.forDexVersion(TestConfig.getDefault().getDexVersion());
 		final boolean nopUnknown = TestConfig.getDefault().shouldNopUnknownInstruction();
-		final DexBackedDexFile file = DexFileFactory.loadDexFile(dexName, Opcodes.getDefault());
-		for (@NonNull
-		final DexBackedClassDef cls : file.getClasses()) {
-
-			if (!clsNameCorrect.equals(cls.getType())) {
-				continue;
-			}
-
-			for (@NonNull
-			final DexBackedMethod method : cls.getMethods()) {
-
-				if (!methodNameCorrect.equals(method.getName())) {
-					continue;
-				}
-
-				final int offset = DexHelper.getMethodOffset(method);
-				final int size = DexHelper.getMethodSize(method, offset);
-				
-
-				final Decompiler decompiler = new SmaliDecompiler();
-				final DecompilationResult result = decompiler
-						.decompile(file.getBuffer().readByteRange(offset + 0x10, size), null, opcodes, nopUnknown);
-				validInstructions = result.getInstructions();
-			}
-		}
-
+		final Opcodes opcodes = Opcodes.forDexVersion(TestConfig.getDefault().getDexVersion());
+		final byte[] bytes = DexLoader.get().getMethodBytes();
+		assertNotNull(bytes);
+		
+		final Decompiler decompiler = new SmaliDecompiler();
+		final DecompilationResult result = decompiler.decompile(bytes, null, opcodes, nopUnknown);
+		validInstructions = result.getInstructions();
 		assertNotNull(validInstructions);
 	}
 
 	private static final BFSCFGAnalyser createAnalyser() {
 		return new BFSCFGAnalyser();
 	}
-	
-	private static final int getAmountTargets(@NonNull final CFG cfg, final int target, @NonNull final DecompiledInstruction instruction) {
+
+	private static final int getAmountTargets(@NonNull final CFG cfg, final int target,
+			@NonNull final DecompiledInstruction instruction) {
 		return extractBranchTargets(cfg, target, instruction).size();
 	}
-	
+
 	@NonNull
-	private static final List<Integer> extractBranchTargets(
-			@NonNull final CFG cfg, final int target,
+	private static final List<Integer> extractBranchTargets(@NonNull final CFG cfg, final int target,
 			@NonNull final DecompiledInstruction instruction) {
 
 		List<Integer> branchTargets;
@@ -132,7 +104,7 @@ public class TestBFSCFGAnalyser {
 		} else {
 			branchTargets = new ArrayList<>();
 		}
-		
+
 		// Check whether targets are correct
 		branchTargets.removeIf(t -> cfg.getInstruction(target) == null);
 
@@ -157,7 +129,6 @@ public class TestBFSCFGAnalyser {
 
 			for (final DecompiledInstruction insn : block.getInstructions()) {
 
-				
 				assertEquals(insn, cfg.getInstruction(insn.getOffset()), "" + i);
 				assertEquals(block, cfg.getBlock(insn), insn.toString() + " (i = " + i + ")");
 				i += 1;
@@ -182,9 +153,10 @@ public class TestBFSCFGAnalyser {
 
 			targets = cfg.getGraph().successors(block);
 			instruction = block.getBranchInstruction();
-			
+
 			if (OffsetInstruction.class.isAssignableFrom(instruction.getInstruction().getClass())) {
-				target = instruction.getOffset() + 2 * ((OffsetInstruction)instruction.getInstruction()).getCodeOffset();
+				target = instruction.getOffset()
+						+ 2 * ((OffsetInstruction) instruction.getInstruction()).getCodeOffset();
 				assertEquals(getAmountTargets(cfg, target, instruction), targets.size(), instruction.toString());
 			} else {
 				opcode = instruction.getInstruction().getOpcode();
@@ -197,49 +169,49 @@ public class TestBFSCFGAnalyser {
 			}
 		}
 	}
-	
+
 	@Test
 	public void Given_ValidBytecode_When_OffsetInvalid_Expect_IllegalArgumentException() {
-		
+
 		final CFGAnalyser analyser = createAnalyser();
 		final DecompiledInstruction insn = validInstructions.get(validInstructions.size() - 1);
 		final int oob = insn.getOffset() + insn.getByteCode().length;
 		assertThrowsExactly(IllegalArgumentException.class, () -> analyser.extractCFG(validInstructions, oob));
 	}
-	
+
 	@Test
 	public void Given_ValidBytecode_When_OffsetNegative_Expect_IllegalArgumentException() {
-		
+
 		final CFGAnalyser analyser = createAnalyser();
 		final int oob = -1;
 		assertThrowsExactly(IllegalArgumentException.class, () -> analyser.extractCFG(validInstructions, oob));
 	}
-	
+
 	@Test
 	public void Given_EmptyBytecode_When_EmptyBytecode_Expect_IllegalArgumentException() {
-		
+
 		final CFGAnalyser analyser = createAnalyser();
 		final int oob = -1;
 		assertThrowsExactly(IllegalArgumentException.class, () -> analyser.extractCFG(ImmutableList.of(), oob));
 	}
-	
+
 	@Test
 	public void Given_ValidBytecode_When_AnalyseFromMethodEntry_Expect_ExactlyOneBasicBlockAtEntry() {
-		
+
 		final int entry = 0x0;
 		final CFGAnalyser analyser = createAnalyser();
 		final CFG cfg = analyser.extractCFG(validInstructions, entry);
-		
+
 		assertTrue(cfg.getGraph().nodes().stream().anyMatch(bb -> bb.getOffset() == entry));
 	}
-	
+
 	@Test
 	public void Given_ValidBytecode_When_AnalyseFromMethodMiddle_Expect_ExactlyOneBasicBlockAtEntry() {
-		
+
 		final int entry = validInstructions.get(validInstructions.size() / 2).getOffset();
 		final CFGAnalyser analyser = createAnalyser();
 		final CFG cfg = analyser.extractCFG(validInstructions, entry);
-		
+
 		assertTrue(cfg.getGraph().nodes().stream().anyMatch(bb -> bb.getOffset() == entry));
 	}
 
