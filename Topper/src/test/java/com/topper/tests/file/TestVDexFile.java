@@ -68,7 +68,7 @@ public class TestVDexFile {
 		final Decompiler decompiler = new SmaliDecompiler();
 		final CFGAnalyser analyser = new BFSCFGAnalyser();
 		final VDexFile vdex = new VDexFile(f, getFileContents(f), decompiler, analyser,
-				config.getVdexSkipThreshold());
+				config.getDecompilerConfig().getDexSkipThreshold());
 
 		assertEquals(VALID_VDEX_AMOUNT_DEX_FILES, vdex.getDexFiles().size());
 	}
@@ -135,7 +135,7 @@ public class TestVDexFile {
 		final File f = new File(VALID_VDEX_FILE_PATH);
 		final Decompiler decompiler = new SmaliDecompiler();
 		final CFGAnalyser analyser = new BFSCFGAnalyser();
-		final int threshold = config.getVdexSkipThreshold();
+		final int threshold = config.getDecompilerConfig().getDexSkipThreshold();
 		final VDexFile vdex = new VDexFile(f, getFileContents(f), decompiler, analyser, threshold);
 		final ImmutableList<@NonNull DexMethod> methods = vdex.getMethods();
 

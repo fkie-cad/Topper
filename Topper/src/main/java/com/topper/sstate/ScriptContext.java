@@ -2,6 +2,7 @@ package com.topper.sstate;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.topper.configuration.Config;
 import com.topper.configuration.TopperConfig;
 import com.topper.interactive.IOManager;
 import com.topper.scengine.ScriptParser;
@@ -80,7 +81,7 @@ public final class ScriptContext {
 	
 	/**
 	 * Gets the config assigned to this context.
-	 * @see TopperConfig
+	 * @see Config
 	 * */
 	@NonNull
 	public final TopperConfig getConfig() {

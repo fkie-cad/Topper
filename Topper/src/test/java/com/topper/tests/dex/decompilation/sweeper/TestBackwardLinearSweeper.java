@@ -142,6 +142,7 @@ public class TestBackwardLinearSweeper {
 	@Test
 	public void Given_Sweeper_When_UpperBoundZero_Expect_NopSequence() throws StageException {
 
+		// TODO: Find a work around for testing this case
 		config.setSweeperMaxNumberInstructions(0);
 		final SweeperInfo info = (SweeperInfo) sweeper.execute(createInfo(SHORT_VALID_BYTECODE, 0))
 				.get(SweeperInfo.class.getSimpleName());

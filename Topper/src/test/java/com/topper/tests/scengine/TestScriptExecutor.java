@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.configuration.TopperConfig;
+import com.topper.configuration.Config;
 import com.topper.exceptions.CommandException;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.InvalidStateTransitionException;

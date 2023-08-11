@@ -84,7 +84,7 @@ public class DexFile implements AugmentedFile {
 	 * 
 	 * Loading methods of a .dex file uses an {@link ExecutorService} with a
 	 * configurable number of threads to speed up analysis. Adjust the global
-	 * configuration {@link TopperConfig.setDefaultAmountThreads} using
+	 * configuration {@link Config.setDefaultAmountThreads} using
 	 * {@link ConfigManager} to change the number of threads used (at least 1).
 	 * 
 	 * @param file       File to be augmented.
@@ -140,7 +140,7 @@ public class DexFile implements AugmentedFile {
 	 * 
 	 * Loading methods of a .dex file uses an {@link ExecutorService} with a
 	 * configurable number of threads to speed up analysis. Adjust the global
-	 * configuration {@link TopperConfig.setDefaultAmountThreads} using
+	 * configuration {@link Config.setDefaultAmountThreads} using
 	 * {@link ConfigManager} to change the number of threads used (at least 1).
 	 * 
 	 * @param file       Parsed .dex file used for method enumeration.
@@ -159,10 +159,7 @@ public class DexFile implements AugmentedFile {
 		// in case of large .dex files.
 		final List<Future<List<@NonNull DexMethod>>> results = new ArrayList<>(file.getClasses().size());
 		final ExecutorService pool = Executors
-				.newFixedThreadPool(ConfigManager.getInstance().getConfig().getDefaultAmountThreads());
-		@NonNull
-		final Opcodes opcodes = Opcodes.forDexVersion(ConfigManager.getInstance().getConfig().getDexVersion());
-		final boolean nopUnknown = ConfigManager.getInstance().getConfig().shouldNopUnknownInstruction();
+				.newFixedThreadPool(ConfigManager.get().getGeneralConfig().getDefaultAmountThreads());
 
 		// Iterate over methods
 		for (final DexBackedClassDef cls : file.getClasses()) {
@@ -196,7 +193,7 @@ public class DexFile implements AugmentedFile {
 							if (offset != 0) {
 								size = DexHelper.getMethodSize(method, offset);
 								instructions = decompiler.decompile(
-										file.getBuffer().readByteRange(offset + DexHelper.CODE_ITEM_SIZE, size), file, opcodes, nopUnknown)
+										file.getBuffer().readByteRange(offset + DexHelper.CODE_ITEM_SIZE, size), file, ConfigManager.get().getConfig())
 										.getInstructions();
 
 								// Grab control flow graph

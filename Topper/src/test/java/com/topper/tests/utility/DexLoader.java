@@ -25,7 +25,7 @@ public class DexLoader {
 		this.fileName = "./src/test/java/resources/classes7.dex";
 		this.className = "Lcom/damnvulnerableapp/networking/messages/PlainMessageParser;";
 		this.methodName = "parseFromBytes";
-		final Opcodes opcodes = Opcodes.forDexVersion(TestConfig.getDefault().getDexVersion());
+		final Opcodes opcodes = Opcodes.forDexVersion(TestConfig.getDefault().getDecompilerConfig().getDexVersion());
 		this.file = DexFileFactory.loadDexFile(this.fileName, opcodes);
 	}
 	
@@ -61,7 +61,7 @@ public class DexLoader {
 	}
 	
 	public final DexBackedDexFile loadFile(@NonNull final String fileName) throws IOException {
-		return DexFileFactory.loadDexFile(fileName, Opcodes.forDexVersion(TestConfig.getDefault().getDexVersion()));
+		return DexFileFactory.loadDexFile(fileName, Opcodes.forDexVersion(TestConfig.getDefault().getDecompilerConfig().getDexVersion()));
 	}
 	
 	public final DexBackedDexFile getFile() {

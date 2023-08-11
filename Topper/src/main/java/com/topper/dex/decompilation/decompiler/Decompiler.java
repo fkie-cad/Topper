@@ -2,9 +2,9 @@ package com.topper.dex.decompilation.decompiler;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 
+import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
 /**
@@ -40,5 +40,5 @@ public interface Decompiler {
 	 */
 	@NonNull
 	DecompilationResult decompile(final byte @NonNull [] bytes, @Nullable final DexBackedDexFile augmentation,
-			@NonNull final Opcodes opcodes, final boolean nopUnknownInstruction);
+			@NonNull final TopperConfig config);
 }

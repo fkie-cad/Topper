@@ -7,7 +7,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.configuration.TopperConfig;
+import com.topper.configuration.StaticAnalyserConfig;
 import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompilation.graphs.DFG;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
@@ -31,7 +31,7 @@ public final class DefaultStaticAnalyser<@NonNull T extends Map<@NonNull String,
 		if (sweeper == null) {
 			throw new MissingStageInfoException("DefaultStaticAnalyser requires sweeper info.");
 		}
-		final TopperConfig config = args.getConfig();
+		final StaticAnalyserConfig config = args.getConfig().getStaticAnalyserConfig();
 		
 		@NonNull
 		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = sweeper.getInstructionSequences();

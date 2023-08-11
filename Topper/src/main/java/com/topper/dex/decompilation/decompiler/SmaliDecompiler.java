@@ -14,6 +14,7 @@ import org.jf.dexlib2.dexbacked.util.VariableSizeLookaheadIterator;
 import org.jf.util.ExceptionWithContext;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompiler.instructions.BufferedInstruction;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
@@ -62,8 +63,7 @@ public final class SmaliDecompiler implements Decompiler {
 	@NonNull
 	@Override
 	public final DecompilationResult decompile(final byte @NonNull [] bytecode,
-			@Nullable final DexBackedDexFile augmentation, @NonNull final Opcodes opcodes,
-			final boolean nopUnknownInstruction) throws IndexOutOfBoundsException, ExceptionWithContext {
+			@Nullable final DexBackedDexFile augmentation, @NonNull final TopperConfig config) throws IndexOutOfBoundsException, ExceptionWithContext {
 
 		if ((bytecode.length % 2) != 0) {
 			throw new IllegalArgumentException("bytecode buffer must contain an even amount of bytes.");
@@ -75,8 +75,8 @@ public final class SmaliDecompiler implements Decompiler {
 		int size;
 		final List<@NonNull DecompiledInstruction> decompiledInstructions = new LinkedList<DecompiledInstruction>();
 		byte[] buf;
-		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer, augmentation, opcodes,
-				nopUnknownInstruction)) {
+		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer, augmentation, config.getDecompilerConfig().getOpcodes(),
+				config.getDecompilerConfig().shouldNopUnknownInstruction())) {
 
 			size = instruction.getCodeUnits() * 2;
 			buf = new byte[size];

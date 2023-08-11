@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<configuration>
+	<general>
+		<defaultAmountThreads>1</defaultAmountThreads>
+	</general>
+	<staticAnalyser>
+		<skipCFG>false</skipCFG>
+		<skipDFG>false</skipDFG>
+	</staticAnalyser>
+	<sweeper>
+		<maxNumberInstructions>10</maxNumberInstructions>
+		<pivotOpcode>throw</pivotOpcode>
+	</sweeper>
+	<decompiler>
+		<dexSkipThreshold>500000</dexSkipThreshold>
+		<dexVersion>29</dexVersion>
+		<shouldNopUnknownInstruction>false</shouldNopUnknownInstruction>
+	</decompiler>
+</configuration>

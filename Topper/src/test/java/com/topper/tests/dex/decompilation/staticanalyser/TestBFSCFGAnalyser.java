@@ -12,7 +12,6 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcode;
-import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.iface.instruction.OffsetInstruction;
 import org.jf.dexlib2.iface.instruction.SwitchPayload;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,14 +37,12 @@ public class TestBFSCFGAnalyser {
 	@BeforeAll
 	public static final void loadInstructions() throws IOException, IllegalArgumentException, IllegalAccessException,
 			NoSuchFieldException, SecurityException {
-
-		final boolean nopUnknown = TestConfig.getDefault().shouldNopUnknownInstruction();
-		final Opcodes opcodes = Opcodes.forDexVersion(TestConfig.getDefault().getDexVersion());
+		
 		final byte[] bytes = DexLoader.get().getMethodBytes();
 		assertNotNull(bytes);
 		
 		final Decompiler decompiler = new SmaliDecompiler();
-		final DecompilationResult result = decompiler.decompile(bytes, null, opcodes, nopUnknown);
+		final DecompilationResult result = decompiler.decompile(bytes, null, TestConfig.getDefault());
 		validInstructions = result.getInstructions();
 		assertNotNull(validInstructions);
 	}

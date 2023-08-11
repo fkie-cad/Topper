@@ -46,7 +46,7 @@ public final class InteractiveTopper {
 			final ScriptParser parser = new ScriptParser();
 			
 			// Create context and executor
-			final ScriptContext context = new ScriptContext(ConfigManager.getInstance().getConfig(), io, parser);
+			final ScriptContext context = new ScriptContext(ConfigManager.get().getConfig(), io, parser);
 			final ScriptExecutor executor = new ScriptExecutor();
 			
 			// Register commands with parser

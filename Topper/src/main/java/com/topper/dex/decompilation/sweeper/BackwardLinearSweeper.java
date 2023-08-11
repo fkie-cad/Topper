@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Format;
-import org.jf.dexlib2.Opcodes;
 import org.jf.util.ExceptionWithContext;
 
 import com.google.common.collect.ImmutableList;
@@ -72,7 +71,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		final TopperConfig config = args.getConfig();
 
 		// Perform bound checks on buffer and offset.
-		final int currentSize = config.getPivotInstruction().format.size;
+		final int currentSize = config.getSweeperConfig().getPivotOpcode().format.size;
 		if (offset + currentSize > buffer.length) {
 			throw new SweeperException("buffer is too small to hold pivot instruction at " + offset + ".");
 		} else if (offset < 0) {
@@ -80,22 +79,21 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		}
 
 		final Decompiler decompiler = this.getDecompiler();
-		final int maxSizes = config.getSweeperMaxNumberInstructions();
+		final int maxSizes = config.getSweeperConfig().getSweeperMaxNumberInstructions();
 		final List<Integer> checkedGadgetSizes = new ArrayList<Integer>(maxSizes);
 		checkedGadgetSizes.add(currentSize);
 		final int depth = 1;
 
 		// Try to decompile pivot instruction pointed to by offset.
 		try {
-			final DecompilationResult result = decompiler.decompile(
-					Arrays.copyOfRange(buffer, offset, offset + currentSize), null,
-					Opcodes.forDexVersion(config.getDexVersion()), config.shouldNopUnknownInstruction());
+			final DecompilationResult result = decompiler
+					.decompile(Arrays.copyOfRange(buffer, offset, offset + currentSize), null, config);
 			final ImmutableList<DecompiledInstruction> instructions = result.getInstructions();
 			final DecompiledInstruction instruction = instructions.get(0);
 
 			// Thoroughly check pivot instruction, because its format is known in advance.
 			if (instructions.size() != 1 || instruction.getByteCode().length != currentSize
-					|| !instruction.getInstruction().getOpcode().equals(config.getPivotInstruction())) {
+					|| !instruction.getInstruction().getOpcode().equals(config.getSweeperConfig().getPivotOpcode())) {
 				throw new SweeperException("Pivot instruction (" + instruction.getInstructionString() + " at offset "
 						+ offset + " is invalid.");
 			}
@@ -180,7 +178,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		}
 
 		// Check if maximum number of instructions is reached.
-		if (depth >= config.getSweeperMaxNumberInstructions()) {
+		if (depth >= config.getSweeperConfig().getSweeperMaxNumberInstructions()) {
 			return sequences.build();
 		}
 
@@ -196,7 +194,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		// instructions as the maximum allowed instructions minus
 		// the current depth.
 		final ArrayList<DecompiledInstruction> path = new ArrayList<DecompiledInstruction>(
-				config.getSweeperMaxNumberInstructions() - (depth - 1));
+				config.getSweeperConfig().getSweeperMaxNumberInstructions() - (depth - 1));
 
 		int instructionSize;
 		int totalSize;
@@ -219,8 +217,9 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 			try {
 
 				// Decompile instruction.
-				instructions = decompiler.decompile(Arrays.copyOfRange(buffer, offset - instructionSize, offset), null,
-						Opcodes.forDexVersion(config.getDexVersion()), config.shouldNopUnknownInstruction()).getInstructions();
+				instructions = decompiler
+						.decompile(Arrays.copyOfRange(buffer, offset - instructionSize, offset), null, config)
+						.getInstructions();
 
 				// Check instructions. If invalid, then this instruction can be ignored/is not
 				// valid.

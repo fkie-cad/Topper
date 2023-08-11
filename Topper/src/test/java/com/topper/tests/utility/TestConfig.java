@@ -1,18 +1,25 @@
 package com.topper.tests.utility;
 
-import org.jf.dexlib2.Opcode;
+import java.nio.file.Paths;
 
+import com.topper.configuration.ConfigManager;
 import com.topper.configuration.TopperConfig;
 import com.topper.exceptions.InvalidConfigException;
 
 public class TestConfig {
 
+	private static final String CONFIG_PATH = "./src/test/java/resources/test_config.xml";
+	private static boolean loaded = false;
+	
 	public static TopperConfig getDefault() {
 		try {
-			return new TopperConfig(10, Opcode.THROW, 8, 500000, 38, false, false, false);
+			if (!loaded) {
+				ConfigManager.get().loadConfig(Paths.get(CONFIG_PATH));
+				loaded = true;
+			}
+			return ConfigManager.get().getConfig();
 		} catch (InvalidConfigException ignored) {
 		}
 		return null;
 	}
-
 }
