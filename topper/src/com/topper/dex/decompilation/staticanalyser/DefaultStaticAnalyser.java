@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompilation.graphs.DFG;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
@@ -14,15 +15,23 @@ import com.topper.dex.decompilation.pipeline.StageInfo;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.exceptions.MissingStageInfoException;
 
 public final class DefaultStaticAnalyser<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> extends StaticAnalyser<T> {
 	
 	@Override
 	@NonNull
-	public final T execute(@NonNull T results) {
+	public final T execute(@NonNull final T results) throws MissingStageInfoException {
 		
 		final PipelineArgs args = (PipelineArgs) results.get(PipelineArgs.class.getSimpleName());
+		if (args == null) {
+			throw new MissingStageInfoException("DefaultStaticAnalyser requires pipeline arguments.");
+		}
 		final SweeperInfo sweeper = (SweeperInfo) results.get(SweeperInfo.class.getSimpleName());
+		if (sweeper == null) {
+			throw new MissingStageInfoException("DefaultStaticAnalyser requires sweeper info.");
+		}
+		final TopperConfig config = args.getConfig();
 		
 		@NonNull
 		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = sweeper.getInstructionSequences();
@@ -30,13 +39,21 @@ public final class DefaultStaticAnalyser<@NonNull T extends Map<@NonNull String,
 		
 		// Try out all instruction sequences from sweeping stage.
 		final List<@NonNull Gadget> gadgets = new LinkedList<@NonNull Gadget>();
+		CFG cfg;
+		DFG dfg;
 		for (final ImmutableList<@NonNull DecompiledInstruction> instructions : sequences) {
 		
 			// Extract CFG
-			final CFG cfg = this.getCFGAnalyser().extractCFG(instructions, entry);
+			cfg = null;
+			if (!config.shouldSkipCFG()) {
+				cfg = this.getCFGAnalyser().extractCFG(instructions, entry);
+			}
 			
 			// Extract DFG. Maybe this requires CFG as well.
-			final DFG dfg = this.getDFGAnalyser().extractDFG(instructions);
+			dfg = null;
+			if (!config.shouldSkipDFG()) {
+				dfg = this.getDFGAnalyser().extractDFG(instructions);
+			}
 			
 			gadgets.add(new Gadget(instructions, cfg, dfg));
 		}

@@ -45,10 +45,20 @@ public final class TopperConfig {
 	 * to continue decompilation.
 	 * */
 	private boolean nopUnknownInstruction;
+	
+	/**
+	 * Whether or not to skip Control Flow Graph extraction in static analysis.
+	 * */
+	private boolean skipCFG;
+	
+	/**
+	 * Whether or not to skip Data Flow Graph extraction in static analysis.
+	 * */
+	private boolean skipDFG;
 
 	public TopperConfig(final int sweeperMaxNumberInstructions, @NonNull final Opcode pivotOpcode,
 			final int defaultAmountThreads, final int vdexSkipThreshold, final int dexVersion,
-			final boolean nopUnknownInstruction) throws InvalidConfigException {
+			final boolean nopUnknownInstruction, final boolean skipCFG, final boolean skipDFG) throws InvalidConfigException {
 
 		if (sweeperMaxNumberInstructions <= 0) {
 			throw new InvalidConfigException("sweeperMaxNumberInstructions must be >= 1.");
@@ -69,14 +79,16 @@ public final class TopperConfig {
 		this.vdexSkipThreshold = vdexSkipThreshold;
 		this.dexVersion = dexVersion;
 		this.nopUnknownInstruction = nopUnknownInstruction;
+		this.skipCFG = skipCFG;
+		this.skipDFG = skipDFG;
 	}
-	
+
 	/**
 	 * Gets current upper bound on the number of instructions to obtain from a
 	 * sweeper.
 	 */
 	public final int getSweeperMaxNumberInstructions() {
-		return sweeperMaxNumberInstructions;
+		return this.sweeperMaxNumberInstructions;
 	}
 
 	/**
@@ -173,5 +185,32 @@ public final class TopperConfig {
 	public final void setNopUnknownInstruction(final boolean nopUnknownInstruction) {
 		this.nopUnknownInstruction = nopUnknownInstruction;
 	}
+	
+	/**
+	 * Determine whether or not to skip CFG extraction in static analysis.
+	 * */
+	public final boolean shouldSkipCFG() {
+		return this.skipCFG;
+	}
 
+	/**
+	 * Sets whether or not to skip CFG extraction in static analysis.
+	 * */
+	public final void setSkipCFG(final boolean skipCFG) {
+		this.skipCFG = skipCFG;
+	}
+
+	/**
+	 * Determine whether or not to skip DFG extraction in static analysis.
+	 * */
+	public final boolean shouldSkipDFG() {
+		return this.skipDFG;
+	}
+
+	/**
+	 * Sets whether or not to skip DFG extraction in static analysis.
+	 * */
+	public final void setSkipDFG(final boolean skipDFG) {
+		this.skipDFG = skipDFG;
+	}
 }

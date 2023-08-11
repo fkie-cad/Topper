@@ -34,7 +34,7 @@ public final class ConfigManager {
 	private final TopperConfig loadConfig() {
 		// TODO: Load from file or something
 		try {
-			return new TopperConfig(10, Opcode.THROW, 8, 500000, 38, false);
+			return new TopperConfig(10, Opcode.THROW, 8, 500000, 38, false, false, false);
 		} catch (InvalidConfigException e) {
 			System.exit(0);
 			throw new IllegalArgumentException("whatever");

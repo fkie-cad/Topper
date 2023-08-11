@@ -9,7 +9,7 @@ public class TestConfig {
 
 	public static TopperConfig getDefault() {
 		try {
-			return new TopperConfig(10, Opcode.THROW, 8, 500000, 38, false);
+			return new TopperConfig(10, Opcode.THROW, 8, 500000, 38, false, false, false);
 		} catch (InvalidConfigException ignored) {
 		}
 		return null;
