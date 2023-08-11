@@ -21,20 +21,6 @@ public abstract class StaticAnalyser<@NonNull T extends Map<@NonNull String, @No
 		this.dfgAnalyser = new DefaultDFGAnalyser();
 	}
 	
-//	@NonNull
-//	public final Gadget analyse(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions) {
-//		
-//		// Extract CFG
-//		final CFG cfg = this.cfgAnalyser.extractCFG(instructions);
-//		
-//		// Extract DFG. Maybe this requires CFG as well.
-//		final DFG dfg = this.dfgAnalyser.extractDFG(instructions);
-//		
-//		return new Gadget(instructions, cfg, dfg);
-//	}
-	
-	// @NonNull public abstract Gadget analyse(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions, final int entry);
-	
 	@NonNull
 	public final CFGAnalyser getCFGAnalyser() {
 		return this.cfgAnalyser;
