@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.016" tests="12" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.024" tests="12" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -12,7 +12,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/home/kuehnemann/eclipse/eclipse/plugins/org.eclipse.justj.openjdk.hotspot.jre.full.linux.x86_64_17.0.5.v20221102-0933/jre/lib"/>
-    <property name="sun.java.command" value="/home/kuehnemann/workspace/github/Topper/Topper/Topper/target/surefire/surefirebooter12002482595340256638.jar /home/kuehnemann/workspace/github/Topper/Topper/Topper/target/surefire 2023-08-11T12-04-36_447-jvmRun1 surefire3523787042789954382tmp surefire_011185767456672515368tmp"/>
+    <property name="sun.java.command" value="/home/kuehnemann/workspace/github/Topper/Topper/Topper/target/surefire/surefirebooter11097227590056037470.jar /home/kuehnemann/workspace/github/Topper/Topper/Topper/target/surefire 2023-08-11T12-18-56_451-jvmRun1 surefire2314531418021901881tmp surefire_05856562528905472014tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/home/kuehnemann/workspace/github/Topper/Topper/Topper/target/test-classes:/home/kuehnemann/workspace/github/Topper/Topper/Topper/target/classes:/home/kuehnemann/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.0/junit-jupiter-engine-5.10.0.jar:/home/kuehnemann/.m2/repository/org/junit/platform/junit-platform-engine/1.10.0/junit-platform-engine-1.10.0.jar:/home/kuehnemann/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/kuehnemann/.m2/repository/org/junit/platform/junit-platform-commons/1.10.0/junit-platform-commons-1.10.0.jar:/home/kuehnemann/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.0/junit-jupiter-api-5.10.0.jar:/home/kuehnemann/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/kuehnemann/.m2/repository/org/smali/dexlib2/2.5.2/dexlib2-2.5.2.jar:/home/kuehnemann/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar:/home/kuehnemann/.m2/repository/org/eclipse/jdt/org.eclipse.jdt.annotation/2.2.700/org.eclipse.jdt.annotation-2.2.700.jar:/home/kuehnemann/.m2/repository/com/google/guava/guava/32.1.2-jre/guava-32.1.2-jre.jar:/home/kuehnemann/.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar:/home/kuehnemann/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/home/kuehnemann/.m2/repository/org/checkerframework/checker-qual/3.33.0/checker-qual-3.33.0.jar:/home/kuehnemann/.m2/repository/com/google/errorprone/error_prone_annotations/2.18.0/error_prone_annotations-2.18.0.jar:/home/kuehnemann/.m2/repository/com/google/j2objc/j2objc-annotations/2.8/j2objc-annotations-2.8.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -28,7 +28,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="/home/kuehnemann/workspace/github/Topper/Topper/Topper/target/surefire/surefirebooter12002482595340256638.jar"/>
+    <property name="surefire.real.class.path" value="/home/kuehnemann/workspace/github/Topper/Topper/Topper/target/surefire/surefirebooter11097227590056037470.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="17.0.5+8"/>
     <property name="user.name" value="kuehnemann"/>
@@ -55,14 +55,14 @@
   </properties>
   <testcase name="Given_OddAmountBytes_When_Decompiling_Expect_IllegalArgumentException" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0"/>
   <testcase name="Given_ValidBytecode_When_DecompilingAugmented_Expect_AllInstructionsAugmented" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.003"/>
-  <testcase name="Given_ValidBytecode_When_Decompiling_Expect_AllInstructions" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.001"/>
+  <testcase name="Given_ValidBytecode_When_Decompiling_Expect_AllInstructions" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.002"/>
   <testcase name="Given_InvalidInstruction_When_Decompiling_Expect_ExceptionWithContext" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.001"/>
   <testcase name="Given_EmptyBytecode_When_Decompiling_Expect_EmptyInstructionList" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0"/>
   <testcase name="Given_OOBInstruction_When_Decompiling_Expect_ArrayIndexOutOfBoundsException" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0"/>
-  <testcase name="Given_InvalidOpcode_When_DecompilingWithNopUnknown_Expect_AllInstructions" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.001"/>
-  <testcase name="Given_ValidBytecode_When_DecompilingWrongAugmentation_Expect_AllInstructionsMaybeAugmented" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.002"/>
+  <testcase name="Given_InvalidOpcode_When_DecompilingWithNopUnknown_Expect_AllInstructions" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0"/>
+  <testcase name="Given_ValidBytecode_When_DecompilingWrongAugmentation_Expect_AllInstructionsMaybeAugmented" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.007"/>
   <testcase name="Given_InvalidStartValidBytecode_When_DecompilingWithNopUnknown_Expect_AllInstructions" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0"/>
-  <testcase name="Given_ValidBytecode_When_DecompilingWithNopWrongAugmentation_Expect_AllInstructionsMaybeAugmented" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.003"/>
+  <testcase name="Given_ValidBytecode_When_DecompilingWithNopWrongAugmentation_Expect_AllInstructionsMaybeAugmented" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.002"/>
   <testcase name="Given_ValidBytecodeInvalidEnd_When_Decompiling_Expect_ArrayIndexOutOfBoundsException" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.001"/>
   <testcase name="Given_InvalidOpcode_When_Decompiling_Expect_ExceptionWithContext" classname="com.topper.tests.dex.decompilation.decompiler.TestSmaliDecompiler" time="0.001"/>
 </testsuite>

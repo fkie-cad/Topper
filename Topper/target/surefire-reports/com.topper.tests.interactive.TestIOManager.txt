@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.topper.tests.interactive.TestIOManager
 -------------------------------------------------------------------------------
-Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 19.042 s - in com.topper.tests.interactive.TestIOManager
+Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 19.04 s - in com.topper.tests.interactive.TestIOManager
