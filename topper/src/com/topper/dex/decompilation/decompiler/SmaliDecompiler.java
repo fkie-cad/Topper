@@ -47,7 +47,7 @@ public final class SmaliDecompiler implements Decompiler {
 	public final DecompilationResult decompile(final byte @NonNull [] bytecode,
 			@Nullable final DexBackedDexFile augmentation, @NonNull final Opcodes opcodes,
 			final boolean nopUnknownInstruction) {
-		
+
 		if ((bytecode.length % 2) != 0) {
 			throw new IllegalArgumentException("bytecode buffer must contain an even amount of bytes.");
 		}
@@ -84,25 +84,8 @@ public final class SmaliDecompiler implements Decompiler {
 			final boolean nopUnknownInstruction) {
 		// instructionsSize is the number of 16-bit code units in the instruction list,
 		// not the number of instructions
-		int instructionsSize = buffer.getBuf().length / 2; // dexFile.readSmallUint(codeOffset +
-															// CodeItem.INSTRUCTION_COUNT_OFFSET);
-
 		final int instructionsStartOffset = 0; // codeOffset + CodeItem.INSTRUCTION_START_OFFSET;
-		final int endOffset = instructionsStartOffset + (instructionsSize * 2);
-
-		// Construct dex file from buffer, if possible. This prevents running the
-		// constructor of DexBackedDexFile for each instruction.
-		DexBackedDexFile dexFile = file;
-		if (dexFile == null) {
-
-			try {
-//				dexFile = new DexBackedDexFile(Opcodes.getDefault(), buffer);
-				dexFile = new DexBackedDexFile(Opcodes.forArtVersion(39), buffer);
-			} catch (final Exception e) {
-				dexFile = null;
-			}
-		}
-		final DexBackedDexFile augmentation = dexFile;
+		final int endOffset = instructionsStartOffset + buffer.getBuf().length;
 
 		return new Iterable<BufferedInstruction>() {
 			@Override
@@ -114,8 +97,8 @@ public final class SmaliDecompiler implements Decompiler {
 							return endOfData();
 						}
 
-						final BufferedInstruction instruction = BufferedInstruction.readFrom(reader, augmentation,
-								opcodes, nopUnknownInstruction);
+						final BufferedInstruction instruction = BufferedInstruction.readFrom(reader, file, opcodes,
+								nopUnknownInstruction);
 
 						// Does the instruction extend past the end of the method?
 						final int offset = reader.getOffset();

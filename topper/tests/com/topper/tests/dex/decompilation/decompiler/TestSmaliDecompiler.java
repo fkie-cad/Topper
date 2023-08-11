@@ -234,6 +234,16 @@ public class TestSmaliDecompiler {
 		final DecompilationResult result = decompiler.decompile(DEX_FILE_BYTECODE, DexLoader.get().loadFile("./tests/resources/classes9.dex"), opcodes, true);
 		
 		this.checkResult(result, DEX_FILE_BYTECODE, false);
-		System.out.println(result.getPrettyInstructions());
+	}
+	
+	@Test
+	public void Given_ValidBytecode_When_DecompilingWrongAugmentation_Expect_AllInstructionsMaybeAugmented() throws IOException {
+		// Reason: Decompiler must resolve as many references as possible given a context (augmentation file).
+		// If resolution does not work, then it may be ignored. No nopping for completeness sake.
+		
+		final Decompiler decompiler = new SmaliDecompiler();
+		final DecompilationResult result = decompiler.decompile(DEX_FILE_BYTECODE, DexLoader.get().loadFile("./tests/resources/classes9.dex"), opcodes, false);
+		
+		this.checkResult(result, DEX_FILE_BYTECODE, true);
 	}
 }
