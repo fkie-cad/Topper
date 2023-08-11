@@ -81,6 +81,9 @@ public class TestSmaliDecompiler {
 
 	private void checkResult(@NonNull final DecompilationResult result, final byte @NonNull [] bytecode,
 			final boolean checkOpcode) {
+		
+		// Compare buffers
+		assertArrayEquals(bytecode, result.getBuffer().getBuf());
 
 		DecompiledInstruction insn;
 		DecompiledInstruction next;

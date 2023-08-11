@@ -11,9 +11,10 @@ import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.util.ExceptionWithContext;
 
 /**
- * Buffered version of an <code>Instruction</code>. It is "buffered", because
- * all subclasses store their bytecode into fields. This aims to support storing
- * instructions to file.
+ * Buffered version of an {@link Instruction}. It is "buffered", because all
+ * subclasses store their bytecode into fields. This aims to support storing
+ * instructions to file. Also it removes the need to keep alive the buffer an
+ * instruction is coming from.
  * 
  * Its implementation is based on <a href=
  * "https://cs.android.com/android/platform/superproject/+/master:external/google-smali/dexlib2/src/main/java/com/android/tools/smali/dexlib2/dexbacked/instruction/DexBackedInstruction.java;l=42;drc=3713aeddd5faa8ba395999d1ee32c3fb3e68e3f4">AOSP's
@@ -65,24 +66,38 @@ public class BufferedInstruction implements Instruction {
 	}
 
 	/**
-	 * Reads from <code>reader</code> the next <code>BufferedInstruction</code>.
+	 * Reads from {@code reader} the next {@link BufferedInstruction}.
 	 * 
-	 * Optionally, <code>file</code> is set to allow for reference resolution in
-	 * case the underlying buffer represents an entire .dex file.
+	 * Optionally, {@code file} is set to allow for reference resolution in case the
+	 * underlying buffer is to be interpreted in a different context.
 	 * 
 	 * Its implementation is based on <a href=
 	 * "https://cs.android.com/android/platform/superproject/+/master:external/google-smali/dexlib2/src/main/java/com/android/tools/smali/dexlib2/dexbacked/instruction/DexBackedInstruction.java;l=59;drc=3713aeddd5faa8ba395999d1ee32c3fb3e68e3f4">AOSP's
 	 * dexlib2</a>.
 	 * 
-	 * @param reader Reader, from which to fetch the next instruction.
-	 * @param file   If not <code>null</code>, it will represent the underlying
-	 *               buffer of <code>reader</code> as a dex file.
-	 * @return The next instruction in <code>reader</code>.
+	 * @param reader                Reader, from which to fetch the next
+	 *                              instruction.
+	 * @param file                  If not {@code null}, it will represent the
+	 *                              underlying buffer of {@code reader} as a dex
+	 *                              file.
+	 * @param opcodes               Set of opcodes to use for decompilation. This is
+	 *                              application-specific.
+	 * @param nopUnknownInstruction Indicates how unknown instruction must be
+	 *                              handled. Either an unknown instruction is nop`ed
+	 *                              out ({@code true}), or an exception is thrown
+	 *                              and all decompilation results discarded
+	 *                              ({@code false}).
+	 * @return The next instruction in {@code reader}.
+	 * @throws IndexOutOfBoundsException If an instruction requires an out - of -
+	 *                                   bounds read.
+	 * @throws ExceptionWithContext      If an unknown instruction is met, or an
+	 *                                   internal logic error occurs like too large
+	 *                                   integer values for reference indices.
 	 */
 	@NonNull
 	public static BufferedInstruction readFrom(@NonNull final DexReader<@NonNull ?> reader,
-			@Nullable final DexBackedDexFile file, @NonNull final Opcodes opcodes,
-			final boolean nopUnknownInstruction) {
+			@Nullable final DexBackedDexFile file, @NonNull final Opcodes opcodes, final boolean nopUnknownInstruction)
+			throws IndexOutOfBoundsException, ExceptionWithContext {
 
 		int opcodeValue = reader.peekUbyte();
 
@@ -99,10 +114,10 @@ public class BufferedInstruction implements Instruction {
 	}
 
 	/**
-	 * Constructs an instruction from a fixed position in <code>buffer</code>.
+	 * Constructs an instruction from a fixed position in {@code buffer}.
 	 * 
-	 * Optionally, <code>file</code> is an alternative, but parallel, view on
-	 * <code>buffer</code> that enables reference resolution.
+	 * Optionally, {@code file} is an alternative, but parallel, view on
+	 * {@code buffer} that enables reference resolution.
 	 * 
 	 * Its implementation is based on <a href=
 	 * "https://cs.android.com/android/platform/superproject/+/master:external/google-smali/dexlib2/src/main/java/com/android/tools/smali/dexlib2/dexbacked/instruction/DexBackedInstruction.java;l=75;drc=3713aeddd5faa8ba395999d1ee32c3fb3e68e3f4">AOSP's
@@ -112,14 +127,24 @@ public class BufferedInstruction implements Instruction {
 	 *                               instruction.
 	 * @param opcode                 Opcode of the next instruction. This e.g.
 	 *                               determines the format.
-	 * @param instructionStartOffset Offset into <code>buffer</code>, from which to
+	 * @param instructionStartOffset Offset into {@code buffer}, from which to
 	 *                               start fetching the next instruction.
-	 * @param file                   Alternative view on <code>buffer</code> for
-	 *                               reference resolution. Can be <code>null</code>.
-	 * @return Next instruction in <code>buffer</code> at offset
-	 *         <code>instructionStartOffset</code>. The instruction may be annotated
-	 *         with additional reference information, if <code>file</code> is not
-	 *         <code>null</code>.
+	 * @param file                   Alternative view on {@code buffer} for
+	 *                               reference resolution. Can be {@code null}.
+	 * @param nopUnknownInstruction Indicates how unknown instruction must be
+	 *                              handled. Either an unknown instruction is nop`ed
+	 *                              out ({@code true}), or an exception is thrown
+	 *                              and all decompilation results discarded
+	 *                              ({@code false}).
+	 * @return Next instruction in {@code buffer} at offset
+	 *         {@code instructionStartOffset}. The instruction may be annotated
+	 *         with additional reference information, if {@code file} is not
+	 *         {@code null}.
+	 * @throws IndexOutOfBoundsException If an instruction requires an out - of -
+	 *                                   bounds read.
+	 * @throws ExceptionWithContext      If an unknown instruction is met, or an
+	 *                                   internal logic error occurs like too large
+	 *                                   integer values for reference indices.
 	 */
 	@NonNull
 	private static BufferedInstruction buildInstruction(@NonNull final DexBuffer buffer, @Nullable final Opcode opcode,
