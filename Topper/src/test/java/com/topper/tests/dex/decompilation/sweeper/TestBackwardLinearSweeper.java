@@ -9,6 +9,7 @@ import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcode;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,6 +21,7 @@ import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
 import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.StageException;
 import com.topper.exceptions.SweeperException;
 import com.topper.tests.utility.TestConfig;
@@ -44,13 +46,18 @@ public class TestBackwardLinearSweeper {
 	// Sweeper is stateless
 	private static final Sweeper<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> sweeper = new BackwardLinearSweeper<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>();
 
-	private static TopperConfig config = TestConfig.getDefault();
+	private static TopperConfig config;
+	
+	@BeforeAll
+	public static void init() throws InvalidConfigException {
+		config = TestConfig.getDefault();
+	}
 	
 	@BeforeEach
-	public final void initClass() {
+	public final void initClass() throws InvalidConfigException {
 		
-		config.setSweeperMaxNumberInstructions(VALID_BYTECODE_NUMBER_INSTRUCTIONS_IN_GADGET);
-		config.setPivotInstruction(Opcode.THROW);
+		config.getSweeperConfig().setMaxNumberInstructions(VALID_BYTECODE_NUMBER_INSTRUCTIONS_IN_GADGET);
+		config.getSweeperConfig().setPivotOpcode("THROW");
 	}
 
 	@NonNull
@@ -139,27 +146,28 @@ public class TestBackwardLinearSweeper {
 		assertThrowsExactly(SweeperException.class, () -> sweeper.execute(createInfo(incompleteThrow, 0)));
 	}
 
+	// NOTE: Cannot be tested anymore, because config rejects non-positive value for maxNumberInstructions
+//	@Test
+//	public void Given_Sweeper_When_UpperBoundZero_Expect_NopSequence() throws StageException, InvalidConfigException {
+//
+//		// TODO: Find a work around for testing this case
+//		config.getSweeperConfig().setMaxNumberInstructions(0);
+//		final SweeperInfo info = (SweeperInfo) sweeper.execute(createInfo(SHORT_VALID_BYTECODE, 0))
+//				.get(SweeperInfo.class.getSimpleName());
+//		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = info
+//				.getInstructionSequences();
+//
+//		assertEquals(1, sequences.size());
+//		assertEquals(1, sequences.get(0).size());
+//
+//		final DecompiledInstruction insn = sequences.get(0).get(0);
+//		assertEquals(Opcode.THROW, insn.getInstruction().getOpcode());
+//	}
+
 	@Test
-	public void Given_Sweeper_When_UpperBoundZero_Expect_NopSequence() throws StageException {
+	public void Given_Sweeper_When_CannotCheckAllSizes_Expect_AllSequences() throws StageException, InvalidConfigException {
 
-		// TODO: Find a work around for testing this case
-		config.setSweeperMaxNumberInstructions(0);
-		final SweeperInfo info = (SweeperInfo) sweeper.execute(createInfo(SHORT_VALID_BYTECODE, 0))
-				.get(SweeperInfo.class.getSimpleName());
-		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = info
-				.getInstructionSequences();
-
-		assertEquals(1, sequences.size());
-		assertEquals(1, sequences.get(0).size());
-
-		final DecompiledInstruction insn = sequences.get(0).get(0);
-		assertEquals(Opcode.THROW, insn.getInstruction().getOpcode());
-	}
-
-	@Test
-	public void Given_Sweeper_When_CannotCheckAllSizes_Expect_AllSequences() throws StageException {
-
-		config.setSweeperMaxNumberInstructions(MEDIUM_VALID_BYTECODE_AMOUNT_INSTRUCTIONS + 1);
+		config.getSweeperConfig().setMaxNumberInstructions(MEDIUM_VALID_BYTECODE_AMOUNT_INSTRUCTIONS + 1);
 		final SweeperInfo info = (SweeperInfo) sweeper
 				.execute(createInfo(MEDIUM_VALID_BYTECODE, MEDIUM_VALID_BYTECODE_THROW_OFFSET))
 				.get(SweeperInfo.class.getSimpleName());

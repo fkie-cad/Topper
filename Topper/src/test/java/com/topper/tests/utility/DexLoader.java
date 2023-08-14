@@ -9,6 +9,7 @@ import org.jf.dexlib2.dexbacked.DexBackedClassDef;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBackedMethod;
 
+import com.topper.exceptions.InvalidConfigException;
 import com.topper.file.DexHelper;
 
 public class DexLoader {
@@ -21,7 +22,7 @@ public class DexLoader {
 	
 	private DexBackedDexFile file;
 	
-	private DexLoader() throws IOException {
+	private DexLoader() throws IOException, InvalidConfigException {
 		this.fileName = "./src/test/java/resources/classes7.dex";
 		this.className = "Lcom/damnvulnerableapp/networking/messages/PlainMessageParser;";
 		this.methodName = "parseFromBytes";
@@ -30,7 +31,7 @@ public class DexLoader {
 	}
 	
 	@NonNull
-	public static final DexLoader get() throws IOException {
+	public static final DexLoader get() throws IOException, InvalidConfigException {
 		if (DexLoader.instance == null) {
 			DexLoader.instance = new DexLoader();
 		}
@@ -60,7 +61,7 @@ public class DexLoader {
 		return null;
 	}
 	
-	public final DexBackedDexFile loadFile(@NonNull final String fileName) throws IOException {
+	public final DexBackedDexFile loadFile(@NonNull final String fileName) throws IOException, InvalidConfigException {
 		return DexFileFactory.loadDexFile(fileName, Opcodes.forDexVersion(TestConfig.getDefault().getDecompilerConfig().getDexVersion()));
 	}
 	

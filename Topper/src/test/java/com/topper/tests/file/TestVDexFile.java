@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.AccessFlags;
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -24,6 +25,7 @@ import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.decompilation.staticanalyser.BFSCFGAnalyser;
 import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
+import com.topper.exceptions.InvalidConfigException;
 import com.topper.file.DexFile;
 import com.topper.file.DexMethod;
 import com.topper.file.VDexFile;
@@ -37,7 +39,12 @@ public class TestVDexFile {
 
 	private static final int VALID_VDEX_AMOUNT_DEX_FILES = 11;
 	
-	private static final TopperConfig config = TestConfig.getDefault();
+	private static TopperConfig config;
+	
+	@BeforeAll
+	public static void init() throws InvalidConfigException {
+		config = TestConfig.getDefault();
+	}
 
 	private static final byte @NonNull [] getFileContents(@NonNull final File file) throws IOException {
 		final FileInputStream input = new FileInputStream(file);

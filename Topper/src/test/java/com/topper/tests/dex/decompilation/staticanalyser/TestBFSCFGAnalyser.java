@@ -27,6 +27,7 @@ import com.topper.dex.decompilation.staticanalyser.BFSCFGAnalyser;
 import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.exceptions.InvalidConfigException;
 import com.topper.tests.utility.DexLoader;
 import com.topper.tests.utility.TestConfig;
 
@@ -36,7 +37,7 @@ public class TestBFSCFGAnalyser {
 
 	@BeforeAll
 	public static final void loadInstructions() throws IOException, IllegalArgumentException, IllegalAccessException,
-			NoSuchFieldException, SecurityException {
+			NoSuchFieldException, SecurityException, InvalidConfigException {
 		
 		final byte[] bytes = DexLoader.get().getMethodBytes();
 		assertNotNull(bytes);

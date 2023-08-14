@@ -22,7 +22,7 @@ public final class GeneralConfig extends Config {
 		return this.defaultAmountThreads;
 	}
 	
-	private final void setDefaultAmountThreads(final int defaultAmountThreads) throws InvalidConfigException {
+	public final void setDefaultAmountThreads(final int defaultAmountThreads) throws InvalidConfigException {
 		if (defaultAmountThreads <= 0) {
 			throw new InvalidConfigException("defaultAmountThreads must be >= 1.");
 		}

@@ -1,5 +1,7 @@
 package com.topper.configuration;
 
+import java.util.Iterator;
+
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.ex.ConversionException;
 import org.eclipse.jdt.annotation.NonNull;
@@ -17,9 +19,25 @@ public abstract class Config {
 
 	public final void load(@NonNull final XMLConfiguration config) throws InvalidConfigException {
 
-		if (!config.containsKey(this.getTag())) {
+		final Iterator<String> it = config.getKeys();
+		String key;
+		boolean containsTag = false;
+		while (it.hasNext()) {
+			key = it.next();
+			
+			if (key.startsWith(this.getTag())) {
+				containsTag = true;
+				break;
+			}
+		}
+		
+		if (!containsTag) {
 			throw new InvalidConfigException(this.getTag() + " tag is missing.");
 		}
+		
+//		if (!config.containsKey(this.getTag())) {
+//			throw new InvalidConfigException(this.getTag() + " tag is missing.");
+//		}
 
 		Getter<?> getter;
 		for (@NonNull final ConfigElement<?> e : this.getElements()) {

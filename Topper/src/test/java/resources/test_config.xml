@@ -13,7 +13,7 @@
 	</sweeper>
 	<decompiler>
 		<dexSkipThreshold>500000</dexSkipThreshold>
-		<dexVersion>29</dexVersion>
+		<dexVersion>39</dexVersion>
 		<shouldNopUnknownInstruction>false</shouldNopUnknownInstruction>
 	</decompiler>
 </configuration>

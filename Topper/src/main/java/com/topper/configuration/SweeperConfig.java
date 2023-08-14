@@ -29,7 +29,7 @@ public class SweeperConfig extends Config {
 		return this.maxNumberInstructions;
 	}
 	
-	private final void setMaxNumberInstructions(final int maxNumberInstructions) throws InvalidConfigException {
+	public final void setMaxNumberInstructions(final int maxNumberInstructions) throws InvalidConfigException {
 		if (maxNumberInstructions <= 0) {
 			throw new InvalidConfigException("maxNumberInstructions must be >= 1.");
 		}
@@ -46,7 +46,7 @@ public class SweeperConfig extends Config {
 		return this.pivotOpcode;
 	}
 	
-	private final void setPivotOpcode(final String pivotOpcodeName) throws InvalidConfigException {
+	public final void setPivotOpcode(final String pivotOpcodeName) throws InvalidConfigException {
 		try {
 			this.pivotOpcode = Opcode.valueOf(pivotOpcodeName);
 		} catch (final Exception e) {

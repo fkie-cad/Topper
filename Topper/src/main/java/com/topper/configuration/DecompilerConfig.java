@@ -2,6 +2,7 @@ package com.topper.configuration;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcodes;
+import org.jf.dexlib2.VersionMap;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompilation.decompiler.Decompiler;
@@ -29,6 +30,9 @@ public class DecompilerConfig extends Config {
 	 * */
 	private boolean nopUnknownInstruction;
 	
+	/**
+	 * {@link Opcodes} chosen based on {@code dexVersion}.
+	 * */
 	private Opcodes opcodes;
 	
 	public DecompilerConfig() {
@@ -46,7 +50,7 @@ public class DecompilerConfig extends Config {
 		return this.dexSkipThreshold;
 	}
 	
-	private final void setDexSkipThreshold(final int threshold) {
+	public final void setDexSkipThreshold(final int threshold) {
 		this.dexSkipThreshold = threshold;
 	}
 
@@ -60,12 +64,12 @@ public class DecompilerConfig extends Config {
 		return this.dexVersion;
 	}
 	
-	private final void setDexVersion(final int version) throws InvalidConfigException {
+	public final void setDexVersion(final int version) throws InvalidConfigException {
 		try {
 			this.opcodes = Opcodes.forDexVersion(version);
 			this.dexVersion = version;
 		} catch (final RuntimeException e) {
-			throw new InvalidConfigException("Dex version is invalid.");
+			throw new InvalidConfigException("Dex version is invalid.", e);
 		}
 	}
 	
@@ -85,7 +89,7 @@ public class DecompilerConfig extends Config {
 		return this.nopUnknownInstruction;
 	}
 	
-	private final void setNopUnknownInstruction(final boolean nopUnknownInstruction) {
+	public final void setNopUnknownInstruction(final boolean nopUnknownInstruction) {
 		this.nopUnknownInstruction = nopUnknownInstruction;
 	}
 

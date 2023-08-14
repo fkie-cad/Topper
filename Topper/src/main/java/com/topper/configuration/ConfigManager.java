@@ -3,10 +3,14 @@ package com.topper.configuration;
 import java.nio.file.Path;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.topper.dex.decompilation.decompiler.Decompiler;
+import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
+import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.exceptions.InvalidConfigException;
 
 public final class ConfigManager {
@@ -98,8 +102,15 @@ public final class ConfigManager {
 
 		try {
 
-			//  TODO: Check this method
-			final XMLConfiguration xmlConfig = new Configurations().xml(path.toString());
+//			final XMLConfiguration xmlConfig = new Configurations().xml(path.toString());
+			final Parameters params = new Parameters();
+			final FileBasedConfigurationBuilder<XMLConfiguration> builder = new FileBasedConfigurationBuilder<>(XMLConfiguration.class)
+					.configure(params.xml()
+							.setFileName(path.toString())	// use path
+//							.setSchemaValidation(true));	// enable xml file validation
+							);
+			final XMLConfiguration xmlConfig = builder.getConfiguration();
+			
 			if (xmlConfig == null) {
 				throw new InvalidConfigException("Failed to load config.");
 			}

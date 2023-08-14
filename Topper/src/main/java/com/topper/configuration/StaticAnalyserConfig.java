@@ -25,8 +25,7 @@ public class StaticAnalyserConfig extends Config {
 		return this.skipCFG;
 	}
 	
-	private final void setSkipCFG(final boolean skip) {
-		this.check();
+	public final void setSkipCFG(final boolean skip) {
 		this.skipCFG = skip;
 	}
 	
@@ -38,7 +37,7 @@ public class StaticAnalyserConfig extends Config {
 		return this.skipDFG;
 	}
 	
-	private final void setSkipDFG(final boolean skip) {
+	public final void setSkipDFG(final boolean skip) {
 		this.skipDFG = skip;
 	}
 

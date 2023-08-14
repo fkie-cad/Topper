@@ -20,16 +20,20 @@ import org.jf.util.ExceptionWithContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.exceptions.InvalidConfigException;
 import com.topper.tests.utility.DexLoader;
 import com.topper.tests.utility.TestConfig;
 
 public class TestSmaliDecompiler {
 
-	private static final Opcodes opcodes = Opcodes.forDexVersion(TestConfig.getDefault().getDexVersion());
+	private static TopperConfig config;
+	
+	private static Opcodes opcodes;
 
 	private static final byte @NonNull [] VALID_BYTECODE = new byte[] { 0x54, 0x30, 0x24, 0x8, 0x1d, 0x0, 0x52, 0x31,
 			0x25, 0x8, (byte) 0xd8, 0x1, 0x1, (byte) 0xff, 0x59, 0x31, 0x25, 0x8, 0x12, (byte) 0xf2, 0x33, 0x21, 0xb,
@@ -42,31 +46,36 @@ public class TestSmaliDecompiler {
 	private static final byte @NonNull [] INVALID_OPCODE_BYTECODE = new byte[] { (byte) 0x3e, // unused
 			0x42 // random follow - up, as instruction are at least 2 bytes in size
 	};
-
-	private static final byte @NonNull [] OOB_BYTECODE = new byte[] {
-			opcodes.getOpcodeValue(Opcode.INVOKE_VIRTUAL_RANGE).byteValue(), // requires at least 3 more bytes
-			0x42 // 0x42 arguments
-	};
-
-	private static final byte @NonNull [] INVALID_INSTRUCTION_BYTECODE = new byte[] {
-			opcodes.getOpcodeValue(Opcode.CONST_STRING_JUMBO).byteValue(), 0x0, // destination register
-			(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff // string index
-	};
-
-	private static final byte @NonNull [] VALID_BYTECODE_INVALID_END = concatBytes(VALID_BYTECODE, OOB_BYTECODE);
-	private static final byte @NonNull [] INVALID_START_VALID_BYTECODE = concatBytes(INVALID_OPCODE_BYTECODE,
-			VALID_BYTECODE);
 	
 	private static final byte @NonNull [] INCOMPLETE_NOP = new byte [] { 0x0 };
+
+	private static byte[] OOB_BYTECODE;
+	private static byte[] INVALID_INSTRUCTION_BYTECODE;
+	private static byte[] VALID_BYTECODE_INVALID_END;
+	private static byte[] INVALID_START_VALID_BYTECODE;
 	
 	private static byte[] DEX_FILE_BYTECODE;
 	private static DexBackedDexFile DEX_FILE;
 	
-	
 	@BeforeAll
-	public static void init() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+	public static void init() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException, InvalidConfigException {
+		config = TestConfig.getDefault();
+		opcodes = Opcodes.forDexVersion(config.getDecompilerConfig().getDexVersion());
 		DEX_FILE_BYTECODE = DexLoader.get().getMethodBytes();
 		DEX_FILE = DexLoader.get().getFile();
+		
+		OOB_BYTECODE = new byte[] {
+			opcodes.getOpcodeValue(Opcode.INVOKE_VIRTUAL_RANGE).byteValue(), // requires at least 3 more bytes
+			0x42 // 0x42 arguments
+		};
+		
+		INVALID_INSTRUCTION_BYTECODE = new byte[] {
+			opcodes.getOpcodeValue(Opcode.CONST_STRING_JUMBO).byteValue(), 0x0, // destination register
+			(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff // string index
+		};
+		
+		VALID_BYTECODE_INVALID_END = concatBytes(VALID_BYTECODE, OOB_BYTECODE);
+		INVALID_START_VALID_BYTECODE = concatBytes(INVALID_OPCODE_BYTECODE, VALID_BYTECODE);
 	}
 	
 	private static final byte @NonNull [] concatBytes(final byte @NonNull [] first, final byte @NonNull [] second) {
@@ -116,8 +125,9 @@ public class TestSmaliDecompiler {
 	public void Given_EmptyBytecode_When_Decompiling_Expect_EmptyInstructionList() {
 		// Reason: No bytes mean no instructions.
 
+		config.getDecompilerConfig().setNopUnknownInstruction(false);
 		final Decompiler decompiler = new SmaliDecompiler();
-		final DecompilationResult result = decompiler.decompile(new byte[0], null, opcodes, false);
+		final DecompilationResult result = decompiler.decompile(new byte[0], null, config);
 		assertEquals(0, result.getInstructions().size());
 	}
 
@@ -125,17 +135,19 @@ public class TestSmaliDecompiler {
 	public void Given_InvalidOpcode_When_Decompiling_Expect_ExceptionWithContext() {
 		// Reason: With RawFile, invalid opcodes are very likely.
 
+		config.getDecompilerConfig().setNopUnknownInstruction(false);
 		final Decompiler decompiler = new SmaliDecompiler();
 		assertThrowsExactly(ExceptionWithContext.class,
-				() -> decompiler.decompile(INVALID_OPCODE_BYTECODE, null, opcodes, false));
+				() -> decompiler.decompile(INVALID_OPCODE_BYTECODE, null, config));
 	}
 	
 	@Test
 	public void Given_InvalidOpcode_When_DecompilingWithNopUnknown_Expect_AllInstructions() {
 		// Reason: Interpreters may treat unknown instructions as NOP.
 		
+		config.getDecompilerConfig().setNopUnknownInstruction(true);
 		final Decompiler decompiler = new SmaliDecompiler();
-		final DecompilationResult result = decompiler.decompile(INVALID_OPCODE_BYTECODE, null, opcodes, true);
+		final DecompilationResult result = decompiler.decompile(INVALID_OPCODE_BYTECODE, null, config);
 		
 		this.checkResult(result, INVALID_OPCODE_BYTECODE, false);
 	}
@@ -145,9 +157,10 @@ public class TestSmaliDecompiler {
 		// Reason: With RawFile, invalid instructions are very likely. An instruction
 		// may go beyond the buffer.
 
+		config.getDecompilerConfig().setNopUnknownInstruction(false);
 		final Decompiler decompiler = new SmaliDecompiler();
 		assertThrowsExactly(ArrayIndexOutOfBoundsException.class,
-				() -> decompiler.decompile(OOB_BYTECODE, null, opcodes, false /* or true */));
+				() -> decompiler.decompile(OOB_BYTECODE, null, config/* or true */));
 	}
 
 	@Test
@@ -155,17 +168,19 @@ public class TestSmaliDecompiler {
 		// Reason: With RawFile, invalid instruction are very likely. E.g. too large
 		// integer values.
 
+		config.getDecompilerConfig().setNopUnknownInstruction(false);
 		final Decompiler decompiler = new SmaliDecompiler();
 		assertThrowsExactly(ExceptionWithContext.class,
-				() -> decompiler.decompile(INVALID_INSTRUCTION_BYTECODE, null, opcodes, false));
+				() -> decompiler.decompile(INVALID_INSTRUCTION_BYTECODE, null, config));
 	}
 
 	@Test
 	public void Given_ValidBytecode_When_Decompiling_Expect_AllInstructions() {
 		// Reason: Bytes of correct bytecode must be fully covered and decompiled.
 
+		config.getDecompilerConfig().setNopUnknownInstruction(false);
 		final Decompiler decompiler = new SmaliDecompiler();
-		final DecompilationResult result = decompiler.decompile(VALID_BYTECODE, null, opcodes, false /* or true */);
+		final DecompilationResult result = decompiler.decompile(VALID_BYTECODE, null, config/* or true */);
 
 		this.checkResult(result, VALID_BYTECODE, true);
 	}
@@ -176,17 +191,19 @@ public class TestSmaliDecompiler {
 		// Two Cases: Either out - of - bounds or context(e.g. integer too large)
 		// exception
 
+		config.getDecompilerConfig().setNopUnknownInstruction(false);
 		final Decompiler decompiler = new SmaliDecompiler();
 		assertThrowsExactly(ArrayIndexOutOfBoundsException.class,
-				() -> decompiler.decompile(VALID_BYTECODE_INVALID_END, null, opcodes, false));
+				() -> decompiler.decompile(VALID_BYTECODE_INVALID_END, null, config));
 	}
 
 	@Test
 	public void Given_InvalidStartValidBytecode_When_DecompilingWithNopUnknown_Expect_AllInstructions() {
 		// Reason: Decompiler must replace (first) invalid instruction with a NOP when requested.
 
+		config.getDecompilerConfig().setNopUnknownInstruction(true);
 		final Decompiler decompiler = new SmaliDecompiler();
-		final DecompilationResult result = decompiler.decompile(INVALID_START_VALID_BYTECODE, null, opcodes, true);
+		final DecompilationResult result = decompiler.decompile(INVALID_START_VALID_BYTECODE, null, config);
 
 		this.checkResult(result, INVALID_START_VALID_BYTECODE, false);
 	}
@@ -195,8 +212,9 @@ public class TestSmaliDecompiler {
 	public void Given_OddAmountBytes_When_Decompiling_Expect_IllegalArgumentException() {
 		// Reason: Decompiler must only consider an even amount of bytes for decompilation.
 		
+		config.getDecompilerConfig().setNopUnknownInstruction(false);
 		final Decompiler decompiler = new SmaliDecompiler();
-		assertThrowsExactly(IllegalArgumentException.class, () -> decompiler.decompile(INCOMPLETE_NOP, null, opcodes, false));
+		assertThrowsExactly(IllegalArgumentException.class, () -> decompiler.decompile(INCOMPLETE_NOP, null, config)); 
 	}
 	
 	@Test
@@ -204,8 +222,9 @@ public class TestSmaliDecompiler {
 		// Reason: Decompiler must take into account a given .dex file, if requested.
 		// All references must be valid!
 		
+		config.getDecompilerConfig().setNopUnknownInstruction(false);
 		final Decompiler decompiler = new SmaliDecompiler();
-		final DecompilationResult result = decompiler.decompile(DEX_FILE_BYTECODE, DEX_FILE, opcodes, false);
+		final DecompilationResult result = decompiler.decompile(DEX_FILE_BYTECODE, DEX_FILE, config);
 		
 		this.checkResult(result, DEX_FILE_BYTECODE, true);
 		
@@ -227,25 +246,27 @@ public class TestSmaliDecompiler {
 	}
 	
 	@Test
-	public void Given_ValidBytecode_When_DecompilingWithNopWrongAugmentation_Expect_AllInstructionsMaybeAugmented() throws IOException {
+	public void Given_ValidBytecode_When_DecompilingWithNopWrongAugmentation_Expect_AllInstructionsMaybeAugmented() throws IOException, InvalidConfigException {
 		// Reason: Decompiler must resolve as many references as possible given a context (augmentation file).
 		// If resolution does not work, then it may be ignored.
 		// Observe: Nopping unknown instructions should be used here to reflect what is done in practice. I.e.
 		// using different .dex files to see what a gadget does in different contexts.
 		
+		config.getDecompilerConfig().setNopUnknownInstruction(true);
 		final Decompiler decompiler = new SmaliDecompiler();
-		final DecompilationResult result = decompiler.decompile(DEX_FILE_BYTECODE, DexLoader.get().loadFile("./src/test/java/resources/classes9.dex"), opcodes, true);
+		final DecompilationResult result = decompiler.decompile(DEX_FILE_BYTECODE, DexLoader.get().loadFile("./src/test/java/resources/classes9.dex"), config);
 		
 		this.checkResult(result, DEX_FILE_BYTECODE, false);
 	}
 	
 	@Test
-	public void Given_ValidBytecode_When_DecompilingWrongAugmentation_Expect_AllInstructionsMaybeAugmented() throws IOException {
+	public void Given_ValidBytecode_When_DecompilingWrongAugmentation_Expect_AllInstructionsMaybeAugmented() throws IOException, InvalidConfigException {
 		// Reason: Decompiler must resolve as many references as possible given a context (augmentation file).
 		// If resolution does not work, then it may be ignored. No nopping for completeness sake.
 		
+		config.getDecompilerConfig().setNopUnknownInstruction(false);
 		final Decompiler decompiler = new SmaliDecompiler();
-		final DecompilationResult result = decompiler.decompile(DEX_FILE_BYTECODE, DexLoader.get().loadFile("./src/test/java/resources/classes9.dex"), opcodes, false);
+		final DecompilationResult result = decompiler.decompile(DEX_FILE_BYTECODE, DexLoader.get().loadFile("./src/test/java/resources/classes9.dex"), config);
 		
 		this.checkResult(result, DEX_FILE_BYTECODE, true);
 	}
