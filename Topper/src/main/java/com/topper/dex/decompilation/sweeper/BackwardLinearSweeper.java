@@ -125,7 +125,10 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 	 * If decompilation succeeds and the instruction is valid, then it will be added
 	 * to the total result. An instruction is considered valid, iff. the decompiler
 	 * produces only this single instruction and the instruction size matches the
-	 * size of the current iteration.
+	 * size of the current iteration. If an instruction with opcode
+	 * <code>config.getSweeperConfig().getPivotOpcocde()</code> is observed, then
+	 * this pivot instruction will be skipped, because pivot instructions signal the
+	 * end of an instruction sequence.
 	 * 
 	 * The <code>checkedGadgetSizes</code> is used to keep track of what gadget
 	 * sizes have been checked so far. E.g. it should be impossible to first find a
@@ -224,6 +227,14 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 				// Check instructions. If invalid, then this instruction can be ignored/is not
 				// valid.
 				if (instructions.size() != 1 || instructions.get(0).getByteCode().length != instructionSize) {
+					continue;
+				}
+
+				// Check if decompiled instruction is pivot instruction. If so,
+				// skip it, because the pivot instruction always signals the end of
+				// an instruction sequence.
+				if (instructions.get(0).getInstruction().getOpcode()
+						.equals(config.getSweeperConfig().getPivotOpcode())) {
 					continue;
 				}
 

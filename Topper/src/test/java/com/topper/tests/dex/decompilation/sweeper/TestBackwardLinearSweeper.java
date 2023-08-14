@@ -1,6 +1,7 @@
 package com.topper.tests.dex.decompilation.sweeper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -93,6 +94,17 @@ public class TestBackwardLinearSweeper {
 
 		for (int i = 0; i < exist.length; i++) {
 			assertTrue(exist[i]);
+		}
+		
+		// All starting instructions must be pivot instructions.
+		// No intermediate instruction must be a pivot instruction.
+		for (final ImmutableList<@NonNull DecompiledInstruction> sequence : sequences) {
+			
+			assertEquals(config.getSweeperConfig().getPivotOpcode(), sequence.get(0).getInstruction().getOpcode());
+			for (int i = 1; i < sequence.size(); i++) {
+				
+				assertNotEquals(config.getSweeperConfig().getPivotOpcode(), sequence.get(i).getInstruction().getOpcode());
+			}
 		}
 
 		// Expecting different sizes
