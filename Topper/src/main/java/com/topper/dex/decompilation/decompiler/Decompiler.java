@@ -25,17 +25,11 @@ public interface Decompiler {
 	 * If {@code augmentation} is not {@code null}, then it must be used for
 	 * resolving references in order to augment analysis with type names etc.
 	 * 
-	 * @param bytes                 Raw bytes to decompile into dex instructions.
-	 * @param augmentation          Dex file representation to use for resolving
-	 *                              references. This can be used to view instruction
-	 *                              in different execution contexts.
-	 * @param opcodes               Set of opcodes to use for decompilation. This is
-	 *                              application-specific.
-	 * @param nopUnknownInstruction Indicates how unknown instruction must be
-	 *                              handled. Either an unknown instruction is nop`ed
-	 *                              out ({@code true}), or an exception is thrown
-	 *                              and all decompilation results discarded
-	 *                              ({@code false}).
+	 * @param bytes        Raw bytes to decompile into dex instructions.
+	 * @param augmentation Dex file representation to use for resolving references.
+	 *                     This can be used to view instruction in different
+	 *                     execution contexts.
+	 * @param config       Configuration to use during decompilation.
 	 * @return Result wrapping decompiled instructions and further information.
 	 */
 	@NonNull

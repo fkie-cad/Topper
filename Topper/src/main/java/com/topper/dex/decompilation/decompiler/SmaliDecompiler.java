@@ -38,18 +38,11 @@ public final class SmaliDecompiler implements Decompiler {
 	/**
 	 * Decompiles a given byte array into smali instructions.
 	 * 
-	 * @param bytecode              Byte array to interpret as bytecode and to
-	 *                              decompile.
-	 * @param augmentation          Dex file representation to use for resolving
-	 *                              references. This can be used to view instruction
-	 *                              in different execution contexts.
-	 * @param opcodes               Set of opcodes to use for decompilation. This is
-	 *                              application-specific.
-	 * @param nopUnknownInstruction Indicates how unknown instruction must be
-	 *                              handled. Either an unknown instruction is nop`ed
-	 *                              out ({@code true}), or an exception is thrown
-	 *                              and all decompilation results discarded
-	 *                              ({@code false}).
+	 * @param bytecode     Byte array to interpret as bytecode and to decompile.
+	 * @param augmentation Dex file representation to use for resolving references.
+	 *                     This can be used to view instruction in different
+	 *                     execution contexts.
+	 * @param config       Configuration to use during decompilation.
 	 * @return Wrapper holding information on the decompilation. Among other things,
 	 *         it holds the decompiled instructions.
 	 * @throws IndexOutOfBoundsException If an instruction requires an out - of -
@@ -63,7 +56,8 @@ public final class SmaliDecompiler implements Decompiler {
 	@NonNull
 	@Override
 	public final DecompilationResult decompile(final byte @NonNull [] bytecode,
-			@Nullable final DexBackedDexFile augmentation, @NonNull final TopperConfig config) throws IndexOutOfBoundsException, ExceptionWithContext {
+			@Nullable final DexBackedDexFile augmentation, @NonNull final TopperConfig config)
+			throws IndexOutOfBoundsException, ExceptionWithContext {
 
 		if ((bytecode.length % 2) != 0) {
 			throw new IllegalArgumentException("bytecode buffer must contain an even amount of bytes.");
@@ -75,7 +69,8 @@ public final class SmaliDecompiler implements Decompiler {
 		int size;
 		final List<@NonNull DecompiledInstruction> decompiledInstructions = new LinkedList<DecompiledInstruction>();
 		byte[] buf;
-		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer, augmentation, config.getDecompilerConfig().getOpcodes(),
+		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer, augmentation,
+				config.getDecompilerConfig().getOpcodes(),
 				config.getDecompilerConfig().shouldNopUnknownInstruction())) {
 
 			size = instruction.getCodeUnits() * 2;

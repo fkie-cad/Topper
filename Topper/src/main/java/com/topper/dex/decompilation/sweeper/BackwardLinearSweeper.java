@@ -46,15 +46,15 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 	 * multiple of two in size. Therefore, if an instruction precedes the one
 	 * pointed to by <code>offset</code>, then its opcode byte must be located
 	 * somewhere at offset - 2 * i. Then, try to decompile all instructions located
-	 * at offset - 2 * 1, offset - 2 * 2 etc. until one matches and it directly
+	 * at offset - 2 * 1, offset - 2 * 2 etc. until one matches and is directly
 	 * adjacent to the pivot instruction. This is repeated over and over until
 	 * either the buffer is exhausted, or the upper bound on the number of
 	 * instructions is hit.
 	 * 
-	 * @param buffer Buffer, from which to extract instructions.
-	 * @param offset Starting point of the sweep relative to the beginning of the
-	 *               buffer. It must point to a valid instruction. It should point
-	 *               to a pivot instruction.
+	 * @param results Map of results of previous stages. Among other things, it must
+	 *                contain an instance of {@link PipelineArgs}, which references
+	 *                an <code>offset</code> describing the starting point of this sweep,
+	 *                and a <code>buffer</code> from which to fetch instructions.
 	 * @return List of instruction sequences preceding the instruction located at
 	 *         <code>offset</code> in <code>buffer</code>. The instruction pointed
 	 *         to by <code>offset</code> is also part of this list.
