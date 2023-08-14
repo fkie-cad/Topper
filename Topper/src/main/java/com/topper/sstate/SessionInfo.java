@@ -34,4 +34,10 @@ public final class SessionInfo {
 	public final void setGadgets(@NonNull final ImmutableList<@NonNull Gadget> gadgets) {
 		this.gadgets = gadgets;
 	}
+	
+	@NonNull
+	public final String getSessionId() {
+		
+		return (this.loadedFile != null) ? this.loadedFile.getName() : "";
+	}
 }

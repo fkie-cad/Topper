@@ -1,11 +1,7 @@
 package com.topper.scengine.commands;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import com.topper.exceptions.IllegalCommandException;
+import com.topper.file.FileUtil;
 
 /**
  * 
@@ -35,27 +31,36 @@ public final class FileCommandParser implements ScriptCommandParser {
 		
 		// Construct file path and check referenced file
 		final String fileName = tokens[1];
-		try {
-			final Path filePath = Paths.get(fileName).toRealPath();
-			final File file = filePath.toFile();
-			if (!file.canRead()) {
-				throw new IllegalCommandException(String.format("%s is not readable.", filePath));
-			}
-			
-			if (file.isDirectory()) {
-				throw new IllegalCommandException(String.format("%s is a directory.", filePath));
-			}
-			
-			if (!file.isFile()) {
-				throw new IllegalCommandException(String.format("%s is not a normal file.", filePath));
-			}
-		
-			// Up to this point, the file seems fine
-			return new FileCommand(file);
-			
-		} catch (final IOException e) {
-			throw new IllegalCommandException("Verification of file " + fileName + " failed.", e);
+		if (fileName == null) {
+			throw new IllegalCommandException("Invalid usage: " + this.usage());
 		}
+		
+		try {
+			return new FileCommand(FileUtil.openIfValid(fileName));
+		} catch (final IllegalArgumentException e) {
+			throw new IllegalCommandException("File is invalid: " + e.getMessage());
+		}
+//		try {
+//			final Path filePath = Paths.get(fileName).toRealPath();
+//			final File file = filePath.toFile();
+//			if (!file.canRead()) {
+//				throw new IllegalCommandException(String.format("%s is not readable.", filePath));
+//			}
+//			
+//			if (file.isDirectory()) {
+//				throw new IllegalCommandException(String.format("%s is a directory.", filePath));
+//			}
+//			
+//			if (!file.isFile()) {
+//				throw new IllegalCommandException(String.format("%s is not a normal file.", filePath));
+//			}
+//		
+//			// Up to this point, the file seems fine
+//			return new FileCommand(file);
+//			
+//		} catch (final IOException e) {
+//			throw new IllegalCommandException("Verification of file " + fileName + " failed.", e);
+//		}
 	}
 	
 	/**

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.google.common.collect.ImmutableList;
 import com.topper.exceptions.IllegalCommandException;
 import com.topper.scengine.commands.ScriptCommand;
@@ -113,7 +115,8 @@ public final class ScriptParser {
 	 * @throws IllegalCommandException If <code>script</code> contains at least one
 	 * 	invalid command.
 	 * */
-	public final ImmutableList<ScriptCommand> parse(final String script) throws IllegalCommandException {
+	@NonNull
+	public final ImmutableList<@NonNull ScriptCommand> parse(final String script) throws IllegalCommandException {
 		
 		// Also get rid of duplicate line separators
 		String stripped = script.trim().replaceAll(System.lineSeparator() + "+", System.lineSeparator());

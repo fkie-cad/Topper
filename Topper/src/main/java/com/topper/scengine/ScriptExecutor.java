@@ -2,6 +2,8 @@ package com.topper.scengine;
 
 import java.io.IOException;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.google.common.collect.ImmutableList;
 import com.topper.exceptions.CommandException;
 import com.topper.exceptions.InvalidStateTransitionException;
@@ -9,10 +11,6 @@ import com.topper.scengine.commands.ScriptCommand;
 import com.topper.sstate.ScriptContext;
 
 public final class ScriptExecutor {
-
-	public ScriptExecutor() {
-		
-	}
 
 	/**
 	 * Executes a list of <code>commands</code> one by one according
@@ -29,7 +27,7 @@ public final class ScriptExecutor {
 	 * @throws CommandException, IOException 
 	 * @throws InvalidStateTransitionException 
 	 * */
-	public final void execute(final ScriptContext context, final ImmutableList<ScriptCommand> commands) throws CommandException, IOException, InvalidStateTransitionException {
+	public final void execute(@NonNull final ScriptContext context, @NonNull final ImmutableList<@NonNull ScriptCommand> commands) throws CommandException, IOException, InvalidStateTransitionException {
 		
 		// Naively execute each command in given context
 		for (final ScriptCommand command : commands) {

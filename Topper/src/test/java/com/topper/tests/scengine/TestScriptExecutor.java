@@ -1,17 +1,14 @@
 package com.topper.tests.scengine;
 
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.jf.dexlib2.Opcode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.configuration.Config;
 import com.topper.exceptions.CommandException;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.InvalidStateTransitionException;
@@ -53,26 +50,26 @@ public class TestScriptExecutor {
 		);
 	}
 	
-	@Test
-	public void Given_Executor_When_AllNull_Then_NullPointerException() {
-		
-		final ScriptExecutor executor = createExecutor();
-		assertThrowsExactly(NullPointerException.class, () -> executor.execute(null, null));
-	}
-	
-	@Test
-	public void Given_Executor_When_NullContextValidCommand_Then_NullPointerException() {
-		
-		final ScriptExecutor executor = createExecutor();
-		assertThrowsExactly(NullPointerException.class, () -> executor.execute(null, VALID_COMMANDS));
-	}
-	
-	@Test
-	public void Given_Executor_When_ValidContextNullCommands_Then_NullPointerException() {
-		
-		final ScriptExecutor executor = createExecutor();
-		assertThrowsExactly(NullPointerException.class, () -> executor.execute(VALID_CONTEXT, null));
-	}
+//	@Test
+//	public void Given_Executor_When_AllNull_Then_NullPointerException() {
+//		
+//		final ScriptExecutor executor = createExecutor();
+//		assertThrowsExactly(NullPointerException.class, () -> executor.execute(null, null));
+//	}
+//	
+//	@Test
+//	public void Given_Executor_When_NullContextValidCommand_Then_NullPointerException() {
+//		
+//		final ScriptExecutor executor = createExecutor();
+//		assertThrowsExactly(NullPointerException.class, () -> executor.execute(null, VALID_COMMANDS));
+//	}
+//	
+//	@Test
+//	public void Given_Executor_When_ValidContextNullCommands_Then_NullPointerException() {
+//		
+//		final ScriptExecutor executor = createExecutor();
+//		assertThrowsExactly(NullPointerException.class, () -> executor.execute(VALID_CONTEXT, null));
+//	}
 	
 	@Test
 	public void Given_Executor_When_AllValid_Then_TerminationState() throws InvalidStateTransitionException, CommandException, IOException {
