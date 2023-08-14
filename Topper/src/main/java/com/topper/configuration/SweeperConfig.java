@@ -6,8 +6,15 @@ import org.jf.dexlib2.Opcode;
 import com.google.common.collect.ImmutableList;
 import com.topper.exceptions.InvalidConfigException;
 
+/**
+ * Configuration used by {@link Sweeper}. It includes, but is not limited to, a
+ * definition for a pivot instruction (often <code>Opcode.THROW</code>).
+ * 
+ * @author Pascal Kühnemann
+ * @since 14.08.2023
+ */
 public class SweeperConfig extends Config {
-	
+
 	/**
 	 * Upper bound on the number of instructions that may precede a pivot
 	 * instruction (e.g. throw v0) including the pivot instruction. E.g. if a gadget
@@ -19,16 +26,20 @@ public class SweeperConfig extends Config {
 	 * Opcode that signals the end of a gadget.
 	 */
 	private Opcode pivotOpcode;
-	
+
 	/**
 	 * Gets current upper bound on the number of instructions to obtain from a
-	 * sweeper.
-	 * Defaults to 10.
+	 * sweeper. Defaults to 10.
 	 */
-	public final int getSweeperMaxNumberInstructions() {
+	public final int getMaxNumberInstructions() {
 		return this.maxNumberInstructions;
 	}
-	
+
+	/**
+	 * Sets the maximum number of instructions to extract during a sweep.
+	 * 
+	 * @throws InvalidConfigException If {@code maxNumberInstructions <= 0}.
+	 */
 	public final void setMaxNumberInstructions(final int maxNumberInstructions) throws InvalidConfigException {
 		if (maxNumberInstructions <= 0) {
 			throw new InvalidConfigException("maxNumberInstructions must be >= 1.");
@@ -37,16 +48,22 @@ public class SweeperConfig extends Config {
 	}
 
 	/**
-	 * Gets current pivot instruction that signals the end of a gadget.
-	 * Defaults to {@code Opcode.THROW}.
+	 * Gets current pivot instruction that signals the end of a gadget. Defaults to
+	 * <code>Opcode.THROW</code>.
 	 */
 	@NonNull
 	public final Opcode getPivotOpcode() {
 		this.check();
 		return this.pivotOpcode;
 	}
-	
-	public final void setPivotOpcode(final String pivotOpcodeName) throws InvalidConfigException {
+
+	/**
+	 * Sets the pivot opcode to use during sweeping by name.
+	 * 
+	 * @throws InvalidConfigException If <code>pivotOpcodeName</code> is not a valid
+	 *                                {@link Opcode}.
+	 */
+	public final void setPivotOpcode(@NonNull final String pivotOpcodeName) throws InvalidConfigException {
 		try {
 			this.pivotOpcode = Opcode.valueOf(pivotOpcodeName);
 		} catch (final Exception e) {
@@ -54,18 +71,26 @@ public class SweeperConfig extends Config {
 		}
 	}
 
+	/**
+	 * Gets the <code>"sweeper"</code> tag.
+	 * */
 	@Override
-	@NonNull 
+	@NonNull
 	public String getTag() {
 		return "sweeper";
 	}
 
+	/**
+	 * Gets a list of valid {@link Sweeper} configurations. E.g.
+	 * <ul>
+	 * <li>maxNumberInstructions(int)</li>
+	 * <li>pivotOpcode(String)</code>
+	 * </ul>
+	 * */
 	@Override
-	@NonNull 
+	@NonNull
 	public ImmutableList<@NonNull ConfigElement<?>> getElements() {
-		return ImmutableList.of(
-				new ConfigElement<Integer>("maxNumberInstructions", 10, this::setMaxNumberInstructions),
-				new ConfigElement<String>("pivotOpcode", "throw", this::setPivotOpcode)
-		);
+		return ImmutableList.of(new ConfigElement<Integer>("maxNumberInstructions", 10, this::setMaxNumberInstructions),
+				new ConfigElement<String>("pivotOpcode", "throw", this::setPivotOpcode));
 	}
 }

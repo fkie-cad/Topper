@@ -79,7 +79,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		}
 
 		final Decompiler decompiler = this.getDecompiler();
-		final int maxSizes = config.getSweeperConfig().getSweeperMaxNumberInstructions();
+		final int maxSizes = config.getSweeperConfig().getMaxNumberInstructions();
 		final List<Integer> checkedGadgetSizes = new ArrayList<Integer>(maxSizes);
 		checkedGadgetSizes.add(currentSize);
 		final int depth = 1;
@@ -178,7 +178,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		}
 
 		// Check if maximum number of instructions is reached.
-		if (depth >= config.getSweeperConfig().getSweeperMaxNumberInstructions()) {
+		if (depth >= config.getSweeperConfig().getMaxNumberInstructions()) {
 			return sequences.build();
 		}
 
@@ -194,7 +194,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		// instructions as the maximum allowed instructions minus
 		// the current depth.
 		final ArrayList<DecompiledInstruction> path = new ArrayList<DecompiledInstruction>(
-				config.getSweeperConfig().getSweeperMaxNumberInstructions() - (depth - 1));
+				config.getSweeperConfig().getMaxNumberInstructions() - (depth - 1));
 
 		int instructionSize;
 		int totalSize;

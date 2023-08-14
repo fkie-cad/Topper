@@ -4,6 +4,12 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
 
+/**
+ * Configuration used by {@link StaticAnalyser}.
+ * 
+ * @author Pascal Kühnemann
+ * @since 14.08.2023
+ * */
 public class StaticAnalyserConfig extends Config {
 	
 	/**
@@ -18,35 +24,51 @@ public class StaticAnalyserConfig extends Config {
 	
 	/**
 	 * Determines whether or not to skip CFG extraction in static analysis.
-	 * Defaults to {@code false}.
+	 * Defaults to <code>false</code>.
 	 * */
 	public final boolean shouldSkipCFG() {
 		this.check();
 		return this.skipCFG;
 	}
 	
+	/**
+	 * Sets whether to skip CFG extraction.
+	 * */
 	public final void setSkipCFG(final boolean skip) {
 		this.skipCFG = skip;
 	}
 	
 	/**
 	 * Determines whether or not to skip DFG extraction in static analysis.
-	 * Defaults to {@code false}.
+	 * Defaults to <code>false</code>.
 	 * */
 	public final boolean shouldSkipDFG() {
 		return this.skipDFG;
 	}
 	
+	/**
+	 * Sets whether to skip DFG extraction.
+	 * */
 	public final void setSkipDFG(final boolean skip) {
 		this.skipDFG = skip;
 	}
 
+	/**
+	 * Gets the <code>"staticAnalyser"</code> tag.
+	 * */
 	@Override
 	@NonNull 
 	public String getTag() {
 		return "staticAnalyser";
 	}
 
+	/**
+	 * Gets a list of valid {@link StaticAnalyser} configurations. E.g.
+	 * <ul>
+	 * <li>skipCfg(boolean)</li>
+	 * <li>skipDfg(boolean)</li>
+	 * </ul>
+	 * */
 	@Override
 	@NonNull 
 	public ImmutableList<@NonNull ConfigElement<?>> getElements() {

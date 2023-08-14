@@ -13,6 +13,16 @@ import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.exceptions.InvalidConfigException;
 
+/**
+ * Manager that handles loading {@link Config}s from given xml files and
+ * provides a global access point to the globally unique configuration.
+ * 
+ * Note: One should use dependency injection to pass <code>Config</code>s to
+ * configurable components to avoid global references to this manager.
+ * 
+ * @author Pascal Kühnemann
+ * @since 14.08.2023
+ */
 public final class ConfigManager {
 
 	private static ConfigManager instance;
@@ -27,6 +37,9 @@ public final class ConfigManager {
 
 	}
 
+	/**
+	 * Gets the unique instance of this manager.
+	 */
 	@NonNull
 	public static final ConfigManager get() {
 		if (ConfigManager.instance == null) {
@@ -35,6 +48,12 @@ public final class ConfigManager {
 		return ConfigManager.instance;
 	}
 
+	/**
+	 * Gets the {@link GeneralConfig} configuration.
+	 * 
+	 * @throws UnsupportedOperationException If this method is called before
+	 *                                       <code>loadConfig</code>.
+	 */
 	@NonNull
 	public final GeneralConfig getGeneralConfig() {
 		if (this.config == null) {
@@ -43,6 +62,12 @@ public final class ConfigManager {
 		return this.config.getGeneralConfig();
 	}
 
+	/**
+	 * Gets the {@link StaticAnalyserConfig} configuration.
+	 * 
+	 * @throws UnsupportedOperationException If this method is called before
+	 *                                       <code>loadConfig</code>.
+	 * */
 	@NonNull
 	public final StaticAnalyserConfig getStaticAnalyserConfig() {
 		if (this.config == null) {
@@ -51,6 +76,12 @@ public final class ConfigManager {
 		return this.config.getStaticAnalyserConfig();
 	}
 
+	/**
+	 * Gets the {@link SweeperConfig} configuration.
+	 * 
+	 * @throws UnsupportedOperationException If this method is called before
+	 *                                       <code>loadConfig</code>.
+	 * */
 	@NonNull
 	public final SweeperConfig getSweeperConfig() {
 		if (this.config == null) {
@@ -59,6 +90,12 @@ public final class ConfigManager {
 		return this.config.getSweeperConfig();
 	}
 
+	/**
+	 * Gets the {@link DecompilerConfig} configuration.
+	 * 
+	 * @throws UnsupportedOperationException If this method is called before
+	 *                                       <code>loadConfig</code>.
+	 * */
 	@NonNull
 	public final DecompilerConfig getDecompilerConfig() {
 		if (this.config == null) {
@@ -66,7 +103,14 @@ public final class ConfigManager {
 		}
 		return this.config.getDecompilerConfig();
 	}
-	
+
+	/**
+	 * Gets the {@link TopperConfig} configuration. This is wrapper of all
+	 * other configs to ease using dependency injection.
+	 * 
+	 * @throws UnsupportedOperationException If this method is called before
+	 *                                       <code>loadConfig</code>.
+	 * */
 	@NonNull
 	public final TopperConfig getConfig() {
 		if (this.config == null) {
@@ -102,15 +146,13 @@ public final class ConfigManager {
 
 		try {
 
-//			final XMLConfiguration xmlConfig = new Configurations().xml(path.toString());
 			final Parameters params = new Parameters();
-			final FileBasedConfigurationBuilder<XMLConfiguration> builder = new FileBasedConfigurationBuilder<>(XMLConfiguration.class)
-					.configure(params.xml()
-							.setFileName(path.toString())	// use path
+			final FileBasedConfigurationBuilder<XMLConfiguration> builder = new FileBasedConfigurationBuilder<>(
+					XMLConfiguration.class).configure(params.xml().setFileName(path.toString()) // use path
 //							.setSchemaValidation(true));	// enable xml file validation
-							);
+			);
 			final XMLConfiguration xmlConfig = builder.getConfiguration();
-			
+
 			if (xmlConfig == null) {
 				throw new InvalidConfigException("Failed to load config.");
 			}

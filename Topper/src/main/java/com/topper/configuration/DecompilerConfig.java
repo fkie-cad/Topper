@@ -9,6 +9,12 @@ import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.exceptions.InvalidConfigException;
 
+/**
+ * Configuration used by {@link Decompiler}.
+ * 
+ * @author Pascal Kühnemann
+ * @since 14.08.2023
+ * */
 public class DecompilerConfig extends Config {
 
 	/**
@@ -35,21 +41,21 @@ public class DecompilerConfig extends Config {
 	 * */
 	private Opcodes opcodes;
 	
-	public DecompilerConfig() {
-		
-	}
-	
 	/**
 	 * Gets threshold for .dex file sizes in a .vdex file. If this is exceeded, then
 	 * analysis will skip the respective .dex file. Negative value indicates no threshold.
 	 * 0 can be used to disable analysis for all .dex files.
-	 * Defaults to 500000 bytes.
 	 * */
 	public final int getDexSkipThreshold() {
 		this.check();
 		return this.dexSkipThreshold;
 	}
 	
+	/**
+	 * Sets threshold for .dex file sizes in a .vdex file. If this is exceeded, then
+	 * analysis will skip the respective .dex file. Negative value indicates no threshold.
+	 * 0 can be used to disable analysis for all .dex files.
+	 * */
 	public final void setDexSkipThreshold(final int threshold) {
 		this.dexSkipThreshold = threshold;
 	}
@@ -57,13 +63,17 @@ public class DecompilerConfig extends Config {
 	/**
 	 * Gets the dex version to use for selecting {@link Opcodes}. It is mainly
 	 * used by {@link Decompiler}s.
-	 * Defaults to version 29.
 	 * */
 	public final int getDexVersion() {
 		this.check();
 		return this.dexVersion;
 	}
 	
+	/**
+	 * Sets the dex version to use for selecting {@link Opcodes}.
+	 * 
+	 * @throws InvalidConfigException If dex version is invalid.
+	 * */
 	public final void setDexVersion(final int version) throws InvalidConfigException {
 		try {
 			this.opcodes = Opcodes.forDexVersion(version);
@@ -73,6 +83,9 @@ public class DecompilerConfig extends Config {
 		}
 	}
 	
+	/**
+	 * Gets {@link Opcodes} based on provided dex version.
+	 * */
 	@NonNull
 	public final Opcodes getOpcodes() {
 		this.check();
@@ -89,22 +102,36 @@ public class DecompilerConfig extends Config {
 		return this.nopUnknownInstruction;
 	}
 	
+	/**
+	 * Determines whether or not unknown opcodes should be nopped.
+	 * */
 	public final void setNopUnknownInstruction(final boolean nopUnknownInstruction) {
 		this.nopUnknownInstruction = nopUnknownInstruction;
 	}
 
+	/**
+	 * Gets the <code>"decompiler"</code> tag.
+	 * */
 	@Override
 	@NonNull 
 	public String getTag() {
 		return "decompiler";
 	}
 
+	/**
+	 * Gets a list of valid {@link Decompiler} configurations. E.g.
+	 * <ul>
+	 * <li>dexSkipThreshold(int)</li>
+	 * <li>dexVersion(int)</li>
+	 * <li>shouldNopUnknownInstruction(boolean)</li>
+	 * </ul>
+	 * */
 	@Override
 	@NonNull 
 	public ImmutableList<@NonNull ConfigElement<?>> getElements() {
 		return ImmutableList.of(
 				new ConfigElement<Integer>("dexSkipThreshold", 500000, this::setDexSkipThreshold),
-				new ConfigElement<Integer>("dexVersion", 29, this::setDexVersion),
+				new ConfigElement<Integer>("dexVersion", 39, this::setDexVersion),
 				new ConfigElement<Boolean>("shouldNopUnknownInstruction", false, this::setNopUnknownInstruction)
 		);
 	}

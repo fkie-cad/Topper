@@ -2,6 +2,12 @@ package com.topper.configuration;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+/**
+ * Configuration wrapper for all configuration classes.
+ * 
+ * @author Pascal Kühnemann
+ * @since 14.08.2023
+ * */
 public class TopperConfig {
 
 	/**
