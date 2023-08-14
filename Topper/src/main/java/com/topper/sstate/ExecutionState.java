@@ -6,8 +6,10 @@ import com.google.common.collect.ImmutableList;
 import com.topper.exceptions.CommandException;
 import com.topper.exceptions.InvalidStateTransitionException;
 import com.topper.scengine.commands.ExitCommand;
+import com.topper.scengine.commands.FileCommand;
 import com.topper.scengine.commands.HelpCommand;
 import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.SearchCommand;
 
 public final class ExecutionState extends CommandState {
 
@@ -18,7 +20,8 @@ public final class ExecutionState extends CommandState {
 	@Override
 	public final ImmutableList<Class<? extends ScriptCommand>> getAvailableCommands() {
 		return ImmutableList.of(
-				// FileCommand.class	// TOOD: Check
+				FileCommand.class,
+				SearchCommand.class,
 				HelpCommand.class,
 				ExitCommand.class
 		);

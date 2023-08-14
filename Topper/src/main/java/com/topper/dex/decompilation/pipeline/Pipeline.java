@@ -7,9 +7,13 @@ import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.topper.dex.decompilation.graphs.CFG;
+import com.topper.dex.decompilation.graphs.DFG;
+import com.topper.dex.decompilation.seeker.PivotSeeker;
 import com.topper.dex.decompilation.semanticanalyser.DefaultSemanticAnalyser;
 import com.topper.dex.decompilation.semanticanalyser.SemanticAnalyser;
 import com.topper.dex.decompilation.staticanalyser.DefaultStaticAnalyser;
+import com.topper.dex.decompilation.staticanalyser.Gadget;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
 import com.topper.dex.decompilation.sweeper.Sweeper;
@@ -128,6 +132,7 @@ public final class Pipeline<@NonNull T extends Map<@NonNull String, @NonNull Sta
 
 		final Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> pipeline = new Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>(
 				TreeMap::new);
+		pipeline.addStage(new PivotSeeker<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
 		pipeline.addStage(new BackwardLinearSweeper<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
 		pipeline.addStage(new DefaultStaticAnalyser<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
 		pipeline.addStage(new DefaultSemanticAnalyser<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());

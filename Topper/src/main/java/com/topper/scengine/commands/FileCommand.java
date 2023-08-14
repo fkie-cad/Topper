@@ -11,7 +11,6 @@ import com.topper.dex.decompilation.pipeline.DecompilationDriver;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
 import com.topper.dex.decompilation.pipeline.StageInfo;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
-import com.topper.dex.decompilation.staticanalyser.DefaultStaticAnalyser;
 import com.topper.dex.decompilation.staticanalyser.Gadget;
 import com.topper.exceptions.CommandException;
 import com.topper.exceptions.StageException;
@@ -49,16 +48,16 @@ public final class FileCommand implements ScriptCommand {
 
 			final TreeMap<@NonNull String, @NonNull StageInfo> results = (TreeMap<@NonNull String, @NonNull StageInfo>) driver
 					.decompile(args).getResults();
-			final ImmutableList<@NonNull Gadget> gadgets = ((StaticInfo)results.get(DefaultStaticAnalyser.class.getSimpleName())).getGadgets();
+			final ImmutableList<@NonNull Gadget> gadgets = ((StaticInfo)results.get(StaticInfo.class.getSimpleName())).getGadgets();
 			
 			// 3. Adjust session info in script context.
 			context.getSession().setLoadedFile(file);
 			context.getSession().setGadgets(gadgets);
 
 		} catch (final IllegalArgumentException e) {
-			context.getIO().error("Failed to read file contents of " + file.getPath());
+			context.getIO().error("Failed to read file contents of " + file.getPath() + System.lineSeparator());
 		} catch (final StageException e) {
-			context.getIO().error("Failed to decompile " + file.getPath());
+			context.getIO().error("Failed to decompile " + file.getPath() + System.lineSeparator());
 		}
 	}
 

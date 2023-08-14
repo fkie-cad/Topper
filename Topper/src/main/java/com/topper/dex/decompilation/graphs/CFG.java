@@ -70,7 +70,7 @@ public class CFG {
 	
 	public CFG(final int entry) {
 		this.entry = entry;
-		this.graph = GraphBuilder.directed().build();
+		this.graph = GraphBuilder.directed().allowsSelfLoops(true).build();
 		this.offsetToInstruction = new TreeMap<Integer, @NonNull DecompiledInstruction>();
 		this.instructionToBlock = new TreeMap<@NonNull DecompiledInstruction, @NonNull BasicBlock>();
 	}

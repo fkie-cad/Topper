@@ -20,6 +20,7 @@ import com.topper.scengine.commands.ExitCommandParser;
 import com.topper.scengine.commands.FileCommandParser;
 import com.topper.scengine.commands.HelpCommandParser;
 import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.SearchCommandParser;
 import com.topper.sstate.ScriptContext;
 
 import picocli.CommandLine;
@@ -76,6 +77,7 @@ public final class TopperMain implements Runnable {
 			parser.registerParser(new FileCommandParser());
 			parser.registerParser(new ExitCommandParser());
 			parser.registerParser(new HelpCommandParser());
+			parser.registerParser(new SearchCommandParser());
 			
 			// Check script file. Only used in non - interactive
 			if (this.scriptPath != null) {
@@ -104,6 +106,7 @@ public final class TopperMain implements Runnable {
 		
 		} catch (final Exception ignored) {
 			
+			ignored.printStackTrace();
 			// Uncaught error...
 			System.exit(42);
 		}

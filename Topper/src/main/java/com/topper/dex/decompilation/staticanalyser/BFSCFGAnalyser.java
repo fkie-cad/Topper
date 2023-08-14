@@ -16,6 +16,7 @@ import org.jf.dexlib2.iface.instruction.OffsetInstruction;
 import org.jf.dexlib2.iface.instruction.SwitchPayload;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.graph.EndpointPair;
 import com.topper.dex.decompilation.graphs.BasicBlock;
 import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
@@ -428,7 +429,6 @@ public class BFSCFGAnalyser implements CFGAnalyser {
 				branchTargets.add(target);
 				// Instruction following if statement (else body)
 				branchTargets.add(instruction.getOffset() + instruction.getByteCode().length);
-
 			} else if (StaticAnalyser.isGoto(insn.getOpcode())) {
 				// goto
 				branchTargets = new ArrayList<>(1);

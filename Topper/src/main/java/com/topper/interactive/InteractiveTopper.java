@@ -45,7 +45,7 @@ public final class InteractiveTopper {
 
 				// TODO: If context has loaded file, then print file name. Otherwise empty
 				// string
-				io.output(String.format(LINE_PREFIX, ""));
+				io.output(String.format(LINE_PREFIX, context.getSession().getSessionId()));
 
 				// Get input line
 				command = io.inputLine();

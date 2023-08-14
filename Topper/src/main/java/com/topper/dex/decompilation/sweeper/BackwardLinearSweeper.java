@@ -14,8 +14,10 @@ import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
+import com.topper.dex.decompilation.pipeline.SeekerInfo;
 import com.topper.dex.decompilation.pipeline.StageInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
+import com.topper.dex.decompilation.seeker.PivotSeeker;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.exceptions.SweeperException;
 
@@ -69,55 +71,62 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 	public final T execute(@NonNull final T results) throws SweeperException {
 
 		final PipelineArgs args = (PipelineArgs) results.get(PipelineArgs.class.getSimpleName());
-		final int offset = args.getOffset();
+		final SeekerInfo seekerInfo = (SeekerInfo) results.get(SeekerInfo.class.getSimpleName());
+		final ImmutableList<Integer> offsets = seekerInfo.getPivotOffsets();
 		final byte[] buffer = args.getBuffer();
 		final TopperConfig config = args.getConfig();
 
-		// Perform bound checks on buffer and offset.
-		final int currentSize = config.getSweeperConfig().getPivotOpcode().format.size;
-		if (offset + currentSize > buffer.length) {
-			throw new SweeperException("buffer is too small to hold pivot instruction at " + offset + ".");
-		} else if (offset < 0) {
-			throw new SweeperException("offset must not be negative.");
-		}
+		final ImmutableList.Builder<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = new ImmutableList.Builder<>();
+		for (final int offset : offsets) {
 
-		final Decompiler decompiler = this.getDecompiler();
-		final int maxSizes = config.getSweeperConfig().getMaxNumberInstructions();
-		final List<Integer> checkedGadgetSizes = new ArrayList<Integer>(maxSizes);
-		checkedGadgetSizes.add(currentSize);
-		final int depth = 1;
-
-		// Try to decompile pivot instruction pointed to by offset.
-		try {
-			final DecompilationResult result = decompiler
-					.decompile(Arrays.copyOfRange(buffer, offset, offset + currentSize), null, config);
-			final ImmutableList<DecompiledInstruction> instructions = result.getInstructions();
-			final DecompiledInstruction instruction = instructions.get(0);
-
-			// Thoroughly check pivot instruction, because its format is known in advance.
-			if (instructions.size() != 1 || instruction.getByteCode().length != currentSize
-					|| !instruction.getInstruction().getOpcode().equals(config.getSweeperConfig().getPivotOpcode())) {
-				throw new SweeperException("Pivot instruction (" + instruction.getInstructionString() + " at offset "
-						+ offset + " is invalid.");
+//			final int offset = args.getOffset();
+			// Perform bound checks on buffer and offset.
+			final int currentSize = config.getSweeperConfig().getPivotOpcode().format.size;
+			if (offset + currentSize > buffer.length) {
+				throw new SweeperException("buffer is too small to hold pivot instruction at " + offset + ".");
+			} else if (offset < 0) {
+				throw new SweeperException("offset must not be negative.");
 			}
 
-			// Use pivot instruction as base for recursive sweep.
-			final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = this
-					.recursiveSweepImpl(decompiler, buffer, offset, currentSize, instructions, checkedGadgetSizes,
-							depth, config);
-			
-			// Reverse instruction sequences so that pivot opcode is last.
-			final ImmutableList.Builder<@NonNull ImmutableList<@NonNull DecompiledInstruction>> reversed = new ImmutableList.Builder<>();
-			for (@NonNull final ImmutableList<@NonNull DecompiledInstruction> sequence : sequences) {
-				reversed.add(sequence.reverse());
-			}
-			
-			results.put(SweeperInfo.class.getSimpleName(), new SweeperInfo(reversed.build()));
-			return results;
+			final Decompiler decompiler = this.getDecompiler();
+			final int maxSizes = config.getSweeperConfig().getMaxNumberInstructions();
+			final List<Integer> checkedGadgetSizes = new ArrayList<Integer>(maxSizes);
+			checkedGadgetSizes.add(currentSize);
+			final int depth = 1;
 
-		} catch (final ExceptionWithContext | ArrayIndexOutOfBoundsException e) {
-			throw new SweeperException("Failed to decompile pivot instruction.");
+			// Try to decompile pivot instruction pointed to by offset.
+			try {
+				final DecompilationResult result = decompiler
+						.decompile(Arrays.copyOfRange(buffer, offset, offset + currentSize), null, config);
+				final ImmutableList<DecompiledInstruction> instructions = result.getInstructions();
+				final DecompiledInstruction instruction = instructions.get(0);
+
+				// Thoroughly check pivot instruction, because its format is known in advance.
+				if (instructions.size() != 1 || instruction.getByteCode().length != currentSize || !instruction
+						.getInstruction().getOpcode().equals(config.getSweeperConfig().getPivotOpcode())) {
+					throw new SweeperException("Pivot instruction (" + instruction.getInstructionString()
+							+ " at offset " + offset + " is invalid.");
+				}
+
+				// Use pivot instruction as base for recursive sweep.
+//				final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = this
+				instructions.get(0).setOffset(offset);
+				sequences.addAll(this.recursiveSweepImpl(decompiler, buffer, offset, currentSize, instructions,
+						checkedGadgetSizes, depth, config).stream().map(l -> l.reverse()).iterator());
+
+				// Reverse instruction sequences so that pivot opcode is last.
+//				final ImmutableList.Builder<@NonNull ImmutableList<@NonNull DecompiledInstruction>> reversed = new ImmutableList.Builder<>();
+//				for (@NonNull
+//				final ImmutableList<@NonNull DecompiledInstruction> sequence : sequences) {
+//					reversed.add(sequence.reverse());
+//				}
+
+			} catch (final ExceptionWithContext | ArrayIndexOutOfBoundsException e) {
+				throw new SweeperException("Failed to decompile pivot instruction.");
+			}
 		}
+		results.put(SweeperInfo.class.getSimpleName(), new SweeperInfo(sequences.build()));
+		return results;
 	}
 
 	/**
@@ -247,7 +256,10 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 						.equals(config.getSweeperConfig().getPivotOpcode())) {
 					continue;
 				}
-
+				
+				// Patch offset of instruction.
+				instructions.get(0).setOffset(offset - instructionSize);
+				
 				// Because decompilation was successful, no other
 				// combination of instructions with the same totalSize
 				// starting at the same offset can be valid.

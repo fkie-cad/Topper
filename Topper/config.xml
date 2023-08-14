@@ -9,7 +9,7 @@
 	</staticAnalyser>
 	<sweeper>
 		<maxNumberInstructions>10</maxNumberInstructions>
-		<pivotOpcode>throw</pivotOpcode>
+		<pivotOpcode>THROW</pivotOpcode>
 	</sweeper>
 	<decompiler>
 		<dexSkipThreshold>500000</dexSkipThreshold>

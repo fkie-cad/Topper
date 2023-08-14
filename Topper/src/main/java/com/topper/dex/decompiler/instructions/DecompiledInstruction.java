@@ -41,6 +41,10 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 	public final int getOffset() {
 		return this.instruction.getOffset();
 	}
+	
+	public final void setOffset(final int offset) {
+		this.instruction.setOffset(offset);
+	}
 
 	@Override
 	public String toString() {

@@ -86,6 +86,10 @@ public abstract class Config {
 				getter = (defaultValue) -> {
 					return config.getInt(tag, (int) e.getDefault());
 				};
+			} else if (e.getDefault() instanceof String) {
+				getter = (defaultValue) -> {
+					return config.getString(tag, (String) e.getDefault());
+				};
 			}
 
 			if (getter != null) {

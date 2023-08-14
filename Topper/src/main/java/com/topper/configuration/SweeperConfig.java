@@ -65,7 +65,7 @@ public class SweeperConfig extends Config {
 	 */
 	public final void setPivotOpcode(@NonNull final String pivotOpcodeName) throws InvalidConfigException {
 		try {
-			this.pivotOpcode = Opcode.valueOf(pivotOpcodeName);
+			this.pivotOpcode = Opcode.valueOf(pivotOpcodeName.toUpperCase());
 		} catch (final Exception e) {
 			throw new InvalidConfigException(pivotOpcodeName + " is unknown.");
 		}
@@ -91,6 +91,6 @@ public class SweeperConfig extends Config {
 	@NonNull
 	public ImmutableList<@NonNull ConfigElement<?>> getElements() {
 		return ImmutableList.of(new ConfigElement<Integer>("maxNumberInstructions", 10, this::setMaxNumberInstructions),
-				new ConfigElement<String>("pivotOpcode", "throw", this::setPivotOpcode));
+				new ConfigElement<@NonNull String>("pivotOpcode", "throw", this::setPivotOpcode));
 	}
 }

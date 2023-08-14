@@ -34,7 +34,7 @@ public class BufferedInstruction implements Instruction {
 	/**
 	 * Offset relative to some buffer.
 	 */
-	private final int offset;
+	private int offset;
 
 	public BufferedInstruction(final Opcode opcode, final int offset) {
 		this.opcode = opcode;
@@ -63,6 +63,10 @@ public class BufferedInstruction implements Instruction {
 	 */
 	public final int getOffset() {
 		return this.offset;
+	}
+	
+	public final void setOffset(final int offset) {
+		this.offset = offset;
 	}
 
 	/**

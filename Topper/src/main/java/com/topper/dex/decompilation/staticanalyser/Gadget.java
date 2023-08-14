@@ -47,4 +47,19 @@ public class Gadget {
 	public final boolean hasDFG() {
 		return this.dfg != null;
 	}
+	
+	@Override
+	public final String toString() {
+		final StringBuilder b = new StringBuilder();
+		
+		// Print entry
+		b.append(String.format("Entry: %#08x" + System.lineSeparator(), (this.cfg != null) ? this.cfg.getEntry() : this.instructions.get(0).getOffset()));
+		
+		// Print instructions
+		for (final DecompiledInstruction insn : this.instructions) {
+			b.append(insn.getInstructionString() + System.lineSeparator());
+		}
+		
+		return b.toString();
+	}
 }
