@@ -53,11 +53,14 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 	 * 
 	 * @param results Map of results of previous stages. Among other things, it must
 	 *                contain an instance of {@link PipelineArgs}, which references
-	 *                an <code>offset</code> describing the starting point of this sweep,
-	 *                and a <code>buffer</code> from which to fetch instructions.
+	 *                an <code>offset</code> describing the starting point of this
+	 *                sweep, and a <code>buffer</code> from which to fetch
+	 *                instructions.
 	 * @return List of instruction sequences preceding the instruction located at
 	 *         <code>offset</code> in <code>buffer</code>. The instruction pointed
-	 *         to by <code>offset</code> is also part of this list.
+	 *         to by <code>offset</code> is also part of this list. The list of
+	 *         instructions is in-order, i.e. the pivot instruction is always the
+	 *         last instruction in a list.
 	 * @throws SweeperException If <code>offset</code> does not point to a pivot
 	 *                          instruction, or is out of bounds wrt.
 	 *                          <code>buffer</code>.
@@ -102,7 +105,14 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 			final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = this
 					.recursiveSweepImpl(decompiler, buffer, offset, currentSize, instructions, checkedGadgetSizes,
 							depth, config);
-			results.put(SweeperInfo.class.getSimpleName(), new SweeperInfo(sequences));
+			
+			// Reverse instruction sequences so that pivot opcode is last.
+			final ImmutableList.Builder<@NonNull ImmutableList<@NonNull DecompiledInstruction>> reversed = new ImmutableList.Builder<>();
+			for (@NonNull final ImmutableList<@NonNull DecompiledInstruction> sequence : sequences) {
+				reversed.add(sequence.reverse());
+			}
+			
+			results.put(SweeperInfo.class.getSimpleName(), new SweeperInfo(reversed.build()));
 			return results;
 
 		} catch (final ExceptionWithContext | ArrayIndexOutOfBoundsException e) {

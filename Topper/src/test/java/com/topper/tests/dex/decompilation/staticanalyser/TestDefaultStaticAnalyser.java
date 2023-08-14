@@ -51,7 +51,7 @@ public class TestDefaultStaticAnalyser {
 			SecurityException, IllegalArgumentException, IllegalAccessException, IOException, StageException, InvalidConfigException {
 		TreeMap<@NonNull String, @NonNull StageInfo> results = new TreeMap<>();
 
-		final PipelineArgs args = new PipelineArgs(config, 0x10, 0, DexLoader.get().getMethodBytes());
+		final PipelineArgs args = new PipelineArgs(config, 0x10, DexLoader.get().getMethodBytes());
 		results.put(PipelineArgs.class.getSimpleName(), args);
 		final Sweeper<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> sweeper = new BackwardLinearSweeper<>();
 		results = sweeper.execute(results);
@@ -84,7 +84,7 @@ public class TestDefaultStaticAnalyser {
 			final CFG cfg = gadget.getCFG();
 			assertNotNull(cfg);
 			assertTrue(gadget.hasCFG());	// cfg != null
-			assertEquals(args.getEntry(), cfg.getEntry());
+			assertEquals(gadget.getInstructions().get(0).getOffset(), cfg.getEntry());
 			assertEquals(1, cfg.getGraph().nodes().stream().filter(bb -> bb.getOffset() == cfg.getEntry()).count());
 		}
 	}
@@ -105,7 +105,7 @@ public class TestDefaultStaticAnalyser {
 
 		final StaticAnalyser<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> analyser = create();
 		final TreeMap<@NonNull String, @NonNull StageInfo> results = new TreeMap();
-		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(config, 0, 0, new byte[0]));
+		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(config, 0, new byte[0]));
 		assertThrowsExactly(MissingStageInfoException.class,
 				() -> analyser.execute(new TreeMap<@NonNull String, @NonNull StageInfo>()));
 	}

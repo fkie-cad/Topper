@@ -35,14 +35,20 @@ public final class DefaultStaticAnalyser<@NonNull T extends Map<@NonNull String,
 		
 		@NonNull
 		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = sweeper.getInstructionSequences();
-		final int entry = args.getEntry();
+		
+		// entry point must be relative to sweeper result
+//		final int entry = args.getEntry();
 		
 		// Try out all instruction sequences from sweeping stage.
 		final List<@NonNull Gadget> gadgets = new LinkedList<@NonNull Gadget>();
+		int entry;
 		CFG cfg;
 		DFG dfg;
-		for (final ImmutableList<@NonNull DecompiledInstruction> instructions : sequences) {
+		for (@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions : sequences) {
 		
+			// Compute entry wrt. current instruction sequence.
+			entry = instructions.get(0).getOffset();
+			
 			// Extract CFG
 			cfg = null;
 			if (!config.shouldSkipCFG()) {

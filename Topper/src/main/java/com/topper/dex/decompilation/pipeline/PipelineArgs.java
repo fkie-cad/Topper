@@ -7,17 +7,15 @@ import com.topper.configuration.TopperConfig;
 public class PipelineArgs extends StageInfo {
 
 	private final int offset;
-	private final int entry;
 	
 	private final byte @NonNull [] buffer;
 	
 	@NonNull
 	private final TopperConfig config;
 	
-	public PipelineArgs(@NonNull final TopperConfig config, final int offset, final int entry, final byte @NonNull [] buffer) {
+	public PipelineArgs(@NonNull final TopperConfig config, final int offset, final byte @NonNull [] buffer) {
 		this.config = config;
 		this.offset = offset;
-		this.entry = entry;
 		this.buffer = buffer;
 	}
 	
@@ -28,10 +26,6 @@ public class PipelineArgs extends StageInfo {
 	
 	public final int getOffset() {
 		return this.offset;
-	}
-	
-	public final int getEntry() {
-		return this.entry;
 	}
 	
 	public final byte @NonNull [] getBuffer() {

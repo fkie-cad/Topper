@@ -64,7 +64,7 @@ public class TestBackwardLinearSweeper {
 	@NonNull
 	private static TreeMap<@NonNull String, @NonNull StageInfo> createInfo(final byte[] bytecode, final int offset) {
 		final TreeMap<@NonNull String, @NonNull StageInfo> results = new TreeMap<>();
-		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(config, offset, 0, bytecode));
+		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(config, offset, bytecode));
 		return results;
 	}
 
@@ -96,12 +96,12 @@ public class TestBackwardLinearSweeper {
 			assertTrue(exist[i]);
 		}
 		
-		// All starting instructions must be pivot instructions.
+		// All ending instructions must be pivot instructions.
 		// No intermediate instruction must be a pivot instruction.
 		for (final ImmutableList<@NonNull DecompiledInstruction> sequence : sequences) {
 			
-			assertEquals(config.getSweeperConfig().getPivotOpcode(), sequence.get(0).getInstruction().getOpcode());
-			for (int i = 1; i < sequence.size(); i++) {
+			assertEquals(config.getSweeperConfig().getPivotOpcode(), sequence.get(sequence.size() - 1).getInstruction().getOpcode());
+			for (int i = 0; i < sequence.size() - 1; i++) {
 				
 				assertNotEquals(config.getSweeperConfig().getPivotOpcode(), sequence.get(i).getInstruction().getOpcode());
 			}

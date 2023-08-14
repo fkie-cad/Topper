@@ -114,7 +114,7 @@ public final class ConfigManager {
 	@NonNull
 	public final TopperConfig getConfig() {
 		if (this.config == null) {
-			throw new UnsupportedOperationException("Missing decompiler config.");
+			throw new UnsupportedOperationException("Missing topper config.");
 		}
 		return this.config;
 	}

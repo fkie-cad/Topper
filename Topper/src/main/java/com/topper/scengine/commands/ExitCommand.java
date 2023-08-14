@@ -2,8 +2,6 @@ package com.topper.scengine.commands;
 
 import java.io.IOException;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.topper.sstate.ScriptContext;
 
 public final class ExitCommand implements ScriptCommand {

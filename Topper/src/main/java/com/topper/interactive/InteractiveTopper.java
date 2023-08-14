@@ -38,6 +38,8 @@ public final class InteractiveTopper {
 	 * */
 	public final void mainLoop() throws IOException {
 		
+		// Try loading config file.
+		
 		// Set up IO
 		final IOManager io = new IOManager();
 		try {
