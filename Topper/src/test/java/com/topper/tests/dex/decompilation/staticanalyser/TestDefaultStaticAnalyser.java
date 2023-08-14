@@ -14,16 +14,17 @@ import org.junit.jupiter.api.Test;
 
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.graphs.CFG;
+import com.topper.dex.decompilation.pipeline.DecompilationDriver;
 import com.topper.dex.decompilation.pipeline.Pipeline;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
 import com.topper.dex.decompilation.pipeline.StageInfo;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
+import com.topper.dex.decompilation.seeker.PivotSeeker;
 import com.topper.dex.decompilation.staticanalyser.DefaultStaticAnalyser;
 import com.topper.dex.decompilation.staticanalyser.Gadget;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
-import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.MissingStageInfoException;
 import com.topper.exceptions.StageException;
@@ -49,15 +50,17 @@ public class TestDefaultStaticAnalyser {
 	 */
 	private static final TreeMap<@NonNull String, @NonNull StageInfo> createResults() throws NoSuchFieldException,
 			SecurityException, IllegalArgumentException, IllegalAccessException, IOException, StageException, InvalidConfigException {
-		TreeMap<@NonNull String, @NonNull StageInfo> results = new TreeMap<>();
+		final PipelineArgs args = new PipelineArgs(config, DexLoader.get().getMethodBytes());
+		
+		final Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> pipeline = new Pipeline(TreeMap::new);
+		pipeline.addStage(new PivotSeeker());
+		pipeline.addStage(new BackwardLinearSweeper());
+		final DecompilationDriver driver = new DecompilationDriver();
+		driver.setPipeline(pipeline);
+		final TreeMap<@NonNull String, @NonNull StageInfo> results = (TreeMap<@NonNull String, @NonNull StageInfo>) driver.decompile(args).getResults();
 
-		final PipelineArgs args = new PipelineArgs(config, 0x10, DexLoader.get().getMethodBytes());
-		results.put(PipelineArgs.class.getSimpleName(), args);
-		final Sweeper<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> sweeper = new BackwardLinearSweeper<>();
-		results = sweeper.execute(results);
-
-		assertTrue(results.containsKey(args.getClass().getSimpleName()));
-		assertTrue(results.containsKey(sweeper.getClass().getSimpleName()));
+		assertTrue(results.containsKey(PipelineArgs.class.getSimpleName()));
+		assertTrue(results.containsKey(BackwardLinearSweeper.class.getSimpleName()));
 
 		return results;
 	}
@@ -105,7 +108,7 @@ public class TestDefaultStaticAnalyser {
 
 		final StaticAnalyser<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> analyser = create();
 		final TreeMap<@NonNull String, @NonNull StageInfo> results = new TreeMap();
-		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(config, 0, new byte[0]));
+		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(config, new byte[0]));
 		assertThrowsExactly(MissingStageInfoException.class,
 				() -> analyser.execute(new TreeMap<@NonNull String, @NonNull StageInfo>()));
 	}

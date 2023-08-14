@@ -43,7 +43,7 @@ public final class FileCommand implements ScriptCommand {
 			final byte[] content = FileUtil.readContents(file);
 
 			// 2. Extract gadgets using a pipeline.
-			final PipelineArgs args = new PipelineArgs(context.getConfig(), 0, content);
+			final PipelineArgs args = new PipelineArgs(context.getConfig(), content);
 			final DecompilationDriver driver = new DecompilationDriver();
 
 			final TreeMap<@NonNull String, @NonNull StageInfo> results = (TreeMap<@NonNull String, @NonNull StageInfo>) driver

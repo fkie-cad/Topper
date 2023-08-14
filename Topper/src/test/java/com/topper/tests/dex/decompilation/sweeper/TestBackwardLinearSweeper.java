@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
+import com.topper.dex.decompilation.pipeline.SeekerInfo;
 import com.topper.dex.decompilation.pipeline.StageInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
@@ -62,9 +63,11 @@ public class TestBackwardLinearSweeper {
 	}
 
 	@NonNull
-	private static TreeMap<@NonNull String, @NonNull StageInfo> createInfo(final byte[] bytecode, final int offset) {
-		final TreeMap<@NonNull String, @NonNull StageInfo> results = new TreeMap<>();
-		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(config, offset, bytecode));
+	private static TreeMap<@NonNull String, @NonNull StageInfo> createInfo(final byte[] bytecode, final int offset) throws StageException {
+		TreeMap<@NonNull String, @NonNull StageInfo> results = new TreeMap<>();
+		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(config, bytecode));
+		results.put(SeekerInfo.class.getSimpleName(), new SeekerInfo(ImmutableList.of(offset)));
+		
 		return results;
 	}
 
