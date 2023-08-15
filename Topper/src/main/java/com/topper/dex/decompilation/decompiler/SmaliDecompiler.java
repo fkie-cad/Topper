@@ -44,20 +44,21 @@ public final class SmaliDecompiler implements Decompiler {
 	 *                     execution contexts.
 	 * @param config       Configuration to use during decompilation.
 	 * @return Wrapper holding information on the decompilation. Among other things,
-	 *         it holds the decompiled instructions.
-	 * @throws IndexOutOfBoundsException If an instruction requires an out - of -
-	 *                                   bounds read.
+	 *         it holds a list of {@link DecompiledInstruction}s.
 	 * @throws ExceptionWithContext      If an unknown instruction is met, or an
 	 *                                   internal logic error occurs like too large
 	 *                                   integer values for reference indices.
+	 * @throws IndexOutOfBoundsException If an instruction performs an out - of -
+	 *                                   bounds read.
 	 * @throws IllegalArgumentException  If the buffer length is not a multiple of
 	 *                                   two.
 	 */
+	@SuppressWarnings("null")	// ImmutableList.copyOf is not expected to return null
 	@NonNull
 	@Override
 	public final DecompilationResult decompile(final byte @NonNull [] bytecode,
 			@Nullable final DexBackedDexFile augmentation, @NonNull final TopperConfig config)
-			throws IndexOutOfBoundsException, ExceptionWithContext {
+			throws ExceptionWithContext, IndexOutOfBoundsException, IllegalArgumentException {
 
 		if ((bytecode.length % 2) != 0) {
 			throw new IllegalArgumentException("bytecode buffer must contain an even amount of bytes.");
@@ -67,11 +68,15 @@ public final class SmaliDecompiler implements Decompiler {
 
 		int offset = 0;
 		int size;
-		final List<@NonNull DecompiledInstruction> decompiledInstructions = new LinkedList<DecompiledInstruction>();
+		final List<@NonNull DecompiledInstruction> decompiledInstructions = new LinkedList<>();
 		byte[] buf;
-		for (final @NonNull BufferedInstruction instruction : this.getInstructions(buffer, augmentation,
+		for (final BufferedInstruction instruction : this.getInstructions(buffer, augmentation,
 				config.getDecompilerConfig().getOpcodes(),
 				config.getDecompilerConfig().shouldNopUnknownInstruction())) {
+			
+			if (instruction == null) {
+				continue;
+			}
 
 			size = instruction.getCodeUnits() * 2;
 			buf = new byte[size];
@@ -87,6 +92,10 @@ public final class SmaliDecompiler implements Decompiler {
 	/**
 	 * Retrieves instructions from a given <code>buffer</code>.
 	 * 
+	 * There is no need for the internal decompilation process to know about
+	 * {@link Config} and its subclasses. All required information is passed
+	 * via parameters.
+	 * 
 	 * @param buffer                Byte buffer, from which to extract smali
 	 *                              instructions.
 	 * @param file                  Dex file representation to use for resolving
@@ -99,17 +108,17 @@ public final class SmaliDecompiler implements Decompiler {
 	 *                              out ({@code true}), or an exception is thrown
 	 *                              and all decompilation results discarded
 	 *                              ({@code false}).
-	 * @return List of extracted instructions.
-	 * @throws IndexOutOfBoundsException If an instruction requires an out - of -
-	 *                                   bounds read.
+	 * @return Iterator over extracted instructions.
 	 * @throws ExceptionWithContext      If an unknown instruction is met, or an
 	 *                                   internal logic error occurs like too large
 	 *                                   integer values for reference indices.
+	 * @throws IndexOutOfBoundsException If an instruction requires an out - of -
+	 *                                   bounds read.
 	 */
 	@NonNull
 	private final Iterable<? extends BufferedInstruction> getInstructions(@NonNull final DexBuffer buffer,
 			@Nullable final DexBackedDexFile file, @NonNull final Opcodes opcodes, final boolean nopUnknownInstruction)
-			throws IndexOutOfBoundsException, ExceptionWithContext {
+			throws ExceptionWithContext, IndexOutOfBoundsException{
 		final int instructionsStartOffset = 0;
 		final int endOffset = instructionsStartOffset + buffer.getBuf().length;
 
@@ -130,7 +139,6 @@ public final class SmaliDecompiler implements Decompiler {
 						final int offset = reader.getOffset();
 						if (offset > endOffset || offset < 0) {
 							return endOfData();
-							// throw new ExceptionWithContext("The last instruction is truncated");
 						}
 						return instruction;
 					}
