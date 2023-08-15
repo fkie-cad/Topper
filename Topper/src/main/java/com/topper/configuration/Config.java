@@ -1,10 +1,9 @@
 package com.topper.configuration;
 
-import java.util.Iterator;
-
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.ex.ConversionException;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.exceptions.InvalidConfigException;
@@ -20,7 +19,7 @@ import com.topper.exceptions.InvalidConfigException;
 public abstract class Config {
 
 	/**
-	 * Indicates whether {@code load} finished successfully or not.
+	 * Indicates whether {@link Config#load} finished successfully or not.
 	 */
 	private boolean hasLoaded;
 
@@ -29,48 +28,31 @@ public abstract class Config {
 	 * object.
 	 * 
 	 * Each subclass of this class must register configuration data by overwriting
-	 * {@code getElements}. These elements are used to search for tags in the given
-	 * .xml file. If a tag matches a registered configuration, its value will be
-	 * loaded into the subclass. Otherwise a default value will be loaded.
+	 * {@link Config#getElements}. These elements are used to search for tags in the
+	 * given .xml file. If a tag matches a registered configuration, its value will
+	 * be loaded into the subclass. Otherwise a default value will be loaded. Loading
+	 * default values will always be done, if loading the actual value fails, e.g.
+	 * due to type conversion errors.
 	 * 
-	 * If a tag of a subclass is not part of the xml file, then an
-	 * {@link InvalidConfigException} will be thrown. Therefore, it is required to
-	 * at least specify e.g. {@code <general></general>} for the
-	 * {@link GeneralConfig}. A minimalistic configuration file may look like this:
+	 * It is possible to leave out unused tags. E.g. leaving out {@code <general>}
+	 * forces {@link GeneralConfig} to use its default values.
+	 * 
+	 * A minimalistic configuration file may look like this:
 	 * 
 	 * <pre>{@code 
 	 * <configuration>
-	 *	<general></general>
-	 * 	<staticAnalyser></staticAnalyser>
-	 *	<sweeper></sweeper>
-	 *	<decompiler></decompiler>
 	 * </configuration>
 	 * }</pre>
 	 * 
 	 * @param config A {@code XMLConfiguration} containing information used by
 	 *               individual components.
 	 * @throws InvalidConfigException If a tag of a configuration subclass is
-	 *                                missing.
+	 *                                invalid in the context of this application.
 	 * @see ConfigElement
 	 */
 	public final void load(@NonNull final XMLConfiguration config) throws InvalidConfigException {
 
-		final Iterator<String> it = config.getKeys();
-		String key;
-		boolean containsTag = false;
-		while (it.hasNext()) {
-			key = it.next();
-
-			if (key.startsWith(this.getTag())) {
-				containsTag = true;
-				break;
-			}
-		}
-
-		if (!containsTag) {
-			throw new InvalidConfigException(this.getTag() + " tag is missing.");
-		}
-
+		// Parse all requested tags, if available.
 		Getter<?> getter;
 		for (@NonNull
 		final ConfigElement<?> e : this.getElements()) {
@@ -88,20 +70,20 @@ public abstract class Config {
 				};
 			} else if (e.getDefault() instanceof String) {
 				getter = (defaultValue) -> {
-					return config.getString(tag, (String) e.getDefault());
+					final String value = config.getString(tag, (String) e.getDefault());
+					return (value != null) ? value : (String) e.getDefault();
 				};
 			}
 
-			if (getter != null) {
-				this.setValue(e, getter, e.getDefault());
-			}
+			this.setValue(e, getter, e.getDefault());
 		}
 
+		// Loading is done.
 		this.hasLoaded = true;
 	}
 
 	/**
-	 * Checks whether {@code load} has been executed successfully.
+	 * Checks whether {@link Config#load} has been executed successfully.
 	 * 
 	 * @throws UnsupportedOperationException If {@code load} has <b>not</b> been
 	 *                                       executed yet or execution has not been
@@ -113,20 +95,25 @@ public abstract class Config {
 		}
 	}
 
-	@SuppressWarnings("unchecked")	// Actually it is checked, but not in this method
-	private final <T> void setValue(final ConfigElement<?> e, final Getter<?> getter, final T defaultValue)
-			throws InvalidConfigException {
+	@SuppressWarnings("unchecked") // Actually it is checked, but not in this method
+	private final <T> void setValue(@NonNull final ConfigElement<?> e, @Nullable final Getter<?> getter,
+			@NonNull final T defaultValue) throws InvalidConfigException {
 
-		try {
-			((ConfigElement<T>) e).set(((Getter<T>) getter).get(defaultValue));
-		} catch (final ConversionException ignored) {
+		if (getter != null) {
+			try {
+				((ConfigElement<T>) e).set(((Getter<T>) getter).get(defaultValue));
+
+			} catch (final ConversionException ignored) {
+				((ConfigElement<T>) e).set(defaultValue);
+			}
+		} else {
 			((ConfigElement<T>) e).set(defaultValue);
 		}
 	}
 
 	/**
 	 * Gets the xml tag of this configuration class.
-	 * */
+	 */
 	@NonNull
 	public abstract String getTag();
 
@@ -134,7 +121,7 @@ public abstract class Config {
 	 * Gets a list of configuration elements to be used during loading.
 	 * 
 	 * @see ConfigElement
-	 * */
+	 */
 	@NonNull
 	public abstract ImmutableList<@NonNull ConfigElement<?>> getElements();
 
