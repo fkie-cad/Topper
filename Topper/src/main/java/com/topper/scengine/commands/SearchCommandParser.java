@@ -10,11 +10,24 @@ public final class SearchCommandParser implements ScriptCommandParser {
 	@NonNull 
 	public final ScriptCommand parse(@NonNull final String[] tokens) throws IllegalCommandException {
 		
-		if (tokens.length < 1 || tokens.length > 2) {
+		if (tokens.length <= 0) {
 			throw new IllegalCommandException("Invalid usage: " + this.usage());
 		}
 		
-		final String expression = (tokens.length > 1) ? tokens[1] : "";
+		String expression = "";
+		if (tokens.length >= 2) {
+			
+			final StringBuilder b = new StringBuilder();
+			for (int i = 1; i < tokens.length; i++) {
+				if (i < tokens.length - 1) {
+					b.append(tokens[i] + "\\s");
+				} else {
+					b.append(tokens[i]);
+				}
+			}
+			expression = b.toString();
+		}
+		
 		if (expression == null) {
 			throw new IllegalCommandException("Invalid expression.");
 		}
