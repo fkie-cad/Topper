@@ -26,8 +26,8 @@ import com.topper.exceptions.StageException;
  * The four mandatory stages include:
  * <ul>
  * <li>{@link Seeker}: Identifies offsets of interest in a given buffer.</li>
- * <li>{@link Sweeper}: Identifies instruction sequences starting from a given
- * offset.</li>
+ * <li>{@link Sweeper}: Identifies instruction sequences starting from given
+ * offsets.</li>
  * <li>{@link StaticAnalyser}: Extracts {@link CFG} and {@link DFG} from all
  * instruction sequences.</li>
  * <li>{@link SemanticAnalyser}: Performs e.g. reachability analysis, taint
@@ -54,13 +54,11 @@ public final class Pipeline {
 
 	/**
 	 * Finalizer to invoke after <code>stages</code> have been executed.
+	 * Defaults to {@link DefaultFinalizer}.
 	 * */
 	@NonNull
 	private Finalizer finalizer;
 
-	/**
-	 * 
-	 */
 	public Pipeline() {
 		this.stages = new LinkedList<@NonNull Stage>();
 		this.finalizer = new DefaultFinalizer();
@@ -71,38 +69,46 @@ public final class Pipeline {
 
 		if (!this.isValid()) {
 			throw new StageException(
-					"Pipeline must at least contain a Sweeper, a StaticAnalyser and a SemanticAnalyser.");
+					"Pipeline must at least contain a Seeker, a Sweeper, a StaticAnalyser and a SemanticAnalyser.");
 		}
 
-		final PipelineContext context = new PipelineContext(args);
+		// Catch runtime exceptions like IllegalArgumentException
+		// and wrap them in StageException.
+		try {
+			final PipelineContext context = new PipelineContext(args);
+			for (final Stage stage : this.stages) {
+				stage.execute(context);
+			}
 
-		for (final Stage stage : this.stages) {
-			stage.execute(context);
+			return this.finalizer.finalize(context);
+		} catch (final RuntimeException e) {
+			throw new StageException("An internal error occurred.", e);
 		}
-
-		return this.finalizer.finalize(context);
 	}
 
 	/**
 	 * Checks whether this pipeline contains at least
 	 * <ul>
+	 * <li>Seeker</li>
 	 * <li>Sweeper</li>
 	 * <li>StaticAnalyser</li>
 	 * <li>SemanticAnalyser</li>
 	 * </ul>
-	 * 
+	 * Also checks on finalizer.
 	 * Otherwise a pipeline would be useless.
 	 */
 	public final boolean isValid() {
 
+		boolean hasSeeker = false;
 		boolean hasSweeper = false;
 		boolean hasStatic = false;
 		boolean hasSemantic = false;
 
-//		for (final Stage<T> stage : this.stages) {
 		for (final Stage stage : this.stages) {
 
-			if (Sweeper.class.isAssignableFrom(stage.getClass())) {
+			if (Seeker.class.isAssignableFrom(stage.getClass())) {
+				hasSeeker = true;
+			} else if (Sweeper.class.isAssignableFrom(stage.getClass())) {
 				hasSweeper = true;
 			} else if (StaticAnalyser.class.isAssignableFrom(stage.getClass())) {
 				hasStatic = true;
@@ -111,7 +117,7 @@ public final class Pipeline {
 			}
 		}
 
-		return hasSweeper && hasStatic && hasSemantic;
+		return hasSeeker && hasSweeper && hasStatic && hasSemantic && (this.finalizer != null);
 	}
 
 	public final void addStage(@NonNull final Stage stage) {
