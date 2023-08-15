@@ -33,24 +33,36 @@ public class TopperConfig {
 		this.decompilerConfig = decompilerConfig;
 	}
 	
+	/**
+	 * Gets currently loaded {@link GeneralConfig}.
+	 * */
 	@NonNull
 	public final GeneralConfig getGeneralConfig() {
 		this.generalConfig.check();
 		return this.generalConfig;
 	}
 	
+	/**
+	 * Gets currently loaded {@link StaticAnalyserConfig}.
+	 * */
 	@NonNull
 	public final StaticAnalyserConfig getStaticAnalyserConfig() {
 		this.staticAnalyserConfig.check();
 		return this.staticAnalyserConfig;
 	}
 	
+	/**
+	 * Gets currently loaded {@link SweeperConfig}.
+	 * */
 	@NonNull
 	public final SweeperConfig getSweeperConfig() {
 		this.sweeperConfig.check();
 		return this.sweeperConfig;
 	}
 	
+	/**
+	 * Gets currently loaded {@link DecompilerConfig}.
+	 * */
 	@NonNull
 	public final DecompilerConfig getDecompilerConfig() {
 		this.decompilerConfig.check();

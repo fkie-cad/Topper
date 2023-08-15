@@ -22,6 +22,12 @@ public final class GeneralConfig extends Config {
 	/**
 	 * Gets default number of threads to create in case multi - threading
 	 * is used to speed things up.
+	 * 
+	 * Defaults to <code>1</code>.
+	 * 
+	 * @throws UnsupportedOperationException If {@link Config#load} has not been
+	 *                                       executed yet or execution has not been
+	 *                                       successful.
 	 * */
 	public final int getDefaultAmountThreads() {
 		this.check();

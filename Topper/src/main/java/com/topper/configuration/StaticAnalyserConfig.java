@@ -24,7 +24,12 @@ public class StaticAnalyserConfig extends Config {
 	
 	/**
 	 * Determines whether or not to skip CFG extraction in static analysis.
+	 * 
 	 * Defaults to <code>false</code>.
+	 * 
+	 * @throws UnsupportedOperationException If {@link Config#load} has not been
+	 *                                       executed yet or execution has not been
+	 *                                       successful.
 	 * */
 	public final boolean shouldSkipCFG() {
 		this.check();
@@ -40,9 +45,15 @@ public class StaticAnalyserConfig extends Config {
 	
 	/**
 	 * Determines whether or not to skip DFG extraction in static analysis.
+	 * 
 	 * Defaults to <code>false</code>.
+	 * 
+	 * @throws UnsupportedOperationException If {@link Config#load} has not been
+	 *                                       executed yet or execution has not been
+	 *                                       successful.
 	 * */
 	public final boolean shouldSkipDFG() {
+		this.check();
 		return this.skipDFG;
 	}
 	

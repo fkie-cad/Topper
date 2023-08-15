@@ -29,9 +29,16 @@ public class SweeperConfig extends Config {
 
 	/**
 	 * Gets current upper bound on the number of instructions to obtain from a
-	 * sweeper. Defaults to 10.
+	 * sweeper.
+	 * 
+	 * Defaults to <code>10</code>.
+	 * 
+	 * @throws UnsupportedOperationException If {@link Config#load} has not been
+	 *                                       executed yet or execution has not been
+	 *                                       successful.
 	 */
 	public final int getMaxNumberInstructions() {
+		this.check();
 		return this.maxNumberInstructions;
 	}
 
@@ -48,8 +55,13 @@ public class SweeperConfig extends Config {
 	}
 
 	/**
-	 * Gets current pivot instruction that signals the end of a gadget. Defaults to
-	 * <code>Opcode.THROW</code>.
+	 * Gets current pivot instruction that signals the end of a gadget.
+	 * 
+	 * Defaults to <code>Opcode.THROW</code>.
+	 * 
+	 * @throws UnsupportedOperationException If {@link Config#load} has not been
+	 *                                       executed yet or execution has not been
+	 *                                       successful.
 	 */
 	@NonNull
 	public final Opcode getPivotOpcode() {
@@ -73,7 +85,7 @@ public class SweeperConfig extends Config {
 
 	/**
 	 * Gets the <code>"sweeper"</code> tag.
-	 * */
+	 */
 	@Override
 	@NonNull
 	public String getTag() {
@@ -86,7 +98,7 @@ public class SweeperConfig extends Config {
 	 * <li>maxNumberInstructions(int)</li>
 	 * <li>pivotOpcode(String)</code>
 	 * </ul>
-	 * */
+	 */
 	@Override
 	@NonNull
 	public ImmutableList<@NonNull ConfigElement<?>> getElements() {
