@@ -25,6 +25,7 @@ import com.topper.scengine.commands.HelpCommand;
 import com.topper.scengine.commands.HelpCommandParser;
 import com.topper.scengine.commands.ScriptCommand;
 import com.topper.sstate.ScriptContext;
+import com.topper.tests.utility.IOHelper;
 import com.topper.tests.utility.TestConfig;
 
 public class TestScriptExecutor {
@@ -45,20 +46,14 @@ public class TestScriptExecutor {
 	
 	@BeforeAll
 	public static void clearStreams() {
-		out = System.out;
-		err = System.err;
-		System.setOut(new PrintStream(new OutputStream() {
-			public void write(int b) {}
-		}));
-		System.setErr(new PrintStream(new OutputStream() {
-			public void write(int b) {}
-		}));
+		IOHelper.get().clearOut();
+		IOHelper.get().clearErr();
 	}
 	
 	@AfterAll
 	public static void restoreStreams() {
-		System.setOut(out);
-		System.setErr(err);
+		IOHelper.get().restoreOut();
+		IOHelper.get().restoreErr();
 	}
 	
 	@BeforeEach

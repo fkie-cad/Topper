@@ -3,7 +3,6 @@ package com.topper.tests.configuration;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.nio.file.Paths;
 
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import com.topper.configuration.ConfigManager;
 import com.topper.exceptions.InvalidConfigException;
+import com.topper.tests.utility.IOHelper;
 
 public class TestConfigManager {
 	
@@ -27,9 +27,6 @@ public class TestConfigManager {
 	private static final String INVALID_CONFIG_PATH = RESOURCE_PATH + VALID_FILE_INVALID_CONFIG_NAME;
 	
 	private static final ConfigManager manager = ConfigManager.get();
-	
-	private static PrintStream out;
-	private static PrintStream err;
 	
 	private static void nullField(@NonNull final Object obj, @NonNull final String fieldName) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		final Field target = obj.getClass().getDeclaredField(fieldName);
@@ -46,17 +43,15 @@ public class TestConfigManager {
 	}
 	
 	@BeforeAll
-	public static void init() {
-		out = System.out;
-		err = System.err;
-		System.setOut(null);
-		System.setErr(null);
+	public static void clearStreams() {
+		IOHelper.get().clearOut();
+		IOHelper.get().clearErr();
 	}
 	
 	@AfterAll
-	public static void restore() {
-		System.setOut(out);
-		System.setErr(err);
+	public static void restoreStreams() {
+		IOHelper.get().restoreOut();
+		IOHelper.get().restoreErr();
 	}
 	
 	@Test
