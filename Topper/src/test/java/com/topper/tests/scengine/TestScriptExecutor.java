@@ -4,7 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,8 +36,29 @@ public class TestScriptExecutor {
 	
 	private static ScriptContext VALID_CONTEXT;
 	
+	private static PrintStream out;
+	private static PrintStream err;
+	
 	private static final ScriptExecutor createExecutor() {
 		return new ScriptExecutor();
+	}
+	
+	@BeforeAll
+	public static void clearStreams() {
+		out = System.out;
+		err = System.err;
+		System.setOut(new PrintStream(new OutputStream() {
+			public void write(int b) {}
+		}));
+		System.setErr(new PrintStream(new OutputStream() {
+			public void write(int b) {}
+		}));
+	}
+	
+	@AfterAll
+	public static void restoreStreams() {
+		System.setOut(out);
+		System.setErr(err);
 	}
 	
 	@BeforeEach

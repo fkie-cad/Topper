@@ -61,6 +61,7 @@ public final class GeneralConfig extends Config {
 	 * <li>defaultAmountThreads(int)</li>
 	 * </ul>
 	 * */
+	@SuppressWarnings("null")
 	@Override
 	@NonNull 
 	public ImmutableList<@NonNull ConfigElement<?>> getElements() {

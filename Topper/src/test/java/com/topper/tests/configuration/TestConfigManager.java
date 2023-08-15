@@ -3,10 +3,12 @@ package com.topper.tests.configuration;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.nio.file.Paths;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,9 @@ public class TestConfigManager {
 	
 	private static final ConfigManager manager = ConfigManager.get();
 	
+	private static PrintStream out;
+	private static PrintStream err;
+	
 	private static void nullField(@NonNull final Object obj, @NonNull final String fieldName) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		final Field target = obj.getClass().getDeclaredField(fieldName);
 		if (target != null) {
@@ -42,8 +47,16 @@ public class TestConfigManager {
 	
 	@BeforeAll
 	public static void init() {
-		System.setErr(null);
+		out = System.out;
+		err = System.err;
 		System.setOut(null);
+		System.setErr(null);
+	}
+	
+	@AfterAll
+	public static void restore() {
+		System.setOut(out);
+		System.setErr(err);
 	}
 	
 	@Test

@@ -99,6 +99,7 @@ public class SweeperConfig extends Config {
 	 * <li>pivotOpcode(String)</code>
 	 * </ul>
 	 */
+	@SuppressWarnings("null")
 	@Override
 	@NonNull
 	public ImmutableList<@NonNull ConfigElement<?>> getElements() {

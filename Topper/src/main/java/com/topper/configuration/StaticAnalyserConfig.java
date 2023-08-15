@@ -80,6 +80,7 @@ public class StaticAnalyserConfig extends Config {
 	 * <li>skipDfg(boolean)</li>
 	 * </ul>
 	 * */
+	@SuppressWarnings("null")
 	@Override
 	@NonNull 
 	public ImmutableList<@NonNull ConfigElement<?>> getElements() {

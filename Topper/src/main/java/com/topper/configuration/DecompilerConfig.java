@@ -148,6 +148,7 @@ public class DecompilerConfig extends Config {
 	 * <li>shouldNopUnknownInstruction(boolean)</li>
 	 * </ul>
 	 */
+	@SuppressWarnings("null")
 	@Override
 	@NonNull
 	public ImmutableList<@NonNull ConfigElement<?>> getElements() {
