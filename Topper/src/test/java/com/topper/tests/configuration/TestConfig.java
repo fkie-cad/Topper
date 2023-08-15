@@ -1,6 +1,7 @@
 package com.topper.tests.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -236,5 +237,26 @@ public class TestConfig {
 
 		// Check default values
 		assertEquals(InvalidConfig.DEFAULT_CONFIG_VALUE, config.getConfig());
+	}
+	
+	@Test
+	public void Given_NonLoadedConfig_When_Checking_Expect_UnsupportedOperationException() throws IOException, ConfigurationException {
+		// Reason: Prevents using the configuration before loading finished.
+		
+		final XMLConfiguration xml = loadTmpConfig(VALID_PARTIAL_CONFIG);
+		final TmpConfig config = new TmpConfig();
+		
+		assertThrowsExactly(UnsupportedOperationException.class, () -> config.check());
+	}
+	
+	@Test
+	public void Given_LoadedConfig_When_Checking_Expect_NoException() throws IOException, ConfigurationException, InvalidConfigException {
+		// Reason: After loading finished, configuration is usable.
+		
+		final XMLConfiguration xml = loadTmpConfig(VALID_PARTIAL_CONFIG);
+		final TmpConfig config = new TmpConfig();
+		
+		config.load(xml);
+		config.check();
 	}
 }
