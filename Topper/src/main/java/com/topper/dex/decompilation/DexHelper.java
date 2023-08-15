@@ -13,6 +13,9 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
  * 
  * E.g. it provides a way to convert a list of
  * instructions to a human - readable string.
+ * 
+ * @author Pascal Kühnemann
+ * @since 15.08.2023
  * */
 public final class DexHelper {
 

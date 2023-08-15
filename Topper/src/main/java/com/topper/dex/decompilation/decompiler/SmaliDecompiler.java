@@ -32,6 +32,7 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
  * dexlib2</a>
  * 
  * @author Pascal Kühnemann
+ * @since 15.08.2023
  */
 public final class SmaliDecompiler implements Decompiler {
 
