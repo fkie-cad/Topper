@@ -28,7 +28,7 @@ public final class ConfigManager {
 	private static ConfigManager instance;
 
 	/**
-	 * Below configurations are mandatory.
+	 * Mandatory configuration.
 	 */
 	private TopperConfig config;
 
@@ -40,6 +40,7 @@ public final class ConfigManager {
 	/**
 	 * Gets the unique instance of this manager.
 	 */
+	@SuppressWarnings("null") // null is impossible...
 	@NonNull
 	public static final ConfigManager get() {
 		if (ConfigManager.instance == null) {
@@ -52,7 +53,7 @@ public final class ConfigManager {
 	 * Gets the {@link GeneralConfig} configuration.
 	 * 
 	 * @throws UnsupportedOperationException If this method is called before
-	 *                                       <code>loadConfig</code>.
+	 *                                       {@link ConfigManager#loadConfig}.
 	 */
 	@NonNull
 	public final GeneralConfig getGeneralConfig() {
@@ -66,8 +67,8 @@ public final class ConfigManager {
 	 * Gets the {@link StaticAnalyserConfig} configuration.
 	 * 
 	 * @throws UnsupportedOperationException If this method is called before
-	 *                                       <code>loadConfig</code>.
-	 * */
+	 *                                       {@link ConfigManager#loadConfig}.
+	 */
 	@NonNull
 	public final StaticAnalyserConfig getStaticAnalyserConfig() {
 		if (this.config == null) {
@@ -80,8 +81,8 @@ public final class ConfigManager {
 	 * Gets the {@link SweeperConfig} configuration.
 	 * 
 	 * @throws UnsupportedOperationException If this method is called before
-	 *                                       <code>loadConfig</code>.
-	 * */
+	 *                                       {@link ConfigManager#loadConfig}.
+	 */
 	@NonNull
 	public final SweeperConfig getSweeperConfig() {
 		if (this.config == null) {
@@ -94,8 +95,8 @@ public final class ConfigManager {
 	 * Gets the {@link DecompilerConfig} configuration.
 	 * 
 	 * @throws UnsupportedOperationException If this method is called before
-	 *                                       <code>loadConfig</code>.
-	 * */
+	 *                                       {@link ConfigManager#loadConfig}.
+	 */
 	@NonNull
 	public final DecompilerConfig getDecompilerConfig() {
 		if (this.config == null) {
@@ -105,12 +106,12 @@ public final class ConfigManager {
 	}
 
 	/**
-	 * Gets the {@link TopperConfig} configuration. This is wrapper of all
-	 * other configs to ease using dependency injection.
+	 * Gets the {@link TopperConfig} configuration. This is wrapper of all other
+	 * configs to ease using dependency injection.
 	 * 
 	 * @throws UnsupportedOperationException If this method is called before
-	 *                                       <code>loadConfig</code>.
-	 * */
+	 *                                       {@link ConfigManager#loadConfig}.
+	 */
 	@NonNull
 	public final TopperConfig getConfig() {
 		if (this.config == null) {
@@ -121,22 +122,25 @@ public final class ConfigManager {
 
 	/**
 	 * Loads the configurations to use from a given {@code path}. The configuration
-	 * file must be an xml file and specify the following tags:
+	 * file must be an xml file and may specify the following tags:
 	 * <ul>
 	 * <li>general: General information that applies to more than one
 	 * component.</li>
-	 * <li>static-analyser: Configurations for the {@link StaticAnalyser}.</li>
+	 * <li>staticAnalyser: Configurations for the {@link StaticAnalyser}.</li>
 	 * <li>sweeper: Configurations for the {@link Sweeper}.</li>
 	 * <li>decompiler: Configurations for the {@link Decompiler}.</li>
 	 * </ul>
 	 * Visit the respective configuration to see details on its tags.
 	 * 
-	 * If any tags are missing, they will be filled with default values. However, if
-	 * e.g. an integer tag is filled with a string, then an
-	 * {@link InvalidConfigException} is thrown.
+	 * If any tags are missing, they will be filled with default values. If e.g. an
+	 * integer tag is filled with a string, then it will also be assigned its
+	 * default value.
 	 * 
 	 * @param path File path to the xml configuration file.
-	 * @throws InvalidConfigException If loading configurations fails.
+	 * @throws InvalidConfigException If loading configurations fails, e.g. due to
+	 *                                using values that are invalid in the context
+	 *                                of this application like -1 for the number of
+	 *                                threads.
 	 * @see DecompilerConfig
 	 * @see GeneraliConfig
 	 * @see StaticAnalyserConfig
@@ -149,7 +153,6 @@ public final class ConfigManager {
 			final Parameters params = new Parameters();
 			final FileBasedConfigurationBuilder<XMLConfiguration> builder = new FileBasedConfigurationBuilder<>(
 					XMLConfiguration.class).configure(params.xml().setFileName(path.toString()) // use path
-//							.setSchemaValidation(true));	// enable xml file validation
 			);
 			final XMLConfiguration xmlConfig = builder.getConfiguration();
 
