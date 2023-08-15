@@ -5,6 +5,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.jf.dexlib2.Opcode;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.dex.decompilation.DexHelper;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
@@ -144,6 +145,7 @@ public class BasicBlock implements Comparable<BasicBlock> {
 	/**
 	 * Convert a basic block to a string.
 	 * */
+	@SuppressWarnings("null")	// instructions is ALWAYS non-null
 	@Override
 	public final String toString() {
 		final StringBuilder b = new StringBuilder();
@@ -152,10 +154,7 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		b.append(String.format("%#x", this.getOffset()));
 		b.append(System.lineSeparator() + "Size: ");
 		b.append(String.format("%#x", this.getSize()) + System.lineSeparator());
-		for (final DecompiledInstruction instruction : this.getInstructions()) {
-			b.append(instruction);
-			b.append(System.lineSeparator());
-		}
+		b.append(DexHelper.instructionsToString(this.instructions));
 		
 		return b.toString();
 	}

@@ -2,9 +2,9 @@ package com.topper.dex.decompilation.staticanalyser;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.jf.dexlib2.Opcode;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.dex.decompilation.DexHelper;
 import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompilation.graphs.DFG;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
@@ -56,37 +56,8 @@ public class Gadget {
 		// Print entry
 		b.append(String.format("Entry: %#08x" + System.lineSeparator(), (this.cfg != null) ? this.cfg.getEntry() : this.instructions.get(0).getOffset()));
 		
-		// Print instructions
-		int max = 0;
-		for (@NonNull final DecompiledInstruction insn : this.instructions) {
-			if (insn.getInstruction().getOpcode().equals(Opcode.PACKED_SWITCH_PAYLOAD) ||
-					insn.getInstruction().getOpcode().equals(Opcode.SPARSE_SWITCH_PAYLOAD) ||
-					insn.getInstruction().getOpcode().equals(Opcode.ARRAY_PAYLOAD)) {
-				continue;
-			}
-			
-			if (insn.getByteCode().length > max) {
-				max = insn.getByteCode().length;
-			}
-		}
-		
-		for (final DecompiledInstruction insn : this.instructions) {
-			
-			if (insn.getByteCode().length <= max) {
-				// Non - payload instruction, or small payload
-				for (final byte raw : insn.getByteCode()) {
-					b.append(String.format("%02x ", raw));
-				}
-				
-				// Fill up with spaces
-				for (int i = 0; i < (max - insn.getByteCode().length) * 3; i++) {
-					b.append(' ');
-				}
-				b.append(insn.getInstructionString() + System.lineSeparator());
-			} else {
-				b.append(insn.getInstructionString() + System.lineSeparator());
-			}
-		}
+		// Convert instructions to string
+		b.append(DexHelper.instructionsToString(this.instructions));
 		
 		return b.toString();
 	}
