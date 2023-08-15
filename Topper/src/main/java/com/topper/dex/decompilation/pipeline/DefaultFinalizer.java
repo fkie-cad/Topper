@@ -14,7 +14,7 @@ import org.eclipse.jdt.annotation.NonNull;
 public class DefaultFinalizer<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> implements Finalizer<T> {
 
 	/**
-	 * Finalizes the pipeline by wrapping all {@code Stage} results.
+	 * Finalizes the pipeline by wrapping all {@link Stage} results.
 	 * */
 	@Override
 	public @NonNull PipelineResult<T> finalize(@NonNull final T results) {

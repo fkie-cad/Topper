@@ -16,14 +16,14 @@ import org.eclipse.jdt.annotation.NonNull;
 public interface Finalizer<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> {
 
 	/**
-	 * Computes a function of all intermediate {@code Stage} results and returns a
+	 * Computes a function of all intermediate {@link Stage} results and returns a
 	 * single {@link PipelineResult}. The function may be of arbitrary complexity.
 	 * 
-	 * @param results Mapping of identifiers -> {@link StageInfo} that represents
+	 * @param results Mapping of string identifiers to {@link StageInfo} that represents
 	 *                all intermediate results. Beware that if two stages in the
-	 *                {@code Pipeline} use the same identifier, then only the last
-	 *                {@code StageInfo} will be stored.
-	 * @return A summary/function of all the intermediate {@code Stage} results.
+	 *                {@link Pipeline} use the same identifier, then only the last
+	 *                <code>StageInfo</code> will be stored.
+	 * @return A summary/function of all the intermediate <code>Stage</code> results.
 	 */
 	@NonNull
 	PipelineResult<T> finalize(@NonNull final T results);
