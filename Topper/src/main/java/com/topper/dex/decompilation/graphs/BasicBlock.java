@@ -1,10 +1,10 @@
 package com.topper.dex.decompilation.graphs;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.jf.dexlib2.Opcode;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.graph.MutableGraph;
 import com.topper.dex.decompilation.DexHelper;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
@@ -18,7 +18,7 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
  * @author Pascal Kühnemann
  * @since 07.08.2023
  * */
-public class BasicBlock implements Comparable<BasicBlock> {
+public final class BasicBlock implements Comparable<BasicBlock> {
 
 	/**
 	 * List of instructions covered by this block.
@@ -28,6 +28,7 @@ public class BasicBlock implements Comparable<BasicBlock> {
 	/**
 	 * Type of this block. This depends on the type of the last instruction.
 	 * */
+	@NonNull
 	private final BlockType type;
 	
 	/**
@@ -47,6 +48,8 @@ public class BasicBlock implements Comparable<BasicBlock> {
 	 * basic blocks may as well be omitted.
 	 * 
 	 * @param instructions List of instructions that form this basic block.
+	 * 
+	 * @throws IllegalArgumentException If number of instructions is <code>0</code>.
 	 * */
 	public BasicBlock(
 		@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions) {
@@ -58,6 +61,7 @@ public class BasicBlock implements Comparable<BasicBlock> {
 	/**
 	 * Gives the list of instructions that makes up this basic block.
 	 * */
+	@SuppressWarnings("null")	// There exists no path that enables instruction = null
 	@NonNull
 	public final ImmutableList<@NonNull DecompiledInstruction> getInstructions() {
 		return this.instructions;
@@ -67,8 +71,11 @@ public class BasicBlock implements Comparable<BasicBlock> {
 	 * Overwrites the list of instructions that makes up this basic block.
 	 * 
 	 * Its main use is to handle splitting basic blocks due to branch targets.
+	 * 
+	 * @throws IllegalArgumentException If number of instructions is <code>0</code>.
 	 * */
-	public final void setInstructions(@NonNull ImmutableList<@NonNull DecompiledInstruction> instructions) {
+	@SuppressWarnings("null")	// ImmutableList.get is not expected to return null for valid index.
+	public final void setInstructions(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions) {
 		if (instructions.size() == 0) {
 			throw new IllegalArgumentException("Basic block must contain at least one instruction.");
 		}
@@ -81,9 +88,10 @@ public class BasicBlock implements Comparable<BasicBlock> {
 	 * Gives the last instruction in the list of instructions that make up
 	 * this basic block.
 	 * */
+	@SuppressWarnings("null")	// ImmutableList.get is not expected to return null for valid index.
 	@NonNull
 	public final DecompiledInstruction getBranchInstruction() {
-		return this.instructions.get(instructions.size() - 1);
+		return this.instructions.get(this.instructions.size() - 1);
 	}
 	
 	/**
@@ -107,7 +115,7 @@ public class BasicBlock implements Comparable<BasicBlock> {
 	 * an actual branch instruction (like if, goto etc.), then its type is
 	 * {@code BlockType.UNKNOWN}.
 	 * */
-	@Nullable
+	@NonNull
 	public final BlockType getType() {
 		return this.type;
 	}
@@ -145,7 +153,6 @@ public class BasicBlock implements Comparable<BasicBlock> {
 	/**
 	 * Convert a basic block to a string.
 	 * */
-	@SuppressWarnings("null")	// instructions is ALWAYS non-null
 	@Override
 	public final String toString() {
 		final StringBuilder b = new StringBuilder();
@@ -154,7 +161,8 @@ public class BasicBlock implements Comparable<BasicBlock> {
 		b.append(String.format("%#x", this.getOffset()));
 		b.append(System.lineSeparator() + "Size: ");
 		b.append(String.format("%#x", this.getSize()) + System.lineSeparator());
-		b.append(DexHelper.instructionsToString(this.instructions));
+		b.append("Type: " + this.getType().name() + System.lineSeparator());
+		b.append(DexHelper.instructionsToString(this.getInstructions()));
 		
 		return b.toString();
 	}
