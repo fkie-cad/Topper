@@ -22,13 +22,13 @@ public interface Decompiler {
 	 * Decompiles given {@code bytes} into {@link DecompiledInstruction}s wrapped in
 	 * a {@link DecompilationResult}.
 	 * 
-	 * If {@code augmentation} is not {@code null}, then it must be used for
+	 * If <code>augmentation</code> is not <code>null</code>, then it must be used for
 	 * resolving references in order to augment analysis with type names etc.
 	 * 
 	 * @param bytes        Raw bytes to decompile into dex instructions.
 	 * @param augmentation Dex file representation to use for resolving references.
 	 *                     This can be used to view instruction in different
-	 *                     execution contexts.
+	 *                     execution contexts. It may be <code>null</code>.
 	 * @param config       Configuration to use during decompilation.
 	 * @return Result wrapping decompiled instructions and further information.
 	 */
