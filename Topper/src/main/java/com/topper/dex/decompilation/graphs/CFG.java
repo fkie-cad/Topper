@@ -16,25 +16,28 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
  * 
  * Terminal instructions are either
  * <ul>
- * <li>Throw</li>
+ * <li>Throw (unless configured otherwise)</li>
  * <li>Return</li>
  * <li>Out - of - bounds</li>
  * </ul>
  * 
  * A terminal instruction indicates a severe change in code execution. E.g.
- * a {@code throw} often pivots into an exception handler, or a {@code return}
+ * a <code>throw</code> often pivots into an exception handler, or a <code> return</code>
  * returns into the calling method. In the latter case, if a basic block
  * refers to an offset that is beyond the buffer underlying the list of available
  * instructions, then there will not be a way to construct a basic block.
  * 
- * In addition to the graph representation, a {@code CFG} also provides
+ * In addition to the graph representation, a <code>CFG</code> also provides
  * mappings to speed up lookups that otherwise would run in O(#instructions):
  * <ul>
- * <li>Offset -> Instruction yields O(log(#instructions)) instead of O(#instructions).</li>
- * <li>Instruction -> BasicBlock yields O(log(#instructions)) instead of O(#instructions).</li>
+ * <li>Offset -> Instruction: yields O(log(#instructions)) instead of O(#instructions).</li>
+ * <li>Instruction -> BasicBlock: yields O(log(#instructions)) instead of O(#instructions).</li>
  * </ul>
- * where #instructions is the total number of instructions, from which this {@code CFG}
+ * where #instructions is the total number of instructions, from which this <code>CFG</code>
  * was constructed.
+ * 
+ * The graph allows self - references. However, it may be necessary to discard
+ * such CFGs depending on the specifications.
  * 
  * @author Pascal Kühnemann
  * @since 07.08.2023
@@ -47,7 +50,7 @@ public class CFG {
 	private final int entry;
 	
 	/**
-	 * Graph representation containing {@code BasicBlock}s as nodes.
+	 * Graph representation containing {@link BasicBlock}s as nodes.
 	 * It may be empty.
 	 * */
 	@NonNull
@@ -55,9 +58,9 @@ public class CFG {
 	
 	/**
 	 * Offset -> Instruction map to speed up lookups. This map applies to all
-	 * instructions available at the {@code CFG} extraction stage. Therefore the
+	 * instructions available at the {@link CFG} extraction stage. Therefore the
 	 * number of instructions covered by the basic blocks may be less than the
-	 * number of mappings stored in {@code offsetToInstruction}.
+	 * number of mappings stored in <code>offsetToInstruction</code>.
 	 * */
 	@NonNull
 	private final TreeMap<Integer, @NonNull DecompiledInstruction> offsetToInstruction;
@@ -106,7 +109,7 @@ public class CFG {
 	}
 	
 	/**
-	 * Gives the byte offset, from which {@code CFG} extraction starts.
+	 * Gives the byte offset, from which <code>CFG</code> extraction starts.
 	 * */
 	public final int getEntry() {
 		return this.entry;
@@ -124,8 +127,8 @@ public class CFG {
 	}
 	
 	/**
-	 * Tries to obtain the basic block containing {@code instruction}. Notice that
-	 * using e.g. {@code cfg.getBlock(cfg.getInstruction(0x42))} does not work, because
+	 * Tries to obtain the basic block containing <code>instruction</code>. Notice that
+	 * using e.g. <code>cfg.getBlock(cfg.getInstruction(0x42))</code> does not work, because
 	 * the offset -> instruction map may cover more instructions than all basic blocks
 	 * combined.
 	 * 
@@ -145,7 +148,7 @@ public class CFG {
 	}
 	
 	/**
-	 * Converts this {@code CFG} to a readable string representation.
+	 * Converts this <code>CFG</code> to a readable string representation.
 	 * */
 	@Override
 	public final String toString() {
