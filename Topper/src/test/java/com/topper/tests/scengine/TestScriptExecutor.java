@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,9 +34,6 @@ public class TestScriptExecutor {
 	);
 	
 	private static ScriptContext VALID_CONTEXT;
-	
-	private static PrintStream out;
-	private static PrintStream err;
 	
 	private static final ScriptExecutor createExecutor() {
 		return new ScriptExecutor();
