@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
-import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcode;
@@ -17,8 +16,8 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
+import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.SeekerInfo;
-import com.topper.dex.decompilation.pipeline.StageInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
 import com.topper.dex.decompilation.sweeper.Sweeper;
@@ -46,7 +45,7 @@ public class TestBackwardLinearSweeper {
 	private static final int MEDIUM_VALID_BYTECODE_AMOUNT_INSTRUCTIONS = 3;
 
 	// Sweeper is stateless
-	private static final Sweeper<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> sweeper = new BackwardLinearSweeper<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>();
+	private static final Sweeper sweeper = new BackwardLinearSweeper();
 
 	private static TopperConfig config;
 	
@@ -63,12 +62,13 @@ public class TestBackwardLinearSweeper {
 	}
 
 	@NonNull
-	private static TreeMap<@NonNull String, @NonNull StageInfo> createInfo(final byte[] bytecode, final int offset) throws StageException {
-		TreeMap<@NonNull String, @NonNull StageInfo> results = new TreeMap<>();
-		results.put(PipelineArgs.class.getSimpleName(), new PipelineArgs(config, bytecode));
-		results.put(SeekerInfo.class.getSimpleName(), new SeekerInfo(ImmutableList.of(offset)));
+	private static PipelineContext createContext(final byte[] bytecode, final int offset) throws StageException {
 		
-		return results;
+		final PipelineArgs args = new PipelineArgs(config, bytecode);
+		final PipelineContext context = new PipelineContext(args);
+		context.putResult(SeekerInfo.class.getSimpleName(), new SeekerInfo(ImmutableList.of(offset)));
+		
+		return context;
 	}
 
 	// Method: sweep(buffer : byte[], offset : int) :
@@ -76,8 +76,9 @@ public class TestBackwardLinearSweeper {
 	@Test
 	public void Given_Sweeper_When_ValidByteCodeAndOffset_Expect_CorrectSweep() throws StageException {
 
-		final SweeperInfo info = (SweeperInfo) sweeper.execute(createInfo(VALID_BYTECODE, VALID_BYTECODE_THROW_OFFSET))
-				.get(SweeperInfo.class.getSimpleName());
+		final PipelineContext context = createContext(VALID_BYTECODE, VALID_BYTECODE_THROW_OFFSET);
+		sweeper.execute(context);
+		final SweeperInfo info = context.getResult(SweeperInfo.class.getSimpleName());
 		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = info
 				.getInstructionSequences();
 
@@ -128,19 +129,20 @@ public class TestBackwardLinearSweeper {
 
 	@Test
 	public void Given_Sweeper_When_OffsetOutOfBoundsBefore_Expect_SweeperException() {
-		assertThrowsExactly(SweeperException.class, () -> sweeper.execute(createInfo(VALID_BYTECODE, -1)));
+		assertThrowsExactly(SweeperException.class, () -> sweeper.execute(createContext(VALID_BYTECODE, -1)));
 	}
 
 	@Test
 	public void Given_Sweeper_When_OffsetOutOfBoundsAfter_Expect_SweeperException() {
 		assertThrowsExactly(SweeperException.class,
-				() -> sweeper.execute(createInfo(VALID_BYTECODE, VALID_BYTECODE.length)));
+				() -> sweeper.execute(createContext(VALID_BYTECODE, VALID_BYTECODE.length)));
 	}
 
 	@Test
 	public void Given_Sweeper_When_OffsetZeroThrowAtZero_Expect_NopSequence() throws StageException {
-		final SweeperInfo info = (SweeperInfo) sweeper.execute(createInfo(SHORT_VALID_BYTECODE, 0))
-				.get(SweeperInfo.class.getSimpleName());
+		final PipelineContext context = createContext(SHORT_VALID_BYTECODE, 0);
+		sweeper.execute(context);
+		final SweeperInfo info = context.getResult(SweeperInfo.class.getSimpleName());
 		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = info
 				.getInstructionSequences();
 		assertEquals(1, sequences.size());
@@ -152,40 +154,22 @@ public class TestBackwardLinearSweeper {
 
 	@Test
 	public void Given_Sweeper_When_OffsetToInvalidInstruction_Expect_SweeperException() {
-		assertThrowsExactly(SweeperException.class, () -> sweeper.execute(createInfo(VALID_BYTECODE, 0)));
+		assertThrowsExactly(SweeperException.class, () -> sweeper.execute(createContext(VALID_BYTECODE, 0)));
 	}
 
 	@Test
 	public void Given_Sweeper_When_OffsetToIncompleteThrow_Expect_SweeperException() {
 		final byte[] incompleteThrow = Arrays.copyOf(SHORT_VALID_BYTECODE, 1);
-		assertThrowsExactly(SweeperException.class, () -> sweeper.execute(createInfo(incompleteThrow, 0)));
+		assertThrowsExactly(SweeperException.class, () -> sweeper.execute(createContext(incompleteThrow, 0)));
 	}
-
-	// NOTE: Cannot be tested anymore, because config rejects non-positive value for maxNumberInstructions
-//	@Test
-//	public void Given_Sweeper_When_UpperBoundZero_Expect_NopSequence() throws StageException, InvalidConfigException {
-//
-//		// TODO: Find a work around for testing this case
-//		config.getSweeperConfig().setMaxNumberInstructions(0);
-//		final SweeperInfo info = (SweeperInfo) sweeper.execute(createInfo(SHORT_VALID_BYTECODE, 0))
-//				.get(SweeperInfo.class.getSimpleName());
-//		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = info
-//				.getInstructionSequences();
-//
-//		assertEquals(1, sequences.size());
-//		assertEquals(1, sequences.get(0).size());
-//
-//		final DecompiledInstruction insn = sequences.get(0).get(0);
-//		assertEquals(Opcode.THROW, insn.getInstruction().getOpcode());
-//	}
 
 	@Test
 	public void Given_Sweeper_When_CannotCheckAllSizes_Expect_AllSequences() throws StageException, InvalidConfigException {
 
 		config.getSweeperConfig().setMaxNumberInstructions(MEDIUM_VALID_BYTECODE_AMOUNT_INSTRUCTIONS + 1);
-		final SweeperInfo info = (SweeperInfo) sweeper
-				.execute(createInfo(MEDIUM_VALID_BYTECODE, MEDIUM_VALID_BYTECODE_THROW_OFFSET))
-				.get(SweeperInfo.class.getSimpleName());
+		final PipelineContext context = createContext(MEDIUM_VALID_BYTECODE, MEDIUM_VALID_BYTECODE_THROW_OFFSET);
+		sweeper.execute(context);
+		final SweeperInfo info = context.getResult(SweeperInfo.class.getSimpleName());
 		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = info
 				.getInstructionSequences();
 
@@ -206,6 +190,6 @@ public class TestBackwardLinearSweeper {
 
 	@Test
 	public void Given_Sweeper_When_EmptyBuffer_Expect_SweeperException() {
-		assertThrowsExactly(SweeperException.class, () -> sweeper.execute(createInfo(new byte[0], 0)));
+		assertThrowsExactly(SweeperException.class, () -> sweeper.execute(createContext(new byte[0], 0)));
 	}
 }

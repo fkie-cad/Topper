@@ -1,22 +1,19 @@
 package com.topper.dex.decompilation.sweeper;
 
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.decompilation.pipeline.Stage;
-import com.topper.dex.decompilation.pipeline.StageInfo;
 
 /**
  * Abstract decompiler that operates on a buffer. Given a starting point, this
  * decompiler tries to extract instructions.
  * 
  * @author Pascal Kühnemann
+ * @since 15.08.2023
  */
-public abstract class Sweeper<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> implements Stage<T> {
-
+public abstract class Sweeper implements Stage {
 	/**
 	 * Decompiler to use in <code>sweep</code>.
 	 */

@@ -3,7 +3,6 @@ package com.topper.dex.decompilation.sweeper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Format;
@@ -14,11 +13,11 @@ import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
+import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.SeekerInfo;
-import com.topper.dex.decompilation.pipeline.StageInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
-import com.topper.dex.decompilation.seeker.PivotSeeker;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.exceptions.MissingStageInfoException;
 import com.topper.exceptions.SweeperException;
 
 /**
@@ -30,7 +29,7 @@ import com.topper.exceptions.SweeperException;
  * 
  * @author Pascal Kühnemann
  */
-public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> extends Sweeper<T> {
+public class BackwardLinearSweeper extends Sweeper {
 
 	private static final int CODE_UNIT_SIZE = 2;
 
@@ -66,12 +65,14 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 	 * @throws SweeperException If <code>offset</code> does not point to a pivot
 	 *                          instruction, or is out of bounds wrt.
 	 *                          <code>buffer</code>.
+	 * @throws MissingStageInfoException 
 	 */
 	@Override
-	public final T execute(@NonNull final T results) throws SweeperException {
+	public final void execute(@NonNull final PipelineContext context) throws SweeperException, MissingStageInfoException {
 
-		final PipelineArgs args = (PipelineArgs) results.get(PipelineArgs.class.getSimpleName());
-		final SeekerInfo seekerInfo = (SeekerInfo) results.get(SeekerInfo.class.getSimpleName());
+		final PipelineArgs args = context.getArgs();
+		final SeekerInfo seekerInfo = context.getResult(SeekerInfo.class.getSimpleName());
+		
 		final ImmutableList<Integer> offsets = seekerInfo.getPivotOffsets();
 		final byte[] buffer = args.getBuffer();
 		final TopperConfig config = args.getConfig();
@@ -79,7 +80,6 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 		final ImmutableList.Builder<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = new ImmutableList.Builder<>();
 		for (final int offset : offsets) {
 
-//			final int offset = args.getOffset();
 			// Perform bound checks on buffer and offset.
 			final int currentSize = config.getSweeperConfig().getPivotOpcode().format.size;
 			if (offset + currentSize > buffer.length) {
@@ -98,7 +98,7 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 			try {
 				final DecompilationResult result = decompiler
 						.decompile(Arrays.copyOfRange(buffer, offset, offset + currentSize), null, config);
-				final ImmutableList<DecompiledInstruction> instructions = result.getInstructions();
+				final ImmutableList<@NonNull DecompiledInstruction> instructions = result.getInstructions();
 				final DecompiledInstruction instruction = instructions.get(0);
 
 				// Thoroughly check pivot instruction, because its format is known in advance.
@@ -109,24 +109,16 @@ public class BackwardLinearSweeper<@NonNull T extends Map<@NonNull String, @NonN
 				}
 
 				// Use pivot instruction as base for recursive sweep.
-//				final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = this
 				instructions.get(0).setOffset(offset);
 				sequences.addAll(this.recursiveSweepImpl(decompiler, buffer, offset, currentSize, instructions,
 						checkedGadgetSizes, depth, config).stream().map(l -> l.reverse()).iterator());
-
-				// Reverse instruction sequences so that pivot opcode is last.
-//				final ImmutableList.Builder<@NonNull ImmutableList<@NonNull DecompiledInstruction>> reversed = new ImmutableList.Builder<>();
-//				for (@NonNull
-//				final ImmutableList<@NonNull DecompiledInstruction> sequence : sequences) {
-//					reversed.add(sequence.reverse());
-//				}
 
 			} catch (final ExceptionWithContext | ArrayIndexOutOfBoundsException e) {
 				throw new SweeperException("Failed to decompile pivot instruction.");
 			}
 		}
-		results.put(SweeperInfo.class.getSimpleName(), new SweeperInfo(sequences.build()));
-		return results;
+		
+		context.putResult(SweeperInfo.class.getSimpleName(), new SweeperInfo(sequences.build()));
 	}
 
 	/**

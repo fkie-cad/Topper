@@ -1,7 +1,5 @@
 package com.topper.dex.decompilation.pipeline;
 
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.dex.decompilation.staticanalyser.Gadget;
@@ -25,10 +23,9 @@ public class DecompilationDriver {
 
 	/**
 	 * <code>Pipeline</code> to use when decompiling bytecode.
-	 * Explicitly ignore generic type.
 	 * */
 	@NonNull
-	private Pipeline<? extends Map<@NonNull String, @NonNull StageInfo>> pipeline;
+	private Pipeline pipeline;
 	
 	public DecompilationDriver() {
 		this.pipeline = Pipeline.createDefaultPipeline();
@@ -46,14 +43,14 @@ public class DecompilationDriver {
 	 * @throws StageException If an error occurs within a {@link Stage} in the {@code Pipeline}.
 	 * */
 	@NonNull
-	public final PipelineResult<? extends Map<@NonNull String, @NonNull StageInfo>> decompile(@NonNull final PipelineArgs args) throws StageException {
+	public final PipelineResult decompile(@NonNull final PipelineArgs args) throws StageException {
 		return this.pipeline.execute(args);
 	}
 	
 	/**
 	 * Overwrites the current pipeline with a custom pipeline.
 	 * */
-	public final void setPipeline(@NonNull final Pipeline<? extends Map<@NonNull String, @NonNull StageInfo>> pipeline) {
+	public final void setPipeline(@NonNull final Pipeline pipeline) {
 		this.pipeline = pipeline;
 	}
 }

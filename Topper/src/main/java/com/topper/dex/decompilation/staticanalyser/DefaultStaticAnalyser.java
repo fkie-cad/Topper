@@ -2,7 +2,6 @@ package com.topper.dex.decompilation.staticanalyser;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -11,33 +10,23 @@ import com.topper.configuration.StaticAnalyserConfig;
 import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompilation.graphs.DFG;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
-import com.topper.dex.decompilation.pipeline.StageInfo;
+import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.exceptions.MissingStageInfoException;
 
-public final class DefaultStaticAnalyser<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> extends StaticAnalyser<T> {
+public final class DefaultStaticAnalyser extends StaticAnalyser {
 	
 	@Override
-	@NonNull
-	public final T execute(@NonNull final T results) throws MissingStageInfoException {
+	public final void execute(@NonNull final PipelineContext context) throws MissingStageInfoException {
 		
-		final PipelineArgs args = (PipelineArgs) results.get(PipelineArgs.class.getSimpleName());
-		if (args == null) {
-			throw new MissingStageInfoException("DefaultStaticAnalyser requires pipeline arguments.");
-		}
-		final SweeperInfo sweeper = (SweeperInfo) results.get(SweeperInfo.class.getSimpleName());
-		if (sweeper == null) {
-			throw new MissingStageInfoException("DefaultStaticAnalyser requires sweeper info.");
-		}
+		final PipelineArgs args = context.getArgs();
+		final SweeperInfo sweeper = context.getResult(SweeperInfo.class.getSimpleName());
 		final StaticAnalyserConfig config = args.getConfig().getStaticAnalyserConfig();
 		
 		@NonNull
 		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = sweeper.getInstructionSequences();
-		
-		// entry point must be relative to sweeper result
-//		final int entry = args.getEntry();
 		
 		// Try out all instruction sequences from sweeping stage.
 		final List<@NonNull Gadget> gadgets = new LinkedList<@NonNull Gadget>();
@@ -64,7 +53,6 @@ public final class DefaultStaticAnalyser<@NonNull T extends Map<@NonNull String,
 			gadgets.add(new Gadget(instructions, cfg, dfg));
 		}
 		
-		results.put(StaticInfo.class.getSimpleName(), new StaticInfo(ImmutableList.copyOf(gadgets)));
-		return results;
+		context.putResult(StaticInfo.class.getSimpleName(), new StaticInfo(ImmutableList.copyOf(gadgets)));
 	}
 }

@@ -1,7 +1,5 @@
 package com.topper.dex.decompilation.pipeline;
 
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -11,13 +9,14 @@ import org.eclipse.jdt.annotation.NonNull;
  * @author Pascal Kühnemann
  * @since 07.08.2023
  * */
-public class DefaultFinalizer<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> implements Finalizer<T> {
+public class DefaultFinalizer implements Finalizer {
 
 	/**
 	 * Finalizes the pipeline by wrapping all {@link Stage} results.
 	 * */
 	@Override
-	public @NonNull PipelineResult<T> finalize(@NonNull final T results) {
-		return new PipelineResult<T>(results);
+	@NonNull
+	public final PipelineResult finalize(@NonNull final PipelineContext context) {
+		return new PipelineResult(context);
 	}
 }

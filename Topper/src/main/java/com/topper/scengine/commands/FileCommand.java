@@ -2,14 +2,14 @@ package com.topper.scengine.commands;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.dex.decompilation.pipeline.DecompilationDriver;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
-import com.topper.dex.decompilation.pipeline.StageInfo;
+import com.topper.dex.decompilation.pipeline.PipelineContext;
+import com.topper.dex.decompilation.pipeline.PipelineResult;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.dex.decompilation.staticanalyser.Gadget;
 import com.topper.exceptions.CommandException;
@@ -46,9 +46,10 @@ public final class FileCommand implements ScriptCommand {
 			final PipelineArgs args = new PipelineArgs(context.getConfig(), content);
 			final DecompilationDriver driver = new DecompilationDriver();
 
-			final TreeMap<@NonNull String, @NonNull StageInfo> results = (TreeMap<@NonNull String, @NonNull StageInfo>) driver
-					.decompile(args).getResults();
-			final ImmutableList<@NonNull Gadget> gadgets = ((StaticInfo)results.get(StaticInfo.class.getSimpleName())).getGadgets();
+			final PipelineResult result = driver.decompile(args);
+			final PipelineContext pipelineContext = result.getContext();
+			final StaticInfo info = pipelineContext.getResult(StaticInfo.class.getSimpleName());
+			final ImmutableList<@NonNull Gadget> gadgets = info.getGadgets();
 			
 			// 3. Adjust session info in script context.
 			context.getSession().setLoadedFile(file);

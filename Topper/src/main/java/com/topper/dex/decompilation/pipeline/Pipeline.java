@@ -2,14 +2,13 @@ package com.topper.dex.decompilation.pipeline;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompilation.graphs.DFG;
 import com.topper.dex.decompilation.seeker.PivotSeeker;
+import com.topper.dex.decompilation.seeker.Seeker;
 import com.topper.dex.decompilation.semanticanalyser.DefaultSemanticAnalyser;
 import com.topper.dex.decompilation.semanticanalyser.SemanticAnalyser;
 import com.topper.dex.decompilation.staticanalyser.DefaultStaticAnalyser;
@@ -20,65 +19,68 @@ import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.exceptions.StageException;
 
 /**
- * A pipeline consisting of at least three main {@link Stage}s. Its task is to
+ * A pipeline consisting of at least four main {@link Stage}s. Its task is to
  * take in a description of raw bytes, and output a higher level description of
  * these bytes in terms of {@link Gadget}s.
  * 
- * The three mandatory stages include:
+ * The four mandatory stages include:
  * <ul>
+ * <li>{@link Seeker}: Identifies offsets of interest in a given buffer.</li>
  * <li>{@link Sweeper}: Identifies instruction sequences starting from a given
  * offset.</li>
  * <li>{@link StaticAnalyser}: Extracts {@link CFG} and {@link DFG} from all
  * instruction sequences.</li>
  * <li>{@link SemanticAnalyser}: Performs e.g. reachability analysis, taint
- * analysis etc. to determine what gadgets are eligible.</li>
+ * analysis etc. to determine what gadgets are eligible. Also determines
+ * what gadgets are correct.</li>
  * </ul>
  * 
- * Beyond the three mandatory {@code Stages}, it is possible to add additional
- * {@code Stage} implementations.
+ * Beyond the four mandatory <code>Stage</code>s, it is possible to add additional
+ * <code>Stage</code> implementations.
  * 
- * Finally, all {@code Stage} results are feed into a {@link Finalizer} that
+ * Finally, all <code>Stage</code> results are feed into a {@link Finalizer} that
  * summarizes those results.
  * 
  * @author Pascal Kühnemann
  * @since 07.08.2023
  */
-public final class Pipeline<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> {
+public final class Pipeline {
 
+	/**
+	 * List of stages to run in this pipeline.
+	 * */
 	@NonNull
-	private final List<Stage<T>> stages;
+	private final List<@NonNull Stage> stages;
 
+	/**
+	 * Finalizer to invoke after <code>stages</code> have been executed.
+	 * */
 	@NonNull
-	private Finalizer<T> finalizer;
-
-	private final Pipeline.@NonNull Builder<T> builder;
+	private Finalizer finalizer;
 
 	/**
 	 * 
 	 */
-	public Pipeline(final Pipeline.@NonNull Builder<T> builder) {
-		this.stages = new LinkedList<Stage<T>>();
-		this.builder = builder;
-		this.finalizer = new DefaultFinalizer<T>();
+	public Pipeline() {
+		this.stages = new LinkedList<@NonNull Stage>();
+		this.finalizer = new DefaultFinalizer();
 	}
 
 	@NonNull
-	public final PipelineResult<T> execute(@NonNull final PipelineArgs args) throws StageException {
+	public final PipelineResult execute(@NonNull final PipelineArgs args) throws StageException {
 
 		if (!this.isValid()) {
 			throw new StageException(
 					"Pipeline must at least contain a Sweeper, a StaticAnalyser and a SemanticAnalyser.");
 		}
 
-		@NonNull
-		T results = this.builder.build();
-		results.put(PipelineArgs.class.getSimpleName(), args);
+		final PipelineContext context = new PipelineContext(args);
 
-		for (final Stage<T> stage : this.stages) {
-			results = stage.execute(results);
+		for (final Stage stage : this.stages) {
+			stage.execute(context);
 		}
 
-		return this.finalizer.finalize(results);
+		return this.finalizer.finalize(context);
 	}
 
 	/**
@@ -97,7 +99,8 @@ public final class Pipeline<@NonNull T extends Map<@NonNull String, @NonNull Sta
 		boolean hasStatic = false;
 		boolean hasSemantic = false;
 
-		for (final Stage<T> stage : this.stages) {
+//		for (final Stage<T> stage : this.stages) {
+		for (final Stage stage : this.stages) {
 
 			if (Sweeper.class.isAssignableFrom(stage.getClass())) {
 				hasSweeper = true;
@@ -111,11 +114,11 @@ public final class Pipeline<@NonNull T extends Map<@NonNull String, @NonNull Sta
 		return hasSweeper && hasStatic && hasSemantic;
 	}
 
-	public final void addStage(@NonNull final Stage<T> stage) {
+	public final void addStage(@NonNull final Stage stage) {
 		this.stages.add(stage);
 	}
 
-	public final void removeStage(@NonNull final Stage<T> stage) {
+	public final void removeStage(@NonNull final Stage stage) {
 		this.stages.remove(stage);
 	}
 
@@ -123,28 +126,22 @@ public final class Pipeline<@NonNull T extends Map<@NonNull String, @NonNull Sta
 		this.stages.remove(index);
 	}
 
-	public final void setFinalizer(@NonNull final Finalizer<T> finalizer) {
+	public final void setFinalizer(@NonNull final Finalizer finalizer) {
 		this.finalizer = finalizer;
 	}
 
 	@NonNull
-	public static final Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> createDefaultPipeline() {
+	public static final Pipeline createDefaultPipeline() {
 
-		final Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>> pipeline = new Pipeline<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>(
-				TreeMap::new);
-		pipeline.addStage(new PivotSeeker<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
-		pipeline.addStage(new BackwardLinearSweeper<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
-		pipeline.addStage(new DefaultStaticAnalyser<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
-		pipeline.addStage(new DefaultSemanticAnalyser<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
+		final Pipeline pipeline = new Pipeline();
+		pipeline.addStage(new PivotSeeker());
+		pipeline.addStage(new BackwardLinearSweeper());
+		pipeline.addStage(new DefaultStaticAnalyser());
+		pipeline.addStage(new DefaultSemanticAnalyser());
 
 		// Make sure default finalizer is used
-		pipeline.setFinalizer(new DefaultFinalizer<@NonNull TreeMap<@NonNull String, @NonNull StageInfo>>());
+		pipeline.setFinalizer(new DefaultFinalizer());
 
 		return pipeline;
-	}
-
-	public static interface Builder<T> {
-		@NonNull
-		T build();
 	}
 }

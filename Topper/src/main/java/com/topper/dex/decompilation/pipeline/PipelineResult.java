@@ -1,20 +1,18 @@
 package com.topper.dex.decompilation.pipeline;
 
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNull;
 
-public class PipelineResult<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> {
+public class PipelineResult {
 
 	@NonNull
-	private final T results;
+	private final PipelineContext context;
 	
-	public PipelineResult(@NonNull final T results) {
-		this.results = results;
+	public PipelineResult(@NonNull final PipelineContext context) {
+		this.context = context;
 	}
 	
 	@NonNull
-	public final T getResults() {
-		return this.results;
+	public final PipelineContext getContext() {
+		return this.context;
 	}
 }

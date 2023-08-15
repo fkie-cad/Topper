@@ -1,14 +1,11 @@
 package com.topper.dex.decompilation.staticanalyser;
 
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcode;
 
 import com.topper.dex.decompilation.pipeline.Stage;
-import com.topper.dex.decompilation.pipeline.StageInfo;
 
-public abstract class StaticAnalyser<@NonNull T extends Map<@NonNull String, @NonNull StageInfo>> implements Stage<T> {
+public abstract class StaticAnalyser implements Stage {
 
 	@NonNull
 	private CFGAnalyser cfgAnalyser;
