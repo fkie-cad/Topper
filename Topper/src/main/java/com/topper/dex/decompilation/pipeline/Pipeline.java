@@ -81,7 +81,7 @@ public final class Pipeline {
 			}
 
 			return this.finalizer.finalize(context);
-		} catch (final RuntimeException e) {
+		} catch (final Exception e) {
 			throw new StageException("An internal error occurred.", e);
 		}
 	}

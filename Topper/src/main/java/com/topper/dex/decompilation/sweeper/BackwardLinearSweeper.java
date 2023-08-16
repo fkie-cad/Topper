@@ -73,7 +73,7 @@ public class BackwardLinearSweeper extends Sweeper {
 	public final void execute(@NonNull final PipelineContext context) throws SweeperException, MissingStageInfoException, DuplicateInfoIdException {
 
 		final PipelineArgs args = context.getArgs();
-		final SeekerInfo seekerInfo = context.getInfo(SeekerInfo.class.getSimpleName());
+		final SeekerInfo seekerInfo = context.getSeekerInfo(SeekerInfo.class.getSimpleName());
 		
 		final ImmutableList<Integer> offsets = seekerInfo.getPivotOffsets();
 		final byte[] buffer = args.getBuffer();

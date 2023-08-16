@@ -23,7 +23,7 @@ public final class DefaultStaticAnalyser extends StaticAnalyser {
 	public final void execute(@NonNull final PipelineContext context) throws MissingStageInfoException, DuplicateInfoIdException {
 		
 		final PipelineArgs args = context.getArgs();
-		final SweeperInfo sweeper = context.getInfo(SweeperInfo.class.getSimpleName());
+		final SweeperInfo sweeper = context.getSweeperInfo(SweeperInfo.class.getSimpleName());
 		final StaticAnalyserConfig config = args.getConfig().getStaticAnalyserConfig();
 		
 		@NonNull
