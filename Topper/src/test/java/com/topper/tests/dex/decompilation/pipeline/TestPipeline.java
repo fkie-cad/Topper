@@ -3,6 +3,7 @@ package com.topper.tests.dex.decompilation.pipeline;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.pipeline.Pipeline;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
+import com.topper.dex.decompilation.pipeline.PipelineResult;
 import com.topper.dex.decompilation.seeker.PivotSeeker;
 import com.topper.dex.decompilation.seeker.Seeker;
 import com.topper.dex.decompilation.semanticanalyser.DefaultSemanticAnalyser;
@@ -161,8 +163,17 @@ public class TestPipeline {
 	}
 	
 	@Test
-	public void Given_DefaultPipeline_When_OverwritingFinalizer_Expect_Valid() {
+	public void Given_DefaultPipeline_When_OverwritingFinalizer_Expect_Valid() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, StageException {
+		// Reason: Adding a custom finalizer to select custom info must not fail.
 		
+		final PipelineArgs args = createArgs(DexLoader.get().getMethodBytes());
+		final Pipeline p = Pipeline.createDefaultPipeline();
+		
+		p.setFinalizer(PipelineResult::new);
+		assertTrue(p.isValid());
+		
+		// Must not throw
+		p.execute(args);
 	}
 
 	@Test
@@ -198,7 +209,9 @@ public class TestPipeline {
 		p.addStage(seeker);
 		assertTrue(p.isValid());
 		
-		assertThrowsExactly(StageException.class, () -> p.execute(args));
+		// Not using assertThrowsExactly, because the exact exception class
+		// use may change in the future. However StageException is guaranteed.
+		assertThrows(StageException.class, () -> p.execute(args));
 	}
 	
 	@Test
@@ -227,6 +240,21 @@ public class TestPipeline {
 		p.addStage(context -> { throw new RuntimeException();});
 		assertTrue(p.isValid());
 		
+		assertThrowsExactly(StageException.class, () -> p.execute(args));
+	}
+	
+	@Test
+	public void Given_EmptyPipeline_When_AddingStagesWrongOrder_Expect_StageException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException {
+		// Reason: Order of mandatory stages must be enforced.
+		
+		final PipelineArgs args = createArgs(DexLoader.get().getMethodBytes());
+		final Pipeline p = new Pipeline();
+		p.addStage(new PivotSeeker());
+		p.addStage(new BackwardLinearSweeper());
+		p.addStage(new DefaultSemanticAnalyser());
+		p.addStage(new DefaultStaticAnalyser());
+		
+		assertFalse(p.isValid());
 		assertThrowsExactly(StageException.class, () -> p.execute(args));
 	}
 }

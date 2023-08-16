@@ -31,15 +31,15 @@ import com.topper.exceptions.StageException;
  * <li>{@link StaticAnalyser}: Extracts {@link CFG} and {@link DFG} from all
  * instruction sequences.</li>
  * <li>{@link SemanticAnalyser}: Performs e.g. reachability analysis, taint
- * analysis etc. to determine what gadgets are eligible. Also determines
- * what gadgets are correct.</li>
+ * analysis etc. to determine what gadgets are eligible. Also determines what
+ * gadgets are correct.</li>
  * </ul>
  * 
- * Beyond the four mandatory <code>Stage</code>s, it is possible to add additional
- * <code>Stage</code> implementations.
+ * Beyond the four mandatory <code>Stage</code>s, it is possible to add
+ * additional <code>Stage</code> implementations.
  * 
- * Finally, all <code>Stage</code> results are feed into a {@link Finalizer} that
- * summarizes those results.
+ * Finally, all <code>Stage</code> results are feed into a {@link Finalizer}
+ * that summarizes those results.
  * 
  * @author Pascal Kühnemann
  * @since 07.08.2023
@@ -48,14 +48,14 @@ public final class Pipeline {
 
 	/**
 	 * List of stages to run in this pipeline.
-	 * */
+	 */
 	@NonNull
 	private final List<@NonNull Stage> stages;
 
 	/**
-	 * Finalizer to invoke after <code>stages</code> have been executed.
-	 * Defaults to {@link DefaultFinalizer}.
-	 * */
+	 * Finalizer to invoke after <code>stages</code> have been executed. Defaults to
+	 * {@link DefaultFinalizer}.
+	 */
 	@NonNull
 	private Finalizer finalizer;
 
@@ -64,6 +64,34 @@ public final class Pipeline {
 		this.finalizer = new DefaultFinalizer();
 	}
 
+	/**
+	 * Executes this {@link Pipeline} by iterating through the list of registered
+	 * {@link Stage}s. Each <code>Stage</code> is given a {@link PipelineContext},
+	 * which is initialized with <code>args</code>.
+	 * 
+	 * If this <code>Pipeline</code> is not valid, i.e. {@link Pipeline#isValid()}
+	 * returns <code>false</code>, then execution will not take place. Also, if any
+	 * of the registered <code>Stage</code>s throws an exception, execution will be
+	 * interrupted.
+	 * 
+	 * After all <code>Stage</code>s are executed, a {@link Finalizer} is run to
+	 * collect the final <code>Pipeline</code> output.
+	 * 
+	 * Currently, a <code>Pipeline</code> must at least contain the following
+	 * <code>Stage</code>s:
+	 * <ol>
+	 * <li>{@link Seeker}: Identifies offsets of interest in a given buffer.</li>
+	 * <li>{@link Sweeper}: Identifies instruction sequences starting from given
+	 * offsets.</li>
+	 * <li>{@link StaticAnalyser}: Extracts {@link CFG} and {@link DFG} from all
+	 * instruction sequences.</li>
+	 * <li>{@link SemanticAnalyser}: Performs e.g. reachability analysis, taint
+	 * analysis etc. to determine what gadgets are eligible. Also determines what
+	 * gadgets are correct.</li>
+	 * </ol>
+	 * 
+	 * The above <code>Stage</code>s must be in that order.
+	 */
 	@NonNull
 	public final PipelineResult execute(@NonNull final PipelineArgs args) throws StageException {
 
@@ -88,54 +116,83 @@ public final class Pipeline {
 
 	/**
 	 * Checks whether this pipeline contains at least
-	 * <ul>
+	 * <ol>
 	 * <li>Seeker</li>
 	 * <li>Sweeper</li>
 	 * <li>StaticAnalyser</li>
 	 * <li>SemanticAnalyser</li>
-	 * </ul>
-	 * Also checks on finalizer.
-	 * Otherwise a pipeline would be useless.
+	 * </ol>
+	 * in that order. Also checks on finalizer. Otherwise a pipeline would be
+	 * useless.
 	 */
 	public final boolean isValid() {
 
-		boolean hasSeeker = false;
-		boolean hasSweeper = false;
-		boolean hasStatic = false;
-		boolean hasSemantic = false;
+		int seekerIndex = -1;
+		int sweeperIndex = -1;
+		int staticIndex = -1;
+		int semanticIndex = -1;
 
-		for (final Stage stage : this.stages) {
+		Stage stage;
+		for (int i = 0; i < this.stages.size(); i++) {
 
-			if (Seeker.class.isAssignableFrom(stage.getClass())) {
-				hasSeeker = true;
-			} else if (Sweeper.class.isAssignableFrom(stage.getClass())) {
-				hasSweeper = true;
-			} else if (StaticAnalyser.class.isAssignableFrom(stage.getClass())) {
-				hasStatic = true;
-			} else if (SemanticAnalyser.class.isAssignableFrom(stage.getClass())) {
-				hasSemantic = true;
+			stage = this.stages.get(i);
+
+			if (Seeker.class.isAssignableFrom(stage.getClass()) && seekerIndex == -1) {
+				seekerIndex = i;
+			} else if (Sweeper.class.isAssignableFrom(stage.getClass()) && sweeperIndex == -1) {
+				sweeperIndex = i;
+			} else if (StaticAnalyser.class.isAssignableFrom(stage.getClass()) && staticIndex == -1) {
+				staticIndex = i;
+			} else if (SemanticAnalyser.class.isAssignableFrom(stage.getClass()) && semanticIndex == -1) {
+				semanticIndex = i;
 			}
 		}
 
-		return hasSeeker && hasSweeper && hasStatic && hasSemantic && (this.finalizer != null);
+		return 0 <= seekerIndex && seekerIndex < sweeperIndex && sweeperIndex < staticIndex
+				&& staticIndex < semanticIndex && semanticIndex < this.stages.size();
 	}
 
+	/**
+	 * Adds a {@link Stage} to this {@link Pipeline}.
+	 */
 	public final void addStage(@NonNull final Stage stage) {
 		this.stages.add(stage);
 	}
 
+	/**
+	 * Removes a {@link Stage} from this {@link Pipeline}.
+	 */
 	public final void removeStage(@NonNull final Stage stage) {
 		this.stages.remove(stage);
 	}
 
+	/**
+	 * Removes a {@link Stage} at a specified <code>index</code> from this
+	 * {@link Pipeline}.
+	 */
 	public final void removeStage(final int index) {
 		this.stages.remove(index);
 	}
 
+	/**
+	 * Overwrites the {@link Finalizer} with <code>finalizer</code>.
+	 * */
 	public final void setFinalizer(@NonNull final Finalizer finalizer) {
 		this.finalizer = finalizer;
 	}
 
+	/**
+	 * Creates a minimalistic default {@link Pipeline} that works out of the box.
+	 * It consists of*
+	 * <ol>
+	 * <li>{@link PivotSeeker}</li>
+	 * <li>{@link BackwardLinearSweeper}</li>
+	 * <li>{@link DefaultStaticAnalyser}</li>
+	 * <li>{@link DefaultSemanticAnalyser}</li>
+	 * </ol>
+	 * 
+	 * @return Minimalistic, editable, default <code>Pipeline</code>.
+	 * */
 	@NonNull
 	public static final Pipeline createDefaultPipeline() {
 
