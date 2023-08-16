@@ -66,7 +66,7 @@ public class TestBackwardLinearSweeper {
 		
 		final PipelineArgs args = new PipelineArgs(config, bytecode);
 		final PipelineContext context = new PipelineContext(args);
-		context.putResult(SeekerInfo.class.getSimpleName(), new SeekerInfo(ImmutableList.of(offset)));
+		context.putInfo(SeekerInfo.class.getSimpleName(), new SeekerInfo(ImmutableList.of(offset)));
 		
 		return context;
 	}
@@ -78,7 +78,7 @@ public class TestBackwardLinearSweeper {
 
 		final PipelineContext context = createContext(VALID_BYTECODE, VALID_BYTECODE_THROW_OFFSET);
 		sweeper.execute(context);
-		final SweeperInfo info = context.getResult(SweeperInfo.class.getSimpleName());
+		final SweeperInfo info = context.getInfo(SweeperInfo.class.getSimpleName());
 		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = info
 				.getInstructionSequences();
 
@@ -142,7 +142,7 @@ public class TestBackwardLinearSweeper {
 	public void Given_Sweeper_When_OffsetZeroThrowAtZero_Expect_NopSequence() throws StageException {
 		final PipelineContext context = createContext(SHORT_VALID_BYTECODE, 0);
 		sweeper.execute(context);
-		final SweeperInfo info = context.getResult(SweeperInfo.class.getSimpleName());
+		final SweeperInfo info = context.getInfo(SweeperInfo.class.getSimpleName());
 		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = info
 				.getInstructionSequences();
 		assertEquals(1, sequences.size());
@@ -169,7 +169,7 @@ public class TestBackwardLinearSweeper {
 		config.getSweeperConfig().setMaxNumberInstructions(MEDIUM_VALID_BYTECODE_AMOUNT_INSTRUCTIONS + 1);
 		final PipelineContext context = createContext(MEDIUM_VALID_BYTECODE, MEDIUM_VALID_BYTECODE_THROW_OFFSET);
 		sweeper.execute(context);
-		final SweeperInfo info = context.getResult(SweeperInfo.class.getSimpleName());
+		final SweeperInfo info = context.getInfo(SweeperInfo.class.getSimpleName());
 		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = info
 				.getInstructionSequences();
 

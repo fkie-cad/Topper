@@ -62,7 +62,7 @@ public class TestDefaultStaticAnalyser {
 		context = driver.decompile(args).getContext();
 
 		assertNotNull(context.getArgs());
-		assertNotNull(context.getResult(BackwardLinearSweeper.class.getSimpleName()));
+		assertNotNull(context.getInfo(BackwardLinearSweeper.class.getSimpleName()));
 
 		return context;
 	}

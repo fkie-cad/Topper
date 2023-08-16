@@ -17,6 +17,7 @@ import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.SeekerInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.exceptions.DuplicateInfoIdException;
 import com.topper.exceptions.MissingStageInfoException;
 import com.topper.exceptions.SweeperException;
 
@@ -66,12 +67,13 @@ public class BackwardLinearSweeper extends Sweeper {
 	 *                          instruction, or is out of bounds wrt.
 	 *                          <code>buffer</code>.
 	 * @throws MissingStageInfoException 
+	 * @throws DuplicateInfoIdException 
 	 */
 	@Override
-	public final void execute(@NonNull final PipelineContext context) throws SweeperException, MissingStageInfoException {
+	public final void execute(@NonNull final PipelineContext context) throws SweeperException, MissingStageInfoException, DuplicateInfoIdException {
 
 		final PipelineArgs args = context.getArgs();
-		final SeekerInfo seekerInfo = context.getResult(SeekerInfo.class.getSimpleName());
+		final SeekerInfo seekerInfo = context.getInfo(SeekerInfo.class.getSimpleName());
 		
 		final ImmutableList<Integer> offsets = seekerInfo.getPivotOffsets();
 		final byte[] buffer = args.getBuffer();
@@ -118,7 +120,7 @@ public class BackwardLinearSweeper extends Sweeper {
 			}
 		}
 		
-		context.putResult(SweeperInfo.class.getSimpleName(), new SweeperInfo(sequences.build()));
+		context.putInfo(SweeperInfo.class.getSimpleName(), new SweeperInfo(sequences.build()));
 	}
 
 	/**

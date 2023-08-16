@@ -48,7 +48,7 @@ public final class FileCommand implements ScriptCommand {
 
 			final PipelineResult result = driver.decompile(args);
 			final PipelineContext pipelineContext = result.getContext();
-			final StaticInfo info = pipelineContext.getResult(StaticInfo.class.getSimpleName());
+			final StaticInfo info = pipelineContext.getInfo(StaticInfo.class.getSimpleName());
 			final ImmutableList<@NonNull Gadget> gadgets = info.getGadgets();
 			
 			// 3. Adjust session info in script context.

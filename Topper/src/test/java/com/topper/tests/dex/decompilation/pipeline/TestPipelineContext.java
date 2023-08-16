@@ -8,10 +8,12 @@ import java.io.IOException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
 import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.SeekerInfo;
+import com.topper.exceptions.DuplicateInfoIdException;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.MissingStageInfoException;
 import com.topper.tests.utility.DexLoader;
@@ -35,7 +37,7 @@ public class TestPipelineContext {
 		// Reason: Requesting non - existing data must fail.
 		
 		final PipelineContext c = createContext();
-		assertThrowsExactly(MissingStageInfoException.class, () -> c.getResult(""));
+		assertThrowsExactly(MissingStageInfoException.class, () -> c.getInfo(""));
 	}
 	
 	@Test
@@ -45,19 +47,61 @@ public class TestPipelineContext {
 		
 		final PipelineContext c = createContext();
 		assertInstanceOf(PipelineArgs.class, c.getArgs());
-		assertInstanceOf(PipelineArgs.class, c.getResult("PipelineArgs"));
+		assertInstanceOf(PipelineArgs.class, c.getInfo("PipelineArgs"));
 	}
 	
 	@Test
-	public void Given_ArgsContext_When_GettingArgsTypeMismatch_Expect_MissingStageException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException {
-		// Reason: If stage expects a particular type for a given key, getting
-		// a different type must fail --> (key, type) maps to value.
+	public void Given_ArgsContext_When_GettingArgsTypeMismatch_Expect_ClassCastException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, MissingStageInfoException {
+		// Reason: If stage expects a particular type for a given key, but gets
+		// a different type, then this must trigger a ClassCastException.
 		
 		final PipelineContext c = createContext();
 		
-		assertThrowsExactly(MissingStageInfoException.class, () -> {
-			final SeekerInfo info = c.getResult("PipelineArgs");
+		assertThrowsExactly(ClassCastException.class, () -> {
+			final SeekerInfo info = c.getInfo("PipelineArgs");
 		});
+	}
+	
+	@Test
+	public void Given_ArgsContext_When_GettingSeekerInfo_Expect_MissingStageInfoException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException {
+		// Reason: If dedicated getSeekerInfo method is used, then ClassCastExceptions
+		// must be wrapped in MissingStageInfoException to prevent ClassCastExceptions
+		// sneaking too far out.
 		
+		final PipelineContext c = createContext();
+		
+		assertThrowsExactly(MissingStageInfoException.class, () -> c.getSeekerInfo("PipelineArgs"));
+	}
+	
+	@Test
+	public void Given_ArgsContext_When_GettingSweeperInfo_Expect_MissingStageInfoException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException {
+		final PipelineContext c = createContext();
+		assertThrowsExactly(MissingStageInfoException.class, () -> c.getSweeperInfo("PipelineArgs"));
+	}
+	
+	@Test
+	public void Given_ArgsContext_When_GettingStaticInfo_Expect_MissingStageInfoException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException {
+		final PipelineContext c = createContext();
+		assertThrowsExactly(MissingStageInfoException.class, () -> c.getStaticInfo("PipelineArgs"));
+	}
+	
+	@Test
+	public void Given_ArgsContext_When_PuttingExistingId_Expect_DuplicateInfoIdException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, DuplicateInfoIdException {
+		// Reason: Context must not contain duplicate identifiers.
+		
+		final PipelineContext c = createContext();
+		final SeekerInfo info = new SeekerInfo(ImmutableList.of());
+		c.putInfo("test", info);
+		assertThrowsExactly(DuplicateInfoIdException.class, () -> c.putInfo("test", info));
+	}
+	
+	@Test
+	public void Given_ArgsContext_When_PuttingDuplicateInfoDifferentId_Expect_Valid() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, DuplicateInfoIdException {
+		// Reason: Storing the same object under multiple identifiers might be relevant for compatibility reasons.
+		
+		final PipelineContext c = createContext();
+		final SeekerInfo info = new SeekerInfo(ImmutableList.of());
+		c.putInfo("test", info);
+		c.putInfo("other", info);
 	}
 }

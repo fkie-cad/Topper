@@ -14,15 +14,16 @@ import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.exceptions.DuplicateInfoIdException;
 import com.topper.exceptions.MissingStageInfoException;
 
 public final class DefaultStaticAnalyser extends StaticAnalyser {
 	
 	@Override
-	public final void execute(@NonNull final PipelineContext context) throws MissingStageInfoException {
+	public final void execute(@NonNull final PipelineContext context) throws MissingStageInfoException, DuplicateInfoIdException {
 		
 		final PipelineArgs args = context.getArgs();
-		final SweeperInfo sweeper = context.getResult(SweeperInfo.class.getSimpleName());
+		final SweeperInfo sweeper = context.getInfo(SweeperInfo.class.getSimpleName());
 		final StaticAnalyserConfig config = args.getConfig().getStaticAnalyserConfig();
 		
 		@NonNull
@@ -53,6 +54,6 @@ public final class DefaultStaticAnalyser extends StaticAnalyser {
 			gadgets.add(new Gadget(instructions, cfg, dfg));
 		}
 		
-		context.putResult(StaticInfo.class.getSimpleName(), new StaticInfo(ImmutableList.copyOf(gadgets)));
+		context.putInfo(StaticInfo.class.getSimpleName(), new StaticInfo(ImmutableList.copyOf(gadgets)));
 	}
 }
