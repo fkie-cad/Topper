@@ -10,6 +10,7 @@ import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.topper.configuration.TopperConfig;
@@ -22,10 +23,12 @@ import com.topper.dex.decompilation.pipeline.StageInfo;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompilation.seeker.PivotSeeker;
+import com.topper.dex.decompilation.seeker.Seeker;
 import com.topper.dex.decompilation.staticanalyser.DefaultStaticAnalyser;
 import com.topper.dex.decompilation.staticanalyser.Gadget;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
+import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.MissingStageInfoException;
 import com.topper.exceptions.StageException;
@@ -36,13 +39,31 @@ public class TestDefaultStaticAnalyser {
 	
 	private static TopperConfig config;
 	
+	@NonNull
+	private static final PipelineContext createContext(final byte @NonNull [] bytecode) throws NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, StageException {
+		final PipelineArgs args = new PipelineArgs(config, bytecode);
+		final Seeker seeker = new PivotSeeker();
+		final PipelineContext context = new PipelineContext(args);
+		seeker.execute(context);
+		final Sweeper sweeper = new BackwardLinearSweeper();
+		sweeper.execute(context);
+		return context;
+	}
+	
+	private static final StaticAnalyser create() {
+		return new DefaultStaticAnalyser();
+	}
+	
 	@BeforeAll
 	public static void init() throws InvalidConfigException {
 		config = TestConfig.getDefault();
 	}
-
-	private static final StaticAnalyser create() {
-		return new DefaultStaticAnalyser();
+	
+	@BeforeEach
+	public void reset() {
+		config.getStaticAnalyserConfig().setSkipCFG(false);
+		config.getStaticAnalyserConfig().setSkipDFG(false);
 	}
 
 	/**
@@ -98,7 +119,7 @@ public class TestDefaultStaticAnalyser {
 	public void Given_PartialContext_When_Executing_Expect_MissingStageInfoException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException {
 		// Reason: Static analyser must verify that required information is available.
 
-		// Sweeper is missing!
+		// Seeker and Sweeper is missing!
 		final PipelineArgs args = new PipelineArgs(config, DexLoader.get().getMethodBytes());
 		final PipelineContext context = new PipelineContext(args);
 		
@@ -108,7 +129,30 @@ public class TestDefaultStaticAnalyser {
 	}
 
 	@Test
-	public void Given_ValidMap_When_Executing_Expect_ValidStaticInfo() {
-		// Reason: Static analyser must add a valid result to total result map.
+	public void Given_ValidContext_When_ExecutingAll_Expect_ValidStaticInfo() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, StageException {
+		// Reason: Static analyser must add a valid result to context.
+		
+		// No skipping
+		config.getStaticAnalyserConfig().setSkipCFG(false);
+		config.getStaticAnalyserConfig().setSkipDFG(false);
+		
+		final byte[] buffer = DexLoader.get().getMethodBytes();
+		final PipelineContext c = createContext(buffer);
+		
+		final StaticAnalyser analyser = create();
+		
+		// Must not throw
+		analyser.execute(c);
+		
+		final StaticInfo info = c.getStaticInfo(StaticInfo.class.getSimpleName());
+		
+		assertTrue(info.getGadgets().size() >= 1);
+		for (final Gadget gadget : info.getGadgets()) {
+			assertTrue(gadget.getInstructions().size() >= 1);
+			assertNotNull(gadget.getCFG());
+			assertNotNull(gadget.getDFG());
+		}
 	}
+	
+	// TODO: CONTINUE WRITING STATIC ANALYSER TESTS
 }
