@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +34,8 @@ public class TestPipelineContext {
 	public static void init() throws InvalidConfigException {
 		config = TestConfig.getDefault();
 	}
+	
+	@NonNull
 	private static final PipelineContext createContext() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException {
 		final PipelineArgs args = new PipelineArgs(config, DexLoader.get().getMethodBytes());
 		return new PipelineContext(args);
