@@ -31,7 +31,6 @@ import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.pipeline.DuplicateInfoIdException;
 import com.topper.exceptions.pipeline.MissingStageInfoException;
 import com.topper.exceptions.pipeline.StageException;
-import com.topper.exceptions.pipeline.ViolatedAssumptionException;
 import com.topper.tests.utility.DexLoader;
 import com.topper.tests.utility.TestConfig;
 
@@ -210,6 +209,6 @@ public class TestDefaultStaticAnalyser {
 		
 		final StaticAnalyser analyser = create();
 		
-		assertThrowsExactly(ViolatedAssumptionException.class, () -> analyser.execute(context));
+		assertThrowsExactly(IllegalArgumentException.class, () -> analyser.execute(context));
 	}
 }

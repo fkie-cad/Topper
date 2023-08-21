@@ -16,13 +16,12 @@ import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.exceptions.pipeline.DuplicateInfoIdException;
 import com.topper.exceptions.pipeline.MissingStageInfoException;
-import com.topper.exceptions.pipeline.ViolatedAssumptionException;
 
 public final class DefaultStaticAnalyser extends StaticAnalyser {
 
 	@Override
 	public final void execute(@NonNull final PipelineContext context)
-			throws MissingStageInfoException, DuplicateInfoIdException, ViolatedAssumptionException {
+			throws MissingStageInfoException, DuplicateInfoIdException {
 
 		final PipelineArgs args = context.getArgs();
 		final SweeperInfo sweeper = context.getSweeperInfo(SweeperInfo.class.getSimpleName());
@@ -44,7 +43,7 @@ public final class DefaultStaticAnalyser extends StaticAnalyser {
 			// wrong in
 			// a previous stage.
 			if (instructions.size() <= 0) {
-				throw new ViolatedAssumptionException(
+				throw new IllegalArgumentException(
 						"Encountered empty instruction sequence. Missing pivot instruction.");
 			}
 
