@@ -1,5 +1,12 @@
 package com.topper.exceptions;
 
+/**
+ * Top - level Topper exception used to group all Topper
+ * related exceptions.
+ * 
+ * @author Pascal Kühnemann
+ * @since 21.08.2023
+ * */
 public class TopperException extends Exception {
 
 	public TopperException(final String message) {

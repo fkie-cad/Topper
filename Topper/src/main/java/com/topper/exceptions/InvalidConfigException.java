@@ -1,5 +1,12 @@
 package com.topper.exceptions;
 
+/**
+ * Configuration exception used to indicate that an error related
+ * to loading or parsing in e.g. {@link ConfigManager} failed.
+ * 
+ * @author Pascal Kühnemann
+ * @since 21.08.2023
+ * */
 public class InvalidConfigException extends TopperException {
 	
 	private static final String PREFIX = "Config error: ";
