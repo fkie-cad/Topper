@@ -38,7 +38,6 @@ public final class DefaultStaticAnalyser extends StaticAnalyser {
 	 * may decide whether to skip e.g. {@link CFG} extraction.
 	 * 
 	 * @param context <code>PipelineContext</code>, in which to perform static analysis.
-	 * 
 	 * @throws MissingStageInfoException If {@link PipelineArgs} or
 	 *                                   {@link SweeperInfo} is missing.
 	 * @throws DuplicateInfoIdException  If {@link StaticInfo} is already part of

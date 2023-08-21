@@ -5,6 +5,7 @@ import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.Opcodes;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.dex.decompilation.pipeline.Pipeline;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
 import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.SeekerInfo;
@@ -12,16 +13,23 @@ import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.exceptions.pipeline.DuplicateInfoIdException;
 
 /**
+ * Default implementation of {@link Seeker}. It is used in
+ * {@link Pipeline#createDefaultPipeline()}.
+ * 
  * @author Pascal Kühnemann
  * @since 15.08.2023
  */
 public class PivotSeeker extends Seeker {
 
 	/**
-	 * Searches all occurrences of the pivot instruction. This will serve as input
-	 * to {@link Sweeper}. It takes into account the size of the pivot instruction
+	 * Searches all occurrences of the pivot instruction. This may serve as input to
+	 * a {@link Sweeper}. It takes into account the size of the pivot instruction
 	 * determined by its format.
 	 * 
+	 * If successful, then <code>context</code> will be augmented with
+	 * {@link SeekerInfo}.
+	 * 
+	 * @param context {@link PipelineContext}, in which to perform analysis.
 	 * @throws DuplicateInfoIdException If this {@PivotSeeker} has already been
 	 *                                  executed.
 	 */
