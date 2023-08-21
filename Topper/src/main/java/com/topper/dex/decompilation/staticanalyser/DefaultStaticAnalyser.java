@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.topper.configuration.StaticAnalyserConfig;
 import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompilation.graphs.DFG;
+import com.topper.dex.decompilation.pipeline.Pipeline;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
 import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
@@ -17,8 +18,35 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.exceptions.pipeline.DuplicateInfoIdException;
 import com.topper.exceptions.pipeline.MissingStageInfoException;
 
+/**
+ * Default implementation of {@link StaticAnalyser}. It is used in
+ * {@link Pipeline#createDefaultPipeline()}.
+ * 
+ * @author Pascal Kühnemann
+ * @since 21.08.2023
+ */
 public final class DefaultStaticAnalyser extends StaticAnalyser {
 
+	/**
+	 * Performs static analysis on the given {@link PipelineContext}.
+	 * 
+	 * If analysis is successful, then <code>context</code> will be
+	 * augmented with {@link StaticInfo}. Among other things, a list
+	 * of {@link Gadget}s is returned.
+	 * 
+	 * Analysis is configurable via {@link StaticAnalyserConfig} and
+	 * may decide whether to skip e.g. {@link CFG} extraction.
+	 * 
+	 * @param context <code>PipelineContext</code>, in which to perform static analysis.
+	 * 
+	 * @throws MissingStageInfoException If {@link PipelineArgs} or
+	 *                                   {@link SweeperInfo} is missing.
+	 * @throws DuplicateInfoIdException  If {@link StaticInfo} is already part of
+	 *                                   the <code>context</code>.
+	 * @throws IllegalArgumentException  If an instruction sequence obtained from
+	 *                                   <code>SweeperInfo</code> is empty (must at
+	 *                                   least contain pivot instruction).
+	 */
 	@Override
 	public final void execute(@NonNull final PipelineContext context)
 			throws MissingStageInfoException, DuplicateInfoIdException {

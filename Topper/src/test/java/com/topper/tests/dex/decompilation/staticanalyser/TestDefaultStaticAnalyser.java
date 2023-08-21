@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.graphs.CFG;
+import com.topper.dex.decompilation.graphs.DFG;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
 import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.SeekerInfo;
@@ -88,6 +89,10 @@ public class TestDefaultStaticAnalyser {
 
 		for (@NonNull
 		final Gadget gadget : staticInfo.getGadgets()) {
+			
+			// Each gadget must at least contain the pivot instruction
+			assertTrue(gadget.getInstructions().size() >= 1);
+			
 			// Completeness: Check that each gadget covers an instruction sequence of the
 			// sweeper
 			assertEquals(1, sweeperInfo.getInstructionSequences().stream()
@@ -108,6 +113,13 @@ public class TestDefaultStaticAnalyser {
 				assertTrue(gadget.hasCFG()); // cfg != null
 				assertEquals(gadget.getInstructions().get(0).getOffset(), cfg.getEntry());
 				assertEquals(1, cfg.getGraph().nodes().stream().filter(bb -> bb.getOffset() == cfg.getEntry()).count());
+			}
+			
+			final DFG dfg = gadget.getDFG();
+			assertEquals(config.getStaticAnalyserConfig().shouldSkipDFG(), dfg == null);
+			
+			if (dfg != null) {
+				assertTrue(gadget.hasDFG());
 			}
 		}
 	}
@@ -131,10 +143,6 @@ public class TestDefaultStaticAnalyser {
 			InvalidConfigException, IOException, StageException {
 		// Reason: Static analyser must add a valid result to context.
 
-		// No skipping
-		config.getStaticAnalyserConfig().setSkipCFG(false);
-		config.getStaticAnalyserConfig().setSkipDFG(false);
-
 		final byte[] buffer = DexLoader.get().getMethodBytes();
 		final PipelineContext c = createContext(buffer);
 
@@ -143,14 +151,7 @@ public class TestDefaultStaticAnalyser {
 		// Must not throw
 		analyser.execute(c);
 
-		final StaticInfo info = c.getStaticInfo(StaticInfo.class.getSimpleName());
-
-		assertTrue(info.getGadgets().size() >= 1);
-		for (final Gadget gadget : info.getGadgets()) {
-			assertTrue(gadget.getInstructions().size() >= 1);
-			assertNotNull(gadget.getCFG());
-			assertNotNull(gadget.getDFG());
-		}
+		verifyResults(c);
 	}
 	
 	@Test
@@ -192,13 +193,9 @@ public class TestDefaultStaticAnalyser {
 	}
 	
 	@Test
-	public void Given_EmptyInstructionSequence_When_Executing_Expect_ViolatedAssumptionException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, DuplicateInfoIdException {
+	public void Given_EmptyInstructionSequence_When_Executing_Expect_IllegalArgumentException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, DuplicateInfoIdException {
 		// Reason: Static analyser must check correctness of its inputs. If instruction sequence
 		// is missing a pivot instruction and is thus empty, something must have gone wrong.
-		
-		// No skipping
-		config.getStaticAnalyserConfig().setSkipCFG(false);
-		config.getStaticAnalyserConfig().setSkipDFG(false);
 		
 		// Setup input
 		final byte[] buffer = DexLoader.get().getMethodBytes();
