@@ -192,4 +192,19 @@ public class TestBackwardLinearSweeper {
 	public void Given_Sweeper_When_EmptyBuffer_Expect_SweeperException() {
 		assertThrowsExactly(SweeperException.class, () -> sweeper.execute(createContext(new byte[0], 0)));
 	}
+	
+	@Test
+	public void Given_Sweeper_When_Sweeping_Expect_AtMostNInstructions() throws InvalidConfigException, StageException {
+		
+		final PipelineContext context = createContext(MEDIUM_VALID_BYTECODE, MEDIUM_VALID_BYTECODE_THROW_OFFSET);
+		sweeper.execute(context);
+		final SweeperInfo info = context.getInfo(SweeperInfo.class.getSimpleName());
+		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = info
+				.getInstructionSequences();
+		
+		for (@NonNull final ImmutableList<@NonNull DecompiledInstruction> sequence : sequences) {
+			assertTrue(config.getSweeperConfig().getMaxNumberInstructions() >= sequence.size());
+			assertTrue(1 <= sequence.size());
+		}
+	}
 }

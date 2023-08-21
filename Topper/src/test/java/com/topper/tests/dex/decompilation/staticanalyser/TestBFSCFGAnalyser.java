@@ -1,6 +1,8 @@
 package com.topper.tests.dex.decompilation.staticanalyser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,10 +40,10 @@ public class TestBFSCFGAnalyser {
 	@BeforeAll
 	public static final void loadInstructions() throws IOException, IllegalArgumentException, IllegalAccessException,
 			NoSuchFieldException, SecurityException, InvalidConfigException {
-		
+
 		final byte[] bytes = DexLoader.get().getMethodBytes();
 		assertNotNull(bytes);
-		
+
 		final Decompiler decompiler = new SmaliDecompiler();
 		final DecompilationResult result = decompiler.decompile(bytes, null, TestConfig.getDefault());
 		validInstructions = result.getInstructions();
@@ -213,4 +215,28 @@ public class TestBFSCFGAnalyser {
 		assertTrue(cfg.getGraph().nodes().stream().anyMatch(bb -> bb.getOffset() == entry));
 	}
 
+	@Test
+	public void Given_ValidBytecode_When_Analyse_Expect_NonOverlappingBlocks() {
+
+		final CFGAnalyser analyser = createAnalyser();
+		final CFG cfg = analyser.extractCFG(validInstructions, 0x10);
+
+		for (@NonNull
+		final BasicBlock block : cfg.getGraph().nodes()) {
+
+			for (@NonNull
+			final BasicBlock other : cfg.getGraph().nodes()) {
+
+				if (block.equals(other)) {
+					continue;
+				}
+				
+				for (DecompiledInstruction i : block.getInstructions()) {
+					for (DecompiledInstruction j : other.getInstructions()) {
+						assertNotEquals(i, j);
+					}
+				}
+			}
+		}
+	}
 }
