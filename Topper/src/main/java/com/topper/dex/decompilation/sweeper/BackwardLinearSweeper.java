@@ -25,7 +25,7 @@ import com.topper.exceptions.pipeline.SweeperException;
  * Decompiler built on top of <code>SmaliDecompiler</code>, which performs a
  * linear sweep, only backwards. I.e. this decompiler tries to solve the
  * following problem: <blockquote>Given a valid starting instruction, obtain at
- * most the first N instructions that precede the given
+ * most the first N-1 instructions that precede the given
  * instruction.</blockquote>
  * 
  * @author Pascal Kühnemann
@@ -53,28 +53,33 @@ public class BackwardLinearSweeper extends Sweeper {
 	 * either the buffer is exhausted, or the upper bound on the number of
 	 * instructions is hit.
 	 * 
-	 * @param results Map of results of previous stages. Among other things, it must
-	 *                contain an instance of {@link PipelineArgs}, which references
-	 *                an <code>offset</code> describing the starting point of this
-	 *                sweep, and a <code>buffer</code> from which to fetch
-	 *                instructions.
-	 * @return List of instruction sequences preceding the instruction located at
-	 *         <code>offset</code> in <code>buffer</code>. The instruction pointed
-	 *         to by <code>offset</code> is also part of this list. The list of
-	 *         instructions is in-order, i.e. the pivot instruction is always the
-	 *         last instruction in a list.
-	 * @throws SweeperException If <code>offset</code> does not point to a pivot
-	 *                          instruction, or is out of bounds wrt.
-	 *                          <code>buffer</code>.
-	 * @throws MissingStageInfoException 
-	 * @throws DuplicateInfoIdException 
+	 * Adds a list of instruction sequences preceding the instruction located at
+	 * <code>offset</code> in <code>buffer</code> to <code>context</code>. The
+	 * instruction pointed to by <code>offset</code> is also part of this list. The
+	 * list of instructions is in-order, i.e. the pivot instruction is always the
+	 * last instruction in a list.
+	 * 
+	 * @param context {@link PipelineContext}, in which sweeping is performed. It
+	 *                provides access to all {@link StageInfo}s added by previous
+	 *                {@link Stage}s.
+	 * @throws SweeperException          If <code>offset</code> does not point to a
+	 *                                   pivot instruction, or is out of bounds wrt.
+	 *                                   <code>buffer</code>.
+	 * @throws MissingStageInfoException If former <code>Stage</code>s failed to
+	 *                                   provide <code>StageInfo</code>s required by
+	 *                                   this sweeper.
+	 * @throws DuplicateInfoIdException  If <code>context</code> already contains
+	 *                                   the results of this method, which implies
+	 *                                   that this sweeper has been executed before,
+	 *                                   or there is a name collision.
 	 */
 	@Override
-	public final void execute(@NonNull final PipelineContext context) throws SweeperException, MissingStageInfoException, DuplicateInfoIdException {
+	public final void execute(@NonNull final PipelineContext context)
+			throws SweeperException, MissingStageInfoException, DuplicateInfoIdException {
 
 		final PipelineArgs args = context.getArgs();
 		final SeekerInfo seekerInfo = context.getSeekerInfo(SeekerInfo.class.getSimpleName());
-		
+
 		final ImmutableList<Integer> offsets = seekerInfo.getPivotOffsets();
 		final byte[] buffer = args.getBuffer();
 		final TopperConfig config = args.getConfig();
@@ -119,7 +124,7 @@ public class BackwardLinearSweeper extends Sweeper {
 				throw new SweeperException("Failed to decompile pivot instruction.");
 			}
 		}
-		
+
 		context.putInfo(SweeperInfo.class.getSimpleName(), new SweeperInfo(sequences.build()));
 	}
 
@@ -152,6 +157,8 @@ public class BackwardLinearSweeper extends Sweeper {
 	 * differ. Assuming that <code>buffer</code> remains unmodified, this is a
 	 * contradiction.
 	 * 
+	 * @param decompiler           {@link Decompiler} to use for decompiling single
+	 *                             instruction candidates.
 	 * @param buffer               Buffer, in which to search for gadgets.
 	 * @param offset               Starting point relative to the beginning of
 	 *                             <code>buffer</code>. Initially it refers to the
@@ -250,10 +257,10 @@ public class BackwardLinearSweeper extends Sweeper {
 						.equals(config.getSweeperConfig().getPivotOpcode())) {
 					continue;
 				}
-				
+
 				// Patch offset of instruction.
 				instructions.get(0).setOffset(offset - instructionSize);
-				
+
 				// Because decompilation was successful, no other
 				// combination of instructions with the same totalSize
 				// starting at the same offset can be valid.
