@@ -68,4 +68,14 @@ public class TopperConfig {
 		this.decompilerConfig.check();
 		return this.decompilerConfig;
 	}
+	
+	@Override
+	public String toString() {
+		final StringBuilder b = new StringBuilder();
+		b.append(this.generalConfig.toString());
+		b.append(this.decompilerConfig.toString());
+		b.append(this.sweeperConfig.toString());
+		b.append(this.staticAnalyserConfig.toString());
+		return b.toString();
+	}
 }

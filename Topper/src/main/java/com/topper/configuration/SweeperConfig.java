@@ -14,6 +14,8 @@ import com.topper.exceptions.InvalidConfigException;
  * @since 14.08.2023
  */
 public class SweeperConfig extends Config {
+	
+	private static final int UPPER_BOUND_MAX_NUMBER_INSTRUCTIONS = 100;
 
 	/**
 	 * Upper bound on the number of instructions that may precede a pivot
@@ -31,7 +33,7 @@ public class SweeperConfig extends Config {
 	 * Gets current upper bound on the number of instructions to obtain from a
 	 * sweeper.
 	 * 
-	 * Defaults to <code>10</code>.
+	 * Defaults to <code>10</code>. Upper - bounded by <code>100</code>.
 	 * 
 	 * @throws UnsupportedOperationException If {@link Config#load} has not been
 	 *                                       executed yet or execution has not been
@@ -45,11 +47,15 @@ public class SweeperConfig extends Config {
 	/**
 	 * Sets the maximum number of instructions to extract during a sweep.
 	 * 
+	 * Upper - bounded by <code>100</code>.
+	 * 
 	 * @throws InvalidConfigException If {@code maxNumberInstructions <= 0}.
 	 */
 	public final void setMaxNumberInstructions(final int maxNumberInstructions) throws InvalidConfigException {
 		if (maxNumberInstructions <= 0) {
 			throw new InvalidConfigException("maxNumberInstructions must be >= 1.");
+		} else if (maxNumberInstructions > UPPER_BOUND_MAX_NUMBER_INSTRUCTIONS) {
+			throw new InvalidConfigException("maxNumberInstructions must be <= 100");
 		}
 		this.maxNumberInstructions = maxNumberInstructions;
 	}
@@ -105,5 +111,14 @@ public class SweeperConfig extends Config {
 	public ImmutableList<@NonNull ConfigElement<?>> getElements() {
 		return ImmutableList.of(new ConfigElement<Integer>("maxNumberInstructions", 10, this::setMaxNumberInstructions),
 				new ConfigElement<@NonNull String>("pivotOpcode", "throw", this::setPivotOpcode));
+	}
+	
+	@Override
+	public String toString() {
+		final StringBuilder b = new StringBuilder();
+		b.append("Sweeper Config:" + System.lineSeparator());
+		b.append("- maxNumberInstructions: " + this.getMaxNumberInstructions() + System.lineSeparator());
+		b.append("- pivotOpcode: " + this.getPivotOpcode().name + System.lineSeparator());
+		return b.toString();
 	}
 }

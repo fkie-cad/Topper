@@ -156,4 +156,14 @@ public class DecompilerConfig extends Config {
 				new ConfigElement<Integer>("dexVersion", 39, this::setDexVersion),
 				new ConfigElement<Boolean>("shouldNopUnknownInstruction", false, this::setNopUnknownInstruction));
 	}
+	
+	@Override
+	public String toString() {
+		final StringBuilder b = new StringBuilder();
+		b.append("Decompiler Config:" + System.lineSeparator());
+		b.append("- dexSkipThreshold: " + this.getDexSkipThreshold() + System.lineSeparator());
+		b.append("- dexVersion: " + this.getDexVersion() + System.lineSeparator());
+		b.append("- shouldNopUnknownInstruction: " + this.shouldNopUnknownInstruction() + System.lineSeparator());
+		return b.toString();
+	}
 }

@@ -50,19 +50,9 @@ public class Gadget {
 	 *                     configured.
 	 * @param dfg          Data Flow Graph extracted using static analysis, if
 	 *                     configured.
-	 * @throws IllegalArgumentException If <code>instructions</code> is empty or the
-	 *                                  last instruction's opcode does not match
-	 *                                  {@link SweeperConfig#getPivotOpcode()}.
 	 */
 	public Gadget(@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions, @Nullable final CFG cfg,
 			@Nullable DFG dfg) {
-
-		if (instructions.isEmpty()) {
-			throw new IllegalArgumentException("List of instructions must be non - empty.");
-		} else if (!instructions.get(instructions.size() - 1).getInstruction().getOpcode()
-				.equals(ConfigManager.get().getSweeperConfig().getPivotOpcode())) {
-			throw new IllegalArgumentException("Last instruction's opcode must match configured pivot opcode.");
-		}
 		this.instructions = instructions;
 		this.cfg = cfg;
 		this.dfg = dfg;

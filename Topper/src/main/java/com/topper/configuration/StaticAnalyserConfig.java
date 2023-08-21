@@ -89,4 +89,13 @@ public class StaticAnalyserConfig extends Config {
 				new ConfigElement<Boolean>("skipDfg", false, this::setSkipDFG)
 		);
 	}
+	
+	@Override
+	public String toString() {
+		final StringBuilder b = new StringBuilder();
+		b.append("Static Analyser Config:" + System.lineSeparator());
+		b.append("- skipCFG: " + this.shouldSkipCFG() + System.lineSeparator());
+		b.append("- skipDFG: " + this.shouldSkipDFG() + System.lineSeparator());
+		return b.toString();
+	}
 }

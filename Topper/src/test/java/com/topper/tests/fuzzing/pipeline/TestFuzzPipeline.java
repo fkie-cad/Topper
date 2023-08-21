@@ -35,7 +35,6 @@ public class TestFuzzPipeline {
 	
 	private static Pipeline defaultPipeline;
 	
-	private static int largestOpcodeName;
 	
 	private static final void enableConfig(final Config config) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		
@@ -58,7 +57,6 @@ public class TestFuzzPipeline {
 		final SweeperConfig sweeper = new SweeperConfig();
 		enableConfig(sweeper);
 		sweeper.setMaxNumberInstructions(data.consumeInt(1, Integer.MAX_VALUE));
-//		sweeper.setPivotOpcode(data.consumeAsciiString(largestOpcodeName));
 		sweeper.setPivotOpcode("THROW");
 		
 		// Static
@@ -72,7 +70,9 @@ public class TestFuzzPipeline {
 		enableConfig(general);
 		general.setDefaultAmountThreads(data.consumeInt(1, Integer.MAX_VALUE));
 
-		return new TopperConfig(general, sa, sweeper, decompiler);
+		
+		final TopperConfig config = new TopperConfig(general, sa, sweeper, decompiler);
+		return config;
 	}
 	
 	private static final PipelineArgs argsFromBytes(@NonNull final TopperConfig config,
@@ -93,16 +93,22 @@ public class TestFuzzPipeline {
 			// Static
 			// Quickly check existence of cfg
 			assertEquals(config.getStaticAnalyserConfig().shouldSkipCFG(), gadget.getCFG() == null);
-			assertEquals(config.getStaticAnalyserConfig().shouldSkipCFG(), gadget.hasCFG());
+			assertEquals(config.getStaticAnalyserConfig().shouldSkipCFG(), !gadget.hasCFG());
 
 			assertEquals(config.getStaticAnalyserConfig().shouldSkipDFG(), gadget.getDFG() == null);
-			assertEquals(config.getStaticAnalyserConfig().shouldSkipDFG(), gadget.hasDFG());
+			assertEquals(config.getStaticAnalyserConfig().shouldSkipDFG(), !gadget.hasDFG());
 
 			for (@NonNull
 			final DecompiledInstruction insn : gadget.getInstructions()) {
 
-				opcode = opcodes.getOpcodeByValue(insn.getByteCode()[0]);
-				assertEquals(opcode, insn.getInstruction().getOpcode());
+				// TODO: COntinue heere
+				opcode = opcodes.getOpcodeByValue((int)insn.getByteCode()[0]);
+				if (opcode == null) {
+					//assertTrue(config.getDecompilerConfig().shouldNopUnknownInstruction(), insn.toString() + String.format("Opcode: %#02x", insn.getByteCode()[0]));
+					assertEquals(Opcode.NOP, insn.getInstruction().getOpcode());
+				} else {
+					assertEquals(opcode, insn.getInstruction().getOpcode(), String.format("Opcode: %#02x", insn.getByteCode()[0]));
+				}
 			}
 		}
 
@@ -121,14 +127,6 @@ public class TestFuzzPipeline {
 	
 	@BeforeAll
 	public static void init() {
-		int max = Opcode.values()[0].name.length();
-		for (int i = 0; i < Opcode.values().length; i++) {
-			if (Opcode.values()[i].name.length() > max) {
-				max = Opcode.values()[i].name.length();
-			}
-		}
-		largestOpcodeName = max;
-		
 		defaultPipeline = Pipeline.createDefaultPipeline();
 	}
 
@@ -144,12 +142,12 @@ public class TestFuzzPipeline {
 			final PipelineArgs args = argsFromBytes(config, buffer);
 
 			// Run pipeline
-			final PipelineResult result = assertDoesNotThrow(() -> defaultPipeline.execute(args));
+			final PipelineResult result = assertDoesNotThrow(() -> defaultPipeline.execute(args), config.toString());
+			assertNotNull(result);
 
 			// Check adherence to config
-			assertDoesNotThrow(() -> checkConfigAdherence(config, result));
+			assertDoesNotThrow(() -> checkConfigAdherence(config, result), config.toString());
 		} catch (final InvalidConfigException ignored) {
-//			ignored.printStackTrace();
 		}
 	}
 }

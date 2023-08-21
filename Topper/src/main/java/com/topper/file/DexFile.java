@@ -107,7 +107,8 @@ public class DexFile implements AugmentedFile {
 		this.buffer = buffer;
 
 		try {
-			this.dexFile = new DexBackedDexFile(Opcodes.getDefault(), buffer);
+			final Opcodes opcodes = Opcodes.forDexVersion(ConfigManager.get().getDecompilerConfig().getDexVersion());
+			this.dexFile = new DexBackedDexFile(opcodes, buffer);
 		} catch (final RuntimeException e) {
 			throw new IllegalArgumentException("buffer must represent a valid .dex file.", e);
 		}

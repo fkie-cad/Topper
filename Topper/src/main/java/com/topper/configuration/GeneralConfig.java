@@ -69,4 +69,12 @@ public final class GeneralConfig extends Config {
 				new ConfigElement<Integer>("defaultAmountThreads", 1, this::setDefaultAmountThreads)
 		);
 	}
+	
+	@Override
+	public String toString() {
+		final StringBuilder b = new StringBuilder();
+		b.append("General Config:" + System.lineSeparator());
+		b.append("- defaultAmountThreads: " + this.getDefaultAmountThreads() + System.lineSeparator());
+		return b.toString();
+	}
 }
