@@ -8,7 +8,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.exceptions.IllegalCommandException;
+import com.topper.exceptions.scripting.IllegalCommandException;
 import com.topper.scengine.commands.ScriptCommand;
 import com.topper.scengine.commands.ScriptCommandParser;
 

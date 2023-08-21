@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.dex.decompilation.staticanalyser.Gadget;
-import com.topper.exceptions.CommandException;
+import com.topper.exceptions.scripting.CommandException;
 import com.topper.sstate.ScriptContext;
 
 public final class SearchCommand implements ScriptCommand {

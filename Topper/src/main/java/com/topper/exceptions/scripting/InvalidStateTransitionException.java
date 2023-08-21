@@ -1,4 +1,4 @@
-package com.topper.exceptions;
+package com.topper.exceptions.scripting;
 
 public class InvalidStateTransitionException extends StateException {
 	

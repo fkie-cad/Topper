@@ -17,9 +17,9 @@ import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.SeekerInfo;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
-import com.topper.exceptions.DuplicateInfoIdException;
 import com.topper.exceptions.InvalidConfigException;
-import com.topper.exceptions.MissingStageInfoException;
+import com.topper.exceptions.pipeline.DuplicateInfoIdException;
+import com.topper.exceptions.pipeline.MissingStageInfoException;
 import com.topper.tests.utility.DexLoader;
 import com.topper.tests.utility.TestConfig;
 

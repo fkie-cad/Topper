@@ -26,7 +26,7 @@ import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
 import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.exceptions.InvalidConfigException;
-import com.topper.exceptions.StageException;
+import com.topper.exceptions.pipeline.StageException;
 import com.topper.tests.utility.DexLoader;
 import com.topper.tests.utility.TestConfig;
 

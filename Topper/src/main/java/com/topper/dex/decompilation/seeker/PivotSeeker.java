@@ -9,7 +9,7 @@ import com.topper.dex.decompilation.pipeline.PipelineArgs;
 import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.SeekerInfo;
 import com.topper.dex.decompilation.sweeper.Sweeper;
-import com.topper.exceptions.DuplicateInfoIdException;
+import com.topper.exceptions.pipeline.DuplicateInfoIdException;
 
 /**
  * @author Pascal Kühnemann

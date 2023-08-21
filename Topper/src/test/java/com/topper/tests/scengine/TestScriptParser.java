@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.exceptions.IllegalCommandException;
+import com.topper.exceptions.scripting.IllegalCommandException;
 import com.topper.scengine.ScriptParser;
 import com.topper.scengine.commands.ScriptCommand;
 import com.topper.scengine.commands.ScriptCommandParser;

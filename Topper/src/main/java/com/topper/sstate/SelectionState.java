@@ -3,8 +3,8 @@ package com.topper.sstate;
 import java.io.IOException;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.exceptions.CommandException;
-import com.topper.exceptions.InvalidStateTransitionException;
+import com.topper.exceptions.scripting.CommandException;
+import com.topper.exceptions.scripting.InvalidStateTransitionException;
 import com.topper.scengine.commands.ExitCommand;
 import com.topper.scengine.commands.FileCommand;
 import com.topper.scengine.commands.HelpCommand;

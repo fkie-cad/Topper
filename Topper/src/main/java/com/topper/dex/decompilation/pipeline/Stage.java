@@ -2,7 +2,7 @@ package com.topper.dex.decompilation.pipeline;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.exceptions.StageException;
+import com.topper.exceptions.pipeline.StageException;
 
 /**
  * Single step in a {@link Pipeline}. It performs

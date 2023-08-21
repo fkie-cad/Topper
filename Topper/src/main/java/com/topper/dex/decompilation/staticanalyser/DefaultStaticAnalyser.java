@@ -14,46 +14,58 @@ import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
-import com.topper.exceptions.DuplicateInfoIdException;
-import com.topper.exceptions.MissingStageInfoException;
+import com.topper.exceptions.pipeline.DuplicateInfoIdException;
+import com.topper.exceptions.pipeline.MissingStageInfoException;
+import com.topper.exceptions.pipeline.ViolatedAssumptionException;
 
 public final class DefaultStaticAnalyser extends StaticAnalyser {
-	
+
 	@Override
-	public final void execute(@NonNull final PipelineContext context) throws MissingStageInfoException, DuplicateInfoIdException {
-		
+	public final void execute(@NonNull final PipelineContext context)
+			throws MissingStageInfoException, DuplicateInfoIdException, ViolatedAssumptionException {
+
 		final PipelineArgs args = context.getArgs();
 		final SweeperInfo sweeper = context.getSweeperInfo(SweeperInfo.class.getSimpleName());
 		final StaticAnalyserConfig config = args.getConfig().getStaticAnalyserConfig();
-		
+
 		@NonNull
-		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = sweeper.getInstructionSequences();
-		
+		final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = sweeper
+				.getInstructionSequences();
+
 		// Try out all instruction sequences from sweeping stage.
 		final List<@NonNull Gadget> gadgets = new LinkedList<@NonNull Gadget>();
 		int entry;
 		CFG cfg;
 		DFG dfg;
-		for (@NonNull final ImmutableList<@NonNull DecompiledInstruction> instructions : sequences) {
-		
+		for (@NonNull
+		final ImmutableList<@NonNull DecompiledInstruction> instructions : sequences) {
+
+			// If an empty instruction sequence had been found, something must have gone
+			// wrong in
+			// a previous stage.
+			if (instructions.size() <= 0) {
+				throw new ViolatedAssumptionException(
+						"Encountered empty instruction sequence. Missing pivot instruction.");
+			}
+
 			// Compute entry wrt. current instruction sequence.
 			entry = instructions.get(0).getOffset();
-			
+
 			// Extract CFG
 			cfg = null;
 			if (!config.shouldSkipCFG()) {
 				cfg = this.getCFGAnalyser().extractCFG(instructions, entry);
 			}
-			
+
 			// Extract DFG. Maybe this requires CFG as well.
 			dfg = null;
 			if (!config.shouldSkipDFG()) {
 				dfg = this.getDFGAnalyser().extractDFG(instructions);
 			}
-			
+
 			gadgets.add(new Gadget(instructions, cfg, dfg));
 		}
-		
+
 		context.putInfo(StaticInfo.class.getSimpleName(), new StaticInfo(ImmutableList.copyOf(gadgets)));
 	}
 }

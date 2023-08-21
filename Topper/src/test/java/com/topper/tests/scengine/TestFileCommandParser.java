@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.Test;
 
-import com.topper.exceptions.IllegalCommandException;
+import com.topper.exceptions.scripting.IllegalCommandException;
 import com.topper.scengine.commands.FileCommand;
 import com.topper.scengine.commands.FileCommandParser;
 import com.topper.scengine.commands.ScriptCommand;

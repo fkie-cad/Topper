@@ -12,8 +12,8 @@ import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.PipelineResult;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.dex.decompilation.staticanalyser.Gadget;
-import com.topper.exceptions.CommandException;
-import com.topper.exceptions.StageException;
+import com.topper.exceptions.pipeline.StageException;
+import com.topper.exceptions.scripting.CommandException;
 import com.topper.file.FileUtil;
 import com.topper.sstate.ScriptContext;
 

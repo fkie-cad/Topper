@@ -1,4 +1,4 @@
-package com.topper.exceptions;
+package com.topper.exceptions.pipeline;
 
 public class MissingStageInfoException extends StageException {
 

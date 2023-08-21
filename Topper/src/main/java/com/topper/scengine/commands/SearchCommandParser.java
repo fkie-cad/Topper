@@ -2,7 +2,7 @@ package com.topper.scengine.commands;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.exceptions.IllegalCommandException;
+import com.topper.exceptions.scripting.IllegalCommandException;
 
 public final class SearchCommandParser implements ScriptCommandParser {
 

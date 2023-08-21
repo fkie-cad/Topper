@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.exceptions.CommandException;
-import com.topper.exceptions.InvalidStateTransitionException;
+import com.topper.exceptions.scripting.CommandException;
+import com.topper.exceptions.scripting.InvalidStateTransitionException;
 import com.topper.scengine.commands.ScriptCommand;
 import com.topper.sstate.ScriptContext;
 

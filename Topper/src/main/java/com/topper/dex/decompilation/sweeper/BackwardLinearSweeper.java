@@ -17,9 +17,9 @@ import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.SeekerInfo;
 import com.topper.dex.decompilation.pipeline.SweeperInfo;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
-import com.topper.exceptions.DuplicateInfoIdException;
-import com.topper.exceptions.MissingStageInfoException;
-import com.topper.exceptions.SweeperException;
+import com.topper.exceptions.pipeline.DuplicateInfoIdException;
+import com.topper.exceptions.pipeline.MissingStageInfoException;
+import com.topper.exceptions.pipeline.SweeperException;
 
 /**
  * Decompiler built on top of <code>SmaliDecompiler</code>, which performs a

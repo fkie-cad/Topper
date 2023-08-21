@@ -1,6 +1,6 @@
 package com.topper.scengine.commands;
 
-import com.topper.exceptions.IllegalCommandException;
+import com.topper.exceptions.scripting.IllegalCommandException;
 import com.topper.file.FileUtil;
 
 /**

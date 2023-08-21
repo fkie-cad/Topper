@@ -1,4 +1,6 @@
-package com.topper.exceptions;
+package com.topper.exceptions.scripting;
+
+import com.topper.exceptions.TopperException;
 
 public class CommandException extends TopperException {
 	

@@ -23,8 +23,8 @@ import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
 import com.topper.dex.decompilation.sweeper.Sweeper;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.exceptions.InvalidConfigException;
-import com.topper.exceptions.StageException;
-import com.topper.exceptions.SweeperException;
+import com.topper.exceptions.pipeline.StageException;
+import com.topper.exceptions.pipeline.SweeperException;
 import com.topper.tests.utility.TestConfig;
 
 public class TestBackwardLinearSweeper {

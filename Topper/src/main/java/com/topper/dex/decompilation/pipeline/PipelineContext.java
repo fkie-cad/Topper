@@ -5,8 +5,8 @@ import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.exceptions.DuplicateInfoIdException;
-import com.topper.exceptions.MissingStageInfoException;
+import com.topper.exceptions.pipeline.DuplicateInfoIdException;
+import com.topper.exceptions.pipeline.MissingStageInfoException;
 
 /**
  * Execution context of the {@link Pipeline} that abstracts away managing id -

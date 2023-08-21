@@ -1,4 +1,6 @@
-package com.topper.exceptions;
+package com.topper.exceptions.pipeline;
+
+import com.topper.exceptions.TopperException;
 
 public class StageException extends TopperException {
 

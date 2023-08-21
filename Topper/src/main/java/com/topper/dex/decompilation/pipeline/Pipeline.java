@@ -16,7 +16,7 @@ import com.topper.dex.decompilation.staticanalyser.Gadget;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompilation.sweeper.BackwardLinearSweeper;
 import com.topper.dex.decompilation.sweeper.Sweeper;
-import com.topper.exceptions.StageException;
+import com.topper.exceptions.pipeline.StageException;
 
 /**
  * A pipeline consisting of at least four main {@link Stage}s. Its task is to

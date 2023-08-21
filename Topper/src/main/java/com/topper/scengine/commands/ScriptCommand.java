@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.exceptions.CommandException;
+import com.topper.exceptions.scripting.CommandException;
 import com.topper.sstate.ScriptContext;
 
 public interface ScriptCommand {

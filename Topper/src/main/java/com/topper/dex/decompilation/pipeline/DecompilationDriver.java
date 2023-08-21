@@ -3,7 +3,7 @@ package com.topper.dex.decompilation.pipeline;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.dex.decompilation.staticanalyser.Gadget;
-import com.topper.exceptions.StageException;
+import com.topper.exceptions.pipeline.StageException;
 
 /**
  * Driver that unites all decompilation steps into a single
