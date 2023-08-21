@@ -20,7 +20,7 @@ public abstract class Sweeper implements Stage {
 	private Decompiler decompiler;
 
 	/**
-	 * Initialises this sweeper to use <code>SmaliDecompiler</code>.
+	 * Initialises this sweeper to use {@link SmaliDecompiler}.
 	 * 
 	 * @see SmaliDecompiler
 	 */

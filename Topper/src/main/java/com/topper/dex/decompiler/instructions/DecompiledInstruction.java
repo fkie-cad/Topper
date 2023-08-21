@@ -3,10 +3,12 @@ package com.topper.dex.decompiler.instructions;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.ReferenceType;
+import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.SwitchElement;
 import org.jf.dexlib2.iface.reference.Reference;
 import org.jf.util.ExceptionWithContext;
 
+import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompiler.references.CallSiteReference;
 import com.topper.dex.decompiler.references.FieldReference;
 import com.topper.dex.decompiler.references.MethodHandleReference;
@@ -15,13 +17,32 @@ import com.topper.dex.decompiler.references.MethodReference;
 import com.topper.dex.decompiler.references.StringReference;
 import com.topper.dex.decompiler.references.TypeReference;
 
+/**
+ * Representation of an instruction obtained from a {@link Decompiler}.
+ * 
+ * It wraps <code>dexlib2</code>'s {@link Instruction} and augments it with the
+ * bytes the instruction comes from.
+ * 
+ * @author Pascal Kühnemann
+ * @since 21.08.2023
+ */
 public final class DecompiledInstruction implements Comparable<DecompiledInstruction> {
 
+	/**
+	 * Buffered version of a {@link Instruction}.
+	 */
 	@NonNull
 	private final BufferedInstruction instruction;
 
+	/**
+	 * Bytes, from which <code>instruction</code> was extracted.
+	 */
 	private byte @NonNull [] byteCode;
 
+	/**
+	 * Creates a new {@link DecompiledInstruction} from a
+	 * {@link BufferedInstruction} and its associated buffer.
+	 */
 	public DecompiledInstruction(@NonNull final BufferedInstruction instruction, final byte @NonNull [] byteCode) {
 
 		this.instruction = instruction;
@@ -29,19 +50,32 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 		System.arraycopy(byteCode, 0, this.byteCode, 0, this.byteCode.length);
 	}
 
+	/**
+	 * Gets the wrapped {@link BufferedInstruction}.
+	 * */
 	@NonNull
 	public final BufferedInstruction getInstruction() {
 		return this.instruction;
 	}
 
+	/**
+	 * Gets buffer of this instruction.
+	 * */
 	public final byte @NonNull [] getByteCode() {
 		return this.byteCode;
 	}
-	
+
+	/**
+	 * Gets the offset of this instruction relative to the
+	 * buffer that contains <code>byteCode</code>.
+	 * */
 	public final int getOffset() {
 		return this.instruction.getOffset();
 	}
-	
+
+	/**
+	 * Overwrites the offset of this instruction.
+	 * */
 	public final void setOffset(final int offset) {
 		this.instruction.setOffset(offset);
 	}
@@ -56,53 +90,58 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 		return s.toString();
 	}
 
+	/**
+	 * Gets a String representation of this instruction.
+	 * */
 	@NonNull
 	public final String getInstructionString() {
 		return this.instructionToString(this.instruction);
 	}
-	
+
 	/**
-	 * Compares two instructions. Invoking this method only makes sense
-	 * in the context of the same underlying buffer. I.e. if two instructions
-	 * from different buffers are compared, then they will trivially differ.
-	 * However, as instructions do not store the buffer they originate from,
-	 * this is impossible to check. Within the same buffer, two instructions
-	 * are equal iff. their offsets are the same.
+	 * Compares two instructions. Invoking this method only makes sense in the
+	 * context of the same underlying buffer. I.e. if two instructions from
+	 * different buffers are compared, then they will trivially differ. However, as
+	 * instructions do not store the buffer they originate from, this is impossible
+	 * to check. Within the same buffer, two instructions are equal iff. their
+	 * offsets are the same.
 	 * 
-	 * Assumption:
-	 * 1. If <code>other</code> is an instance of <code>DecompiledInstruction</code>,
-	 * 	  then this instruction and <code>other</code> originate from the same buffer.
-	 * */
+	 * Assumption: If <code>other</code> is an instance of
+	 * <code>DecompiledInstruction</code>, then this instruction and
+	 * <code>other</code> originate from the same buffer.
+	 */
 	@Override
 	public final boolean equals(final Object other) {
 		if (other == null || !DecompiledInstruction.class.isAssignableFrom(other.getClass())) {
 			return false;
 		}
-		
 		return this.getOffset() == ((DecompiledInstruction) other).getOffset();
 	}
-	
+
 	/**
-	 * Compares two instructions. See <code>DecompiledInstruction.equals</code>
-	 * for motivation of below assumptions.
+	 * Compares two instructions. See <code>DecompiledInstruction.equals</code> for
+	 * motivation of below assumptions.
 	 * 
-	 * Assumption:
-	 * 1. This instruction and <code>other</code> originate from the same buffer.
+	 * Assumption: 1. This instruction and <code>other</code> originate from the
+	 * same buffer.
 	 * 
 	 * @see DecompiledInstruction.equals
-	 * */
+	 */
 	@Override
 	public int compareTo(final DecompiledInstruction o) {
 		if (o == null) {
 			throw new NullPointerException();
 		}
-		
+
 		return this.getOffset() - o.getOffset();
 	}
 
+	/**
+	 * Converts a {@link BufferedInstruction} to a human - readable string.
+	 * */
 	@NonNull
-	private final String instructionToString(final BufferedInstruction instruction) {
-		
+	private final String instructionToString(@NonNull final BufferedInstruction instruction) {
+
 		Reference ref;
 		int refType;
 		final Opcode opcode = instruction.getOpcode();
@@ -110,157 +149,165 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 
 		switch (opcode.format) {
 		case Format10t:
-			instructionName += "+" + ((BufferedInstruction10t)instruction).getCodeOffset();
+			instructionName += "+" + ((BufferedInstruction10t) instruction).getCodeOffset();
 			break;
 		case Format10x:
 			break;
 		case Format11n:
-			instructionName += "v" + ((BufferedInstruction11n)instruction).getRegisterA() + ", ";
-			instructionName += "#+" + ((BufferedInstruction11n)instruction).getWideLiteral();
+			instructionName += "v" + ((BufferedInstruction11n) instruction).getRegisterA() + ", ";
+			instructionName += "#+" + ((BufferedInstruction11n) instruction).getWideLiteral();
 			break;
 		case Format11x:
-			instructionName += "v" + ((BufferedInstruction11x)instruction).getRegisterA();
+			instructionName += "v" + ((BufferedInstruction11x) instruction).getRegisterA();
 			break;
 		case Format12x:
-			instructionName += "v" + ((BufferedInstruction12x)instruction).getRegisterA() + ", ";
-			instructionName += "v" + ((BufferedInstruction12x)instruction).getRegisterB();
+			instructionName += "v" + ((BufferedInstruction12x) instruction).getRegisterA() + ", ";
+			instructionName += "v" + ((BufferedInstruction12x) instruction).getRegisterB();
 			break;
 		case Format20bc:
-			ref = ((BufferedInstruction20bc)instruction).getReference();
-			refType = ((BufferedInstruction20bc)instruction).getReferenceType();
-			instructionName += ((BufferedInstruction20bc)instruction).getVerificationError() + ", ";
+			ref = ((BufferedInstruction20bc) instruction).getReference();
+			refType = ((BufferedInstruction20bc) instruction).getReferenceType();
+			instructionName += ((BufferedInstruction20bc) instruction).getVerificationError() + ", ";
 			instructionName += this.referenceToString(ref, refType);
 			break;
 		case Format20t:
-			instructionName += "+" + ((BufferedInstruction20t)instruction).getCodeOffset();
+			instructionName += "+" + ((BufferedInstruction20t) instruction).getCodeOffset();
 			break;
 		case Format21c:
-			ref = ((BufferedInstruction21c)instruction).getReference();
-			refType = ((BufferedInstruction21c)instruction).getReferenceType();
-			instructionName += "v" + ((BufferedInstruction21c)instruction).getRegisterA() + ", ";
+			ref = ((BufferedInstruction21c) instruction).getReference();
+			refType = ((BufferedInstruction21c) instruction).getReferenceType();
+			instructionName += "v" + ((BufferedInstruction21c) instruction).getRegisterA() + ", ";
 			instructionName += this.referenceToString(ref, refType);
 			break;
 		case Format21ih:
-			instructionName += "v" + ((BufferedInstruction21ih)instruction).getRegisterA() + ", ";
-			instructionName += "#+" + ((BufferedInstruction21ih)instruction).getWideLiteral();
+			instructionName += "v" + ((BufferedInstruction21ih) instruction).getRegisterA() + ", ";
+			instructionName += "#+" + ((BufferedInstruction21ih) instruction).getWideLiteral();
 			break;
 		case Format21lh:
-			instructionName += "v" + ((BufferedInstruction21lh)instruction).getRegisterA() + ",";
-			instructionName += "#+" + ((BufferedInstruction21lh)instruction).getWideLiteral();
+			instructionName += "v" + ((BufferedInstruction21lh) instruction).getRegisterA() + ",";
+			instructionName += "#+" + ((BufferedInstruction21lh) instruction).getWideLiteral();
 			break;
 		case Format21s:
-			instructionName += "v" + ((BufferedInstruction21s)instruction).getRegisterA() + ", ";
-			instructionName += "#+" + ((BufferedInstruction21s)instruction).getWideLiteral();
+			instructionName += "v" + ((BufferedInstruction21s) instruction).getRegisterA() + ", ";
+			instructionName += "#+" + ((BufferedInstruction21s) instruction).getWideLiteral();
 			break;
 		case Format21t:
-			instructionName += "v" + ((BufferedInstruction21t)instruction).getRegisterA() + ", ";
-			instructionName += "+" + ((BufferedInstruction21t)instruction).getCodeOffset();
+			instructionName += "v" + ((BufferedInstruction21t) instruction).getRegisterA() + ", ";
+			instructionName += "+" + ((BufferedInstruction21t) instruction).getCodeOffset();
 			break;
 		case Format22b:
-			instructionName += "v" + ((BufferedInstruction22b)instruction).getRegisterA() + ", ";
-			instructionName += "v" + ((BufferedInstruction22b)instruction).getRegisterB() + ", ";
-			instructionName += "#+" + ((BufferedInstruction22b)instruction).getWideLiteral();
+			instructionName += "v" + ((BufferedInstruction22b) instruction).getRegisterA() + ", ";
+			instructionName += "v" + ((BufferedInstruction22b) instruction).getRegisterB() + ", ";
+			instructionName += "#+" + ((BufferedInstruction22b) instruction).getWideLiteral();
 			break;
 		case Format22c:
-			ref = ((BufferedInstruction22c)instruction).getReference();
-			refType = ((BufferedInstruction22c)instruction).getReferenceType();
-			instructionName += "v" + ((BufferedInstruction22c)instruction).getRegisterA() + ", ";
-			instructionName += "v" + ((BufferedInstruction22c)instruction).getRegisterB() + ", ";
+			ref = ((BufferedInstruction22c) instruction).getReference();
+			refType = ((BufferedInstruction22c) instruction).getReferenceType();
+			instructionName += "v" + ((BufferedInstruction22c) instruction).getRegisterA() + ", ";
+			instructionName += "v" + ((BufferedInstruction22c) instruction).getRegisterB() + ", ";
 			instructionName += this.referenceToString(ref, refType);
 			break;
 		case Format22cs:
-			instructionName += "v" + ((BufferedInstruction22cs)instruction).getRegisterA() + ", ";
-			instructionName += "v" + ((BufferedInstruction22cs)instruction).getRegisterB() + ", ";
-			instructionName += "fieldoff@" + ((BufferedInstruction22cs)instruction).getFieldOffset();
+			instructionName += "v" + ((BufferedInstruction22cs) instruction).getRegisterA() + ", ";
+			instructionName += "v" + ((BufferedInstruction22cs) instruction).getRegisterB() + ", ";
+			instructionName += "fieldoff@" + ((BufferedInstruction22cs) instruction).getFieldOffset();
 			break;
 		case Format22s:
-			instructionName += "v" + ((BufferedInstruction22s)instruction).getRegisterA() + ", ";
-			instructionName += "v" + ((BufferedInstruction22s)instruction).getRegisterB() + ", ";
-			instructionName += "#+" + ((BufferedInstruction22s)instruction).getWideLiteral();
+			instructionName += "v" + ((BufferedInstruction22s) instruction).getRegisterA() + ", ";
+			instructionName += "v" + ((BufferedInstruction22s) instruction).getRegisterB() + ", ";
+			instructionName += "#+" + ((BufferedInstruction22s) instruction).getWideLiteral();
 			break;
 		case Format22t:
-			instructionName += "v" + ((BufferedInstruction22t)instruction).getRegisterA() + ", ";
-			instructionName += "v" + ((BufferedInstruction22t)instruction).getRegisterB() + ", ";
-			instructionName += "+" + ((BufferedInstruction22t)instruction).getCodeOffset();
+			instructionName += "v" + ((BufferedInstruction22t) instruction).getRegisterA() + ", ";
+			instructionName += "v" + ((BufferedInstruction22t) instruction).getRegisterB() + ", ";
+			instructionName += "+" + ((BufferedInstruction22t) instruction).getCodeOffset();
 			break;
 		case Format22x:
-			instructionName += "v" + ((BufferedInstruction22x)instruction).getRegisterA() + ", ";
-			instructionName += "v" + ((BufferedInstruction22x)instruction).getRegisterB();
+			instructionName += "v" + ((BufferedInstruction22x) instruction).getRegisterA() + ", ";
+			instructionName += "v" + ((BufferedInstruction22x) instruction).getRegisterB();
 			break;
 		case Format23x:
-			instructionName += "v" + ((BufferedInstruction23x)instruction).getRegisterA() + ", ";
-			instructionName += "v" + ((BufferedInstruction23x)instruction).getRegisterB() + ", ";
-			instructionName += "v" + ((BufferedInstruction23x)instruction).getRegisterC();
+			instructionName += "v" + ((BufferedInstruction23x) instruction).getRegisterA() + ", ";
+			instructionName += "v" + ((BufferedInstruction23x) instruction).getRegisterB() + ", ";
+			instructionName += "v" + ((BufferedInstruction23x) instruction).getRegisterC();
 			break;
 		case Format30t:
-			instructionName += "+" + ((BufferedInstruction30t)instruction).getCodeOffset();
+			instructionName += "+" + ((BufferedInstruction30t) instruction).getCodeOffset();
 			break;
 		case Format31c:
-			ref = ((BufferedInstruction31c)instruction).getReference();
-			refType = ((BufferedInstruction31c)instruction).getReferenceType();
-			instructionName += "v" + ((BufferedInstruction31c)instruction).getRegisterA() + ", ";
+			ref = ((BufferedInstruction31c) instruction).getReference();
+			refType = ((BufferedInstruction31c) instruction).getReferenceType();
+			instructionName += "v" + ((BufferedInstruction31c) instruction).getRegisterA() + ", ";
 			instructionName += this.referenceToString(ref, refType);
 			break;
 		case Format31i:
-			instructionName += "v" + ((BufferedInstruction31i)instruction).getRegisterA() + ", ";
-			instructionName += "#+" + ((BufferedInstruction31i)instruction).getWideLiteral();
+			instructionName += "v" + ((BufferedInstruction31i) instruction).getRegisterA() + ", ";
+			instructionName += "#+" + ((BufferedInstruction31i) instruction).getWideLiteral();
 			break;
 		case Format31t:
-			instructionName += "v" + ((BufferedInstruction31t)instruction).getRegisterA() + ", ";
-			instructionName += "+" + ((BufferedInstruction31t)instruction).getCodeOffset();
+			instructionName += "v" + ((BufferedInstruction31t) instruction).getRegisterA() + ", ";
+			instructionName += "+" + ((BufferedInstruction31t) instruction).getCodeOffset();
 			break;
 		case Format32x:
-			instructionName += "v" + ((BufferedInstruction32x)instruction).getRegisterA() + ", ";
-			instructionName += "v" + ((BufferedInstruction32x)instruction).getRegisterB();
+			instructionName += "v" + ((BufferedInstruction32x) instruction).getRegisterA() + ", ";
+			instructionName += "v" + ((BufferedInstruction32x) instruction).getRegisterB();
 			break;
 		case Format35c:
-			final BufferedInstruction35c i35c = (BufferedInstruction35c)instruction;
-			instructionName += "{" + this.registersToString(i35c.getRegisterCount(), i35c.getRegisterC(), i35c.getRegisterD(), i35c.getRegisterE(), i35c.getRegisterF(), i35c.getRegisterG()) + "}";
+			final BufferedInstruction35c i35c = (BufferedInstruction35c) instruction;
+			instructionName += "{" + this.registersToString(i35c.getRegisterCount(), i35c.getRegisterC(),
+					i35c.getRegisterD(), i35c.getRegisterE(), i35c.getRegisterF(), i35c.getRegisterG()) + "}";
 			ref = i35c.getReference();
 			refType = i35c.getReferenceType();
 			instructionName += ", " + this.referenceToString(ref, refType);
 			break;
 		case Format35ms:
-			final BufferedInstruction35ms i35ms = (BufferedInstruction35ms)instruction;
-			instructionName += "{" + this.registersToString(i35ms.getRegisterCount(), i35ms.getRegisterC(), i35ms.getRegisterD(), i35ms.getRegisterE(), i35ms.getRegisterF(), i35ms.getRegisterG()) + "}";
+			final BufferedInstruction35ms i35ms = (BufferedInstruction35ms) instruction;
+			instructionName += "{" + this.registersToString(i35ms.getRegisterCount(), i35ms.getRegisterC(),
+					i35ms.getRegisterD(), i35ms.getRegisterE(), i35ms.getRegisterF(), i35ms.getRegisterG()) + "}";
 			instructionName += ", vtaboff@" + i35ms.getVtableIndex();
 			break;
 		case Format35mi:
-			final BufferedInstruction35mi i35i = (BufferedInstruction35mi)instruction;
-			instructionName += "{" + this.registersToString(i35i.getRegisterCount(), i35i.getRegisterC(), i35i.getRegisterD(), i35i.getRegisterE(), i35i.getRegisterF(), i35i.getRegisterG()) + "}";
+			final BufferedInstruction35mi i35i = (BufferedInstruction35mi) instruction;
+			instructionName += "{" + this.registersToString(i35i.getRegisterCount(), i35i.getRegisterC(),
+					i35i.getRegisterD(), i35i.getRegisterE(), i35i.getRegisterF(), i35i.getRegisterG()) + "}";
 			instructionName += ", vtaboff@" + i35i.getInlineIndex();
 			break;
 		case Format3rc:
-			final BufferedInstruction3rc i3rc = (BufferedInstruction3rc)instruction;
-			instructionName += "{" + this.variableRegistersToString(i3rc.getStartRegister(), i3rc.getRegisterCount()) + "}, ";
+			final BufferedInstruction3rc i3rc = (BufferedInstruction3rc) instruction;
+			instructionName += "{" + this.variableRegistersToString(i3rc.getStartRegister(), i3rc.getRegisterCount())
+					+ "}, ";
 			ref = i3rc.getReference();
 			refType = i3rc.getReferenceType();
 			instructionName += this.referenceToString(ref, refType);
 			break;
 
 		case Format3rmi:
-			final BufferedInstruction3rmi i3rmi = (BufferedInstruction3rmi)instruction;
-			instructionName += "{" + this.variableRegistersToString(i3rmi.getStartRegister(), i3rmi.getRegisterCount()) + "}, ";
+			final BufferedInstruction3rmi i3rmi = (BufferedInstruction3rmi) instruction;
+			instructionName += "{" + this.variableRegistersToString(i3rmi.getStartRegister(), i3rmi.getRegisterCount())
+					+ "}, ";
 			instructionName += "inline@" + i3rmi.getInlineIndex();
 			break;
 		case Format3rms:
-			final BufferedInstruction3rms i3rms = (BufferedInstruction3rms)instruction;
-			instructionName += "{" + this.variableRegistersToString(i3rms.getStartRegister(), i3rms.getRegisterCount()) + "}, ";
+			final BufferedInstruction3rms i3rms = (BufferedInstruction3rms) instruction;
+			instructionName += "{" + this.variableRegistersToString(i3rms.getStartRegister(), i3rms.getRegisterCount())
+					+ "}, ";
 			instructionName += "vtaboff@" + i3rms.getVtableIndex();
 			break;
 		case Format45cc:
-			final BufferedInstruction45cc i45cc = (BufferedInstruction45cc)instruction;
-			instructionName += "{" + this.registersToString(i45cc.getRegisterCount(), i45cc.getRegisterC(), i45cc.getRegisterD(), i45cc.getRegisterE(), i45cc.getRegisterF(), i45cc.getRegisterG()) + "}, ";
+			final BufferedInstruction45cc i45cc = (BufferedInstruction45cc) instruction;
+			instructionName += "{" + this.registersToString(i45cc.getRegisterCount(), i45cc.getRegisterC(),
+					i45cc.getRegisterD(), i45cc.getRegisterE(), i45cc.getRegisterF(), i45cc.getRegisterG()) + "}, ";
 			ref = i45cc.getReference();
-			refType =i45cc.getReferenceType();
+			refType = i45cc.getReferenceType();
 			instructionName += this.referenceToString(ref, refType) + ", ";
 			ref = i45cc.getReference2();
 			refType = i45cc.getReferenceType2();
 			instructionName += this.referenceToString(ref, refType);
 			break;
 		case Format4rcc:
-			final BufferedInstruction4rcc i4rcc = (BufferedInstruction4rcc)instruction;
-			instructionName += "{" + this.variableRegistersToString(i4rcc.getStartRegister(), i4rcc.getRegisterCount()) + "}, ";
+			final BufferedInstruction4rcc i4rcc = (BufferedInstruction4rcc) instruction;
+			instructionName += "{" + this.variableRegistersToString(i4rcc.getStartRegister(), i4rcc.getRegisterCount())
+					+ "}, ";
 			ref = i4rcc.getReference();
 			refType = i4rcc.getReferenceType();
 			instructionName += this.referenceToString(ref, refType) + ", ";
@@ -269,12 +316,12 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 			instructionName += this.referenceToString(ref, refType);
 			break;
 		case Format51l:
-			final BufferedInstruction51l i51l = (BufferedInstruction51l)instruction;
+			final BufferedInstruction51l i51l = (BufferedInstruction51l) instruction;
 			instructionName += "v" + i51l.getRegisterA() + ", ";
 			instructionName += "#+" + i51l.getWideLiteral();
 			break;
 		case PackedSwitchPayload:
-			final BufferedPackedSwitchPayload iPackedSwitch = (BufferedPackedSwitchPayload)instruction;
+			final BufferedPackedSwitchPayload iPackedSwitch = (BufferedPackedSwitchPayload) instruction;
 			String fPackedName = "PackedSwitch@{";
 			for (int i = 0; i < iPackedSwitch.getSwitchElements().size(); i++) {
 
@@ -288,7 +335,7 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 			instructionName += fPackedName;
 			break;
 		case SparseSwitchPayload:
-			final BufferedSparseSwitchPayload iSparseSwitch = (BufferedSparseSwitchPayload)instruction;
+			final BufferedSparseSwitchPayload iSparseSwitch = (BufferedSparseSwitchPayload) instruction;
 			String fSparseName = "SparseSwitch@{";
 			for (int i = 0; i < iSparseSwitch.getSwitchElements().size(); i++) {
 
@@ -302,7 +349,7 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 			instructionName += fSparseName;
 			break;
 		case ArrayPayload:
-			final BufferedArrayPayload iArray = (BufferedArrayPayload)instruction;
+			final BufferedArrayPayload iArray = (BufferedArrayPayload) instruction;
 			String fArray = "Array@{";
 			for (int i = 0; i < iArray.getArrayElements().size(); i++) {
 
@@ -321,7 +368,7 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 		return instructionName;
 	}
 
-	private final String registersToString(int count, int ... regs) {
+	private final String registersToString(int count, int... regs) {
 		final StringBuilder s = new StringBuilder();
 		for (int i = 0; i < regs.length && i < count; i++) {
 
@@ -353,15 +400,16 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 		switch (referenceType) {
 		case ReferenceType.STRING:
 			name += "STRING:";
-			name += "\"" + ((StringReference)reference).getString() + "\"(" + ((StringReference)reference).getSize() + ")";
+			name += "\"" + ((StringReference) reference).getString() + "\"(" + ((StringReference) reference).getSize()
+					+ ")";
 			break;
 		case ReferenceType.TYPE:
 			name += "TYPE:";
-			name += ((TypeReference)reference).getType();
+			name += ((TypeReference) reference).getType();
 			break;
 		case ReferenceType.METHOD:
 			name += "METHOD:";
-			final MethodReference methodRef = (MethodReference)reference;
+			final MethodReference methodRef = (MethodReference) reference;
 			String methodName = methodRef.getDefiningClass() + "->" + methodRef.getName() + "(";
 			for (int i = 0; i < methodRef.getParameterTypes().size(); i++) {
 				final String param = methodRef.getParameterTypes().get(i);
@@ -376,12 +424,13 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 			break;
 		case ReferenceType.FIELD:
 			name += "FIELD:";
-			name += ((FieldReference)reference).getDefiningClass() + "->" + ((FieldReference)reference).getName() + ":" + ((FieldReference)reference).getType();
+			name += ((FieldReference) reference).getDefiningClass() + "->" + ((FieldReference) reference).getName()
+					+ ":" + ((FieldReference) reference).getType();
 			break;
 		case ReferenceType.METHOD_PROTO:
 			name += "PROTO:";
 			name += "proto@";
-			final MethodProtoReference protoRef = (MethodProtoReference)reference;
+			final MethodProtoReference protoRef = (MethodProtoReference) reference;
 			String protoName = protoRef.getReturnType() + "PROTO(";
 			for (int i = 0; i < protoRef.getParameterTypes().size(); i++) {
 				final String param = protoRef.getParameterTypes().get(i);
@@ -395,12 +444,12 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 		case ReferenceType.METHOD_HANDLE:
 			name += "METHOD_HANDLE:";
 			name += "method_handle@";
-			name += ((MethodHandleReference)reference).getMethodHandleType();
+			name += ((MethodHandleReference) reference).getMethodHandleType();
 			break;
 		case ReferenceType.CALL_SITE:
 			name += "CALL_SITE:";
 			name += "site@";
-			final CallSiteReference callRef = (CallSiteReference)reference;
+			final CallSiteReference callRef = (CallSiteReference) reference;
 			name += callRef.getMethodName();
 			break;
 		default:
@@ -409,5 +458,4 @@ public final class DecompiledInstruction implements Comparable<DecompiledInstruc
 
 		return name;
 	}
-
 }
