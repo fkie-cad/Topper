@@ -15,15 +15,11 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.AccessFlags;
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.TopperConfig;
-import com.topper.dex.decompilation.decompiler.Decompiler;
-import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
-import com.topper.dex.decompilation.staticanalyser.BFSCFGAnalyser;
-import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.file.DexFile;
 import com.topper.file.DexMethod;
@@ -40,8 +36,8 @@ public class TestVDexFile {
 	
 	private static TopperConfig config;
 	
-	@BeforeAll
-	public static void init() throws InvalidConfigException {
+	@BeforeEach
+	public void init() throws InvalidConfigException {
 		config = TestConfig.getDefault();
 	}
 
@@ -61,21 +57,9 @@ public class TestVDexFile {
 	public void Given_ValidVDexFile_When_GettingFiles_Expect_CorrectAmount() throws IOException {
 		// Reason: All .dex files covered by a .vdex must be extracted.
 
+		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_VDEX_FILE_PATH);
-		final VDexFile vdex = new VDexFile(f, getFileContents(f));
-		assertEquals(VALID_VDEX_AMOUNT_DEX_FILES, vdex.getDexFiles().size());
-	}
-
-	@Test
-	public void Given_ValidVDexFileWithCFG_When_GettingFiles_Expect_CorrectAmount() throws IOException {
-		// Reason: CFG extraction must not impact .dex file extraction.
-
-		final File f = new File(VALID_VDEX_FILE_PATH);
-		final Decompiler decompiler = new SmaliDecompiler();
-		final CFGAnalyser analyser = new BFSCFGAnalyser();
-		final VDexFile vdex = new VDexFile(f, getFileContents(f), decompiler, analyser,
-				config.getDecompilerConfig().getDexSkipThreshold());
-
+		final VDexFile vdex = new VDexFile(f, getFileContents(f), config);
 		assertEquals(VALID_VDEX_AMOUNT_DEX_FILES, vdex.getDexFiles().size());
 	}
 
@@ -85,9 +69,9 @@ public class TestVDexFile {
 		// Flaky: Using HashSet to remove possible duplicates can suffer from
 		// collisions.
 
+		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_VDEX_FILE_PATH);
-		final VDexFile vdex = new VDexFile(f, getFileContents(f));
-
+		final VDexFile vdex = new VDexFile(f, getFileContents(f), config);
 		assertEquals(vdex.getDexFiles().size(), new HashSet<@NonNull DexFile>(vdex.getDexFiles()).size());
 	}
 
@@ -96,8 +80,9 @@ public class TestVDexFile {
 			throws IOException, InterruptedException {
 		// Reason: All methods covered by .dex files in .vdex must be covered.
 
+		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_VDEX_FILE_PATH);
-		final VDexFile vdex = new VDexFile(f, getFileContents(f));
+		final VDexFile vdex = new VDexFile(f, getFileContents(f), config);
 		final ImmutableList<@NonNull DexMethod> methods = vdex.getMethods();
 
 		int total = 0;
@@ -123,8 +108,9 @@ public class TestVDexFile {
 	public void Given_ValidVDexFile_When_GettingMethods_Expect_CorrectMethodDexFileMapping() throws IOException {
 		// Reason: Each method must reference exactly one .dex file from .vdex file.
 
+		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_VDEX_FILE_PATH);
-		final VDexFile vdex = new VDexFile(f, getFileContents(f));
+		final VDexFile vdex = new VDexFile(f, getFileContents(f), config);
 		final ImmutableList<@NonNull DexMethod> methods = vdex.getMethods();
 
 		for (@NonNull
@@ -135,14 +121,12 @@ public class TestVDexFile {
 	}
 
 	@Test
-	public void Given_ValidVDexFileWithCFG_When_GettingMethods_Expect_AnalysedMethodsValid() throws IOException {
+	public void Given_ValidVDexFile_When_GettingMethods_Expect_AnalysedMethodsValid() throws IOException {
 		// Reason: Methods stored in sufficiently small .dex files must be analysed.
 
 		final File f = new File(VALID_VDEX_FILE_PATH);
-		final Decompiler decompiler = new SmaliDecompiler();
-		final CFGAnalyser analyser = new BFSCFGAnalyser();
 		final int threshold = config.getDecompilerConfig().getDexSkipThreshold();
-		final VDexFile vdex = new VDexFile(f, getFileContents(f), decompiler, analyser, threshold);
+		final VDexFile vdex = new VDexFile(f, getFileContents(f), config);
 		final ImmutableList<@NonNull DexMethod> methods = vdex.getMethods();
 
 		int flags;
@@ -156,12 +140,10 @@ public class TestVDexFile {
 
 				// Check if method has been analysed, taking into account abstract or native
 				// methods.
-				// abstract or native <=> cfg == null
-//				assertIf(isAbstractOrNative(flags), method.getCFG() == null, method.getMethod().toString());
-//				assertIf(method.getCFG() == null, isAbstractOrNative(flags), method.getMethod().toString());
-				assertEquals(isAbstractOrNative(flags), method.getCFG() == null, method.getMethod().toString());
+				// abstract or native <=> (buffer == null)
+				assertEquals(isAbstractOrNative(flags), method.getBuffer() == null, method.getMethod().toString());
 			} else {
-				assertNull(method.getCFG());
+				assertNull(method.getBuffer());
 			}
 		}
 	}
@@ -169,14 +151,16 @@ public class TestVDexFile {
 	@Test
 	public void Given_DexFile_When_Loading_Expect_IllegalArgumentException() {
 		
+		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_DEX_FILE_PATH);
-		assertThrowsExactly(IllegalArgumentException.class, () -> new VDexFile(f, getFileContents(f)));
+		assertThrowsExactly(IllegalArgumentException.class, () -> new VDexFile(f, getFileContents(f), config));
 	}
 	
 	@Test
 	public void Given_CorruptedVDexFile_When_Loading_Expect_IllegalArgumentException() {
 		
+		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(CORRUPTED_VDEX_FILE_PATH);
-		assertThrowsExactly(IllegalArgumentException.class, () -> new VDexFile(f, getFileContents(f)));
+		assertThrowsExactly(IllegalArgumentException.class, () -> new VDexFile(f, getFileContents(f), config));
 	}
 }

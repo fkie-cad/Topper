@@ -10,7 +10,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.jf.dexlib2.Opcodes;
 import org.jf.dexlib2.dexbacked.DexBackedClassDef;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
@@ -18,9 +17,10 @@ import org.jf.dexlib2.dexbacked.DexBackedMethod;
 import org.jf.util.ExceptionWithContext;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.configuration.Config;
 import com.topper.configuration.ConfigManager;
+import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.decompiler.Decompiler;
-import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
@@ -60,20 +60,6 @@ public class DexFile implements AugmentedFile {
 	private final ImmutableList<@NonNull DexMethod> methods;
 
 	/**
-	 * Creates a .dex file using only a {@link File} and a {@code buffer}.
-	 * Internally, methods extracted from {@code buffer} are not decompiled and no
-	 * CFG is constructed.
-	 * 
-	 * @param file   File to be augmented.
-	 * @param buffer Raw bytes that represent a valid .dex file.
-	 * @throws IllegalArgumentException If the buffer is empty or does not contain a
-	 *                                  valid .dex file.
-	 */
-	public DexFile(@NonNull final File file, final byte @NonNull [] buffer) {
-		this(file, buffer, null, null);
-	}
-
-	/**
 	 * Creates a .dex file using a {@link File} and a {@code buffer}. If both
 	 * {@link Decompiler} and {@link CFGAnalyser} are valid, they will be used to
 	 * analyse all methods stored in the .dex file in {@code buffer}.
@@ -87,18 +73,13 @@ public class DexFile implements AugmentedFile {
 	 * configuration {@link Config.setDefaultAmountThreads} using
 	 * {@link ConfigManager} to change the number of threads used (at least 1).
 	 * 
-	 * @param file       File to be augmented.
-	 * @param buffer     Raw bytes that represent a valid .dex file.
-	 * @param decompiler A {@code Decompiler} used in conjunction with
-	 *                   {@code analyser} to decompile all methods.
-	 * @param analyser   A {@code CFGAnalyser} used in conjunction with
-	 *                   {@code decompiler} to extract Control Flow Graphs for all
-	 *                   methods.
+	 * @param file   File to be augmented.
+	 * @param buffer Raw bytes that represent a valid .dex file.
+	 * @param config Configuration to use during .dex file creation.
 	 * @throws IllegalArgumentException If the buffer is empty or does not contain a
 	 *                                  valid .dex file.
 	 */
-	public DexFile(@NonNull final File file, final byte @NonNull [] buffer, @Nullable final Decompiler decompiler,
-			@Nullable final CFGAnalyser analyser) {
+	public DexFile(@NonNull final File file, final byte @NonNull [] buffer, @NonNull final TopperConfig config) {
 		if (buffer.length == 0) {
 			throw new IllegalArgumentException("buffer must not be empty");
 		}
@@ -112,7 +93,7 @@ public class DexFile implements AugmentedFile {
 		} catch (final RuntimeException e) {
 			throw new IllegalArgumentException("buffer must represent a valid .dex file.", e);
 		}
-		this.methods = this.loadMethods(this.dexFile, decompiler, analyser);
+		this.methods = this.loadMethods(this.dexFile);
 	}
 
 	@Override
@@ -151,8 +132,7 @@ public class DexFile implements AugmentedFile {
 	 * @return List of decompiled methods.
 	 */
 	@NonNull
-	private final ImmutableList<@NonNull DexMethod> loadMethods(@NonNull final DexBackedDexFile file,
-			@Nullable final Decompiler decompiler, @Nullable final CFGAnalyser analyser) {
+	private final ImmutableList<@NonNull DexMethod> loadMethods(@NonNull final DexBackedDexFile file) {
 
 		ImmutableList.Builder<@NonNull DexMethod> methods = new ImmutableList.Builder<>();
 
@@ -172,7 +152,7 @@ public class DexFile implements AugmentedFile {
 			results.add((Future<List<@NonNull DexMethod>>) pool.submit(() -> {
 				int offset;
 				int size;
-				CFG cfg;
+				byte[] buffer;
 				ImmutableList<@NonNull DecompiledInstruction> instructions;
 
 				final List<@NonNull DexMethod> clsMethods = new LinkedList<>();
@@ -184,27 +164,19 @@ public class DexFile implements AugmentedFile {
 
 					// Extract control flow graph if requested. If an
 					// error occurs, skip cfg extraction
-					cfg = null;
+					buffer = null;
 					try {
-						if (decompiler != null && analyser != null) {
 
-							// Decompile method.
-							// offset == 0: abstract or native method
-							offset = DexHelper.getMethodOffset(method);
-							if (offset != 0) {
-								size = DexHelper.getMethodSize(method, offset);
-								instructions = decompiler.decompile(
-										file.getBuffer().readByteRange(offset + DexHelper.CODE_ITEM_SIZE, size), file, ConfigManager.get().getConfig())
-										.getInstructions();
-
-								// Grab control flow graph
-								cfg = analyser.extractCFG(instructions, 0);
-							}
+						offset = DexHelper.getMethodOffset(method);
+						if (offset != 0) {
+							size = DexHelper.getMethodSize(method, offset);
+							buffer = file.getBuffer().readByteRange(offset + DexHelper.CODE_ITEM_SIZE, size);
 						}
 					} catch (NoSuchFieldException | SecurityException | IllegalArgumentException
-							| IllegalAccessException | IndexOutOfBoundsException | ExceptionWithContext ignored) {}
+							| IllegalAccessException | IndexOutOfBoundsException | ExceptionWithContext ignored) {
+					}
 
-					clsMethods.add(new DexMethod(this, method, cfg));
+					clsMethods.add(new DexMethod(this, method, buffer));
 				}
 
 				return clsMethods;
