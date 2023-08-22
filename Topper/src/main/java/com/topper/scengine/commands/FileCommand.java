@@ -15,9 +15,13 @@ import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.dex.decompilation.staticanalyser.Gadget;
 import com.topper.exceptions.pipeline.StageException;
 import com.topper.exceptions.scripting.CommandException;
+import com.topper.exceptions.scripting.IllegalCommandException;
+import com.topper.file.AugmentedFile;
 import com.topper.file.DexFile;
 import com.topper.file.DexMethod;
+import com.topper.file.FileType;
 import com.topper.file.FileUtil;
+import com.topper.file.RawFile;
 import com.topper.file.VDexFile;
 import com.topper.sstate.ScriptContext;
 
@@ -29,8 +33,11 @@ public final class FileCommand implements ScriptCommand {
 	@NonNull
 	private final File file;
 
-	public FileCommand(@NonNull final File file) {
+	private final FileType type;
+
+	public FileCommand(@NonNull final File file, @NonNull final FileType type) {
 		this.file = file;
+		this.type = type;
 	}
 
 	/**
@@ -46,35 +53,51 @@ public final class FileCommand implements ScriptCommand {
 			// 1. Read file contents into memory.
 			final byte[] content = FileUtil.readContents(this.file);
 
-			// 2. Identify file and load methods. Depending on the type, use a different set of gadgets.
+			// 2. Identify file and load methods. Depending on the type, use a different set
+			// of gadgets.
 			ImmutableList<@NonNull DexMethod> methods = null;
+			AugmentedFile aug;
 			try {
-				final DexFile dex = new DexFile(this.file, content, context.getConfig());
-				methods = dex.getMethods();
-			} catch (final IllegalArgumentException e) {
-				try {
-					final VDexFile vdex = new VDexFile(this.file, content, context.getConfig());
-					methods = vdex.getMethods();
-				} catch (final IllegalArgumentException e1) {
+				switch (this.type) {
+				case DEX: {
+					aug = new DexFile(this.file, content, context.getConfig());
+					break;
 				}
+				case VDEX: {
+					aug = new VDexFile(this.file, content, context.getConfig());
+					break;
+				}
+				default: {
+					// Raw should work regardless of the file type!
+					aug = new RawFile(file, content);
+					break;
+				}
+				}
+			} catch (final IllegalArgumentException e) {
+				throw new IllegalCommandException(
+						"Requested: " + this.type.name() + ", but provided path points to different file format.");
 			}
-			
+
+			methods = aug.getMethods();
+
 			// For raw files, the entire file is analysed,
 			// whereas for .vdex and .dex, only methods are considered.
-			ImmutableList<@NonNull Gadget> gadgets = null;
-			if (methods == null) {
+			@NonNull
+			final ImmutableList<@NonNull Gadget> gadgets;
+			if (this.type.equals(FileType.RAW)) {
 				gadgets = loadGadgetsFromRaw(context.getConfig(), content);
 			} else {
-				
+
 				final ImmutableList.Builder<@NonNull Gadget> builder = new ImmutableList.Builder<>();
-				
-				for (@NonNull final DexMethod method : methods) {
+
+				for (@NonNull
+				final DexMethod method : methods) {
 					builder.addAll(this.loadGadgetsFromMethod(context.getConfig(), method));
 				}
-				
+
 				gadgets = builder.build();
 			}
-			
+
 			// 3. Adjust session info in script context.
 			context.getSession().setLoadedFile(file);
 			context.getSession().setGadgets(gadgets);
@@ -85,10 +108,11 @@ public final class FileCommand implements ScriptCommand {
 			context.getIO().error("Failed to decompile " + file.getPath() + System.lineSeparator());
 		}
 	}
-	
+
 	@NonNull
-	private final ImmutableList<@NonNull Gadget> loadGadgetsFromRaw(@NonNull final TopperConfig config, final byte @NonNull [] content) throws StageException {
-		
+	private final ImmutableList<@NonNull Gadget> loadGadgetsFromRaw(@NonNull final TopperConfig config,
+			final byte @NonNull [] content) throws StageException {
+
 		try {
 			// Extract gadgets using a pipeline.
 			final PipelineArgs args = new PipelineArgs(config, content);
@@ -102,10 +126,11 @@ public final class FileCommand implements ScriptCommand {
 			throw e;
 		}
 	}
-	
+
 	@NonNull
-	private final ImmutableList<@NonNull Gadget> loadGadgetsFromMethod(@NonNull final TopperConfig config, @NonNull final DexMethod method) throws StageException {
-		
+	private final ImmutableList<@NonNull Gadget> loadGadgetsFromMethod(@NonNull final TopperConfig config,
+			@NonNull final DexMethod method) throws StageException {
+
 		if (method.getBuffer() != null) {
 			return this.loadGadgetsFromRaw(config, method.getBuffer());
 		}
@@ -118,5 +143,13 @@ public final class FileCommand implements ScriptCommand {
 	 */
 	public final File getFile() {
 		return this.file;
+	}
+
+	/**
+	 * Get the requested file type. It does not necessarily coincide with the actual
+	 * file type of {@link FileCommand#file}.
+	 */
+	public final FileType getFileType() {
+		return this.type;
 	}
 }

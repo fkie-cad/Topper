@@ -106,6 +106,7 @@ public final class TopperMain implements Runnable {
 		
 		} catch (final Exception ignored) {
 			
+			// DEBUG
 			ignored.printStackTrace();
 			// Uncaught error...
 			System.exit(42);
