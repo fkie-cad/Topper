@@ -43,7 +43,7 @@ public class TestDefaultStaticAnalyser {
 	private static final PipelineArgs createArgs(final byte @NonNull [] bytecode) {
 		return new PipelineArgs(config, bytecode);
 	}
-	
+
 	@NonNull
 	private static final PipelineContext createContext(final byte @NonNull [] bytecode)
 			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
@@ -72,7 +72,8 @@ public class TestDefaultStaticAnalyser {
 		config.getStaticAnalyserConfig().setSkipDFG(false);
 	}
 
-	private static final void verifyResults(@NonNull final PipelineContext context) throws MissingStageInfoException {
+	public static final void verifyResults(@NonNull final PipelineContext context, @NonNull final TopperConfig config)
+			throws MissingStageInfoException {
 		// Assumption: Static analyser has been executed successfully.
 
 		final PipelineArgs args = context.getArgs();
@@ -89,38 +90,49 @@ public class TestDefaultStaticAnalyser {
 
 		for (@NonNull
 		final Gadget gadget : staticInfo.getGadgets()) {
-			
-			// Each gadget must at least contain the pivot instruction
-			assertTrue(gadget.getInstructions().size() >= 1);
-			
-			// Completeness: Check that each gadget covers an instruction sequence of the
-			// sweeper
-			assertEquals(1, sweeperInfo.getInstructionSequences().stream()
-					.filter(sequence -> sequence.equals(gadget.getInstructions())).count());
-			
-			// Seeker offsets must contain precisely one instruction from gadget, i.e. the pivot gadget.
-			assertEquals(1, seekerInfo.getPivotOffsets().stream().filter(
-					offset -> gadget.getInstructions().stream().mapToInt(insn -> insn.getOffset()).anyMatch(o -> o == offset))
-					.count());
 
-			// Correctness: Check that basic block and entry coincide.
-			final CFG cfg = gadget.getCFG();
-			
-			// Check: shouldSkipCFG <=> (cfg == null)
-			assertEquals(config.getStaticAnalyserConfig().shouldSkipCFG(), cfg == null);
-			
-			if (cfg != null) {
-				assertTrue(gadget.hasCFG()); // cfg != null
-				assertEquals(gadget.getInstructions().get(0).getOffset(), cfg.getEntry());
-				assertEquals(1, cfg.getGraph().nodes().stream().filter(bb -> bb.getOffset() == cfg.getEntry()).count());
-			}
-			
-			final DFG dfg = gadget.getDFG();
-			assertEquals(config.getStaticAnalyserConfig().shouldSkipDFG(), dfg == null);
-			
-			if (dfg != null) {
-				assertTrue(gadget.hasDFG());
-			}
+			verifyGadget(gadget, config, context);
+		}
+	}
+
+	public static final void verifyGadget(@NonNull final Gadget gadget, @NonNull final TopperConfig config,
+			@NonNull final PipelineContext context) throws MissingStageInfoException {
+
+		final PipelineArgs args = context.getArgs();
+		final SeekerInfo seekerInfo = context.getSeekerInfo(SeekerInfo.class.getSimpleName());
+		final SweeperInfo sweeperInfo = context.getSweeperInfo(SweeperInfo.class.getSimpleName());
+		final StaticInfo staticInfo = context.getStaticInfo(StaticInfo.class.getSimpleName());
+		
+		// Each gadget must at least contain the pivot instruction
+		assertTrue(gadget.getInstructions().size() >= 1);
+
+		// Completeness: Check that each gadget covers an instruction sequence of the
+		// sweeper
+		assertEquals(1, sweeperInfo.getInstructionSequences().stream()
+				.filter(sequence -> sequence.equals(gadget.getInstructions())).count());
+
+		// Seeker offsets must contain precisely one instruction from gadget, i.e. the
+		// pivot gadget.
+		assertEquals(1, seekerInfo.getPivotOffsets().stream().filter(offset -> gadget.getInstructions().stream()
+				.mapToInt(insn -> insn.getOffset()).anyMatch(o -> o == offset)).count());
+
+		// Correctness: Check that basic block and entry coincide.
+		final CFG cfg = gadget.getCFG();
+
+		// Check: shouldSkipCFG <=> (cfg == null)
+		assertEquals(config.getStaticAnalyserConfig().shouldSkipCFG(), cfg == null);
+
+		if (cfg != null) {
+			assertTrue(gadget.hasCFG()); // cfg != null
+			assertEquals(gadget.getInstructions().get(0).getOffset(), cfg.getEntry());
+			assertEquals(1, cfg.getGraph().nodes().stream().filter(bb -> bb.getOffset() == cfg.getEntry()).count());
+		}
+
+		final DFG dfg = gadget.getDFG();
+		assertEquals(config.getStaticAnalyserConfig().shouldSkipDFG(), dfg == null);
+
+		if (dfg != null) {
+			assertTrue(gadget.hasDFG());
 		}
 	}
 
@@ -151,13 +163,16 @@ public class TestDefaultStaticAnalyser {
 		// Must not throw
 		analyser.execute(c);
 
-		verifyResults(c);
+		verifyResults(c, config);
 	}
-	
+
 	@Test
-	public void Given_ValidContext_When_ExecutingNoCFG_Expect_CFGNullValid() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, StageException {
-		// Reason: Explicitly ignoring CFG extraction via configuration must not interrupt analysis.
-		
+	public void Given_ValidContext_When_ExecutingNoCFG_Expect_CFGNullValid()
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+			InvalidConfigException, IOException, StageException {
+		// Reason: Explicitly ignoring CFG extraction via configuration must not
+		// interrupt analysis.
+
 		// No skipping
 		config.getStaticAnalyserConfig().setSkipCFG(true);
 		config.getStaticAnalyserConfig().setSkipDFG(false);
@@ -169,14 +184,17 @@ public class TestDefaultStaticAnalyser {
 
 		// Must not throw
 		analyser.execute(c);
-		
-		verifyResults(c);
+
+		verifyResults(c, config);
 	}
-	
+
 	@Test
-	public void Given_ValidContext_When_ExecutingNoDFG_Expect_DFGNullValid() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, StageException {
-		// Reason: Explicitly ignoring DFG extraction via configuration must not interrupt analysis.
-		
+	public void Given_ValidContext_When_ExecutingNoDFG_Expect_DFGNullValid()
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+			InvalidConfigException, IOException, StageException {
+		// Reason: Explicitly ignoring DFG extraction via configuration must not
+		// interrupt analysis.
+
 		// No skipping
 		config.getStaticAnalyserConfig().setSkipCFG(false);
 		config.getStaticAnalyserConfig().setSkipDFG(true);
@@ -188,24 +206,28 @@ public class TestDefaultStaticAnalyser {
 
 		// Must not throw
 		analyser.execute(c);
-		
-		verifyResults(c);
+
+		verifyResults(c, config);
 	}
-	
+
 	@Test
-	public void Given_EmptyInstructionSequence_When_Executing_Expect_IllegalArgumentException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvalidConfigException, IOException, DuplicateInfoIdException {
-		// Reason: Static analyser must check correctness of its inputs. If instruction sequence
-		// is missing a pivot instruction and is thus empty, something must have gone wrong.
-		
+	public void Given_EmptyInstructionSequence_When_Executing_Expect_IllegalArgumentException()
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+			InvalidConfigException, IOException, DuplicateInfoIdException {
+		// Reason: Static analyser must check correctness of its inputs. If instruction
+		// sequence
+		// is missing a pivot instruction and is thus empty, something must have gone
+		// wrong.
+
 		// Setup input
 		final byte[] buffer = DexLoader.get().getMethodBytes();
 		final PipelineArgs args = createArgs(buffer);
 		final SweeperInfo info = new SweeperInfo(ImmutableList.of(ImmutableList.of()));
 		final PipelineContext context = new PipelineContext(args);
 		context.putInfo(SweeperInfo.class.getSimpleName(), info);
-		
+
 		final StaticAnalyser analyser = create();
-		
+
 		assertThrowsExactly(IllegalArgumentException.class, () -> analyser.execute(context));
 	}
 }

@@ -28,7 +28,7 @@ public class SweeperConfig extends Config {
 	 * Opcode that signals the end of a gadget.
 	 */
 	private Opcode pivotOpcode;
-
+	
 	/**
 	 * Gets current upper bound on the number of instructions to obtain from a
 	 * sweeper.
@@ -78,12 +78,23 @@ public class SweeperConfig extends Config {
 	/**
 	 * Sets the pivot opcode to use during sweeping by name.
 	 * 
+	 * Using {@link Opcode#NOP#name} is forbidden, as its least-significant
+	 * byte (i.e. the entire nop byte (0x00)) overlaps with the least-significant
+	 * byte of {@link Opcode#PACKED_SWITCH_PAYLOAD} (0x100), {@link Opcode#SPARSE_SWITCH_PAYLOAD} (0x200)
+	 * and {@link Opcode#ARRAY_PAYLOAD} (0x300). Therefore, the default {@link Decompiler}
+	 * may disrupt the entire {@link Pipeline} due to parsing errors. As <code>Opcode.NOP</code>
+	 * is not regarded a "good" pivot instruction, it is filtered while loading the config.
+	 * 
 	 * @throws InvalidConfigException If <code>pivotOpcodeName</code> is not a valid
-	 *                                {@link Opcode}.
+	 *                                {@link Opcode} or is <code>Opcode.NOP</code>.
 	 */
 	public final void setPivotOpcode(@NonNull final String pivotOpcodeName) throws InvalidConfigException {
 		try {
+			// Check for existence
 			this.pivotOpcode = Opcode.valueOf(pivotOpcodeName.toUpperCase());
+			if (this.pivotOpcode.equals(Opcode.NOP)) {
+				throw new InvalidConfigException("NOP is not a valid pivot opcode.");
+			}
 		} catch (final Exception e) {
 			throw new InvalidConfigException(pivotOpcodeName + " is unknown.");
 		}

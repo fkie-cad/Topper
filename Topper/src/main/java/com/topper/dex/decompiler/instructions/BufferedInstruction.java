@@ -105,12 +105,12 @@ public class BufferedInstruction implements Instruction {
 
 		int opcodeValue = reader.peekUbyte();
 
+		// For e.g. PACKED_SWITCH_PAYLOAD, the opcode is 0x100
 		if (opcodeValue == 0) {
 			opcodeValue = reader.peekUshort();
 		}
 
 		final Opcode opcode = opcodes.getOpcodeByValue(opcodeValue);
-
 		final BufferedInstruction instruction = buildInstruction(reader.dexBuf, opcode, reader.getOffset(), file,
 				nopUnknownInstruction);
 		reader.moveRelative(instruction.getCodeUnits() * 2);

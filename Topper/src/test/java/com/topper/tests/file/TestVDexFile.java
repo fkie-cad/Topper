@@ -1,6 +1,5 @@
 package com.topper.tests.file;
 
-import static com.topper.tests.utility.ConditionalAsserts.assertIf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -158,8 +157,9 @@ public class TestVDexFile {
 				// Check if method has been analysed, taking into account abstract or native
 				// methods.
 				// abstract or native <=> cfg == null
-				assertIf(isAbstractOrNative(flags), method.getCFG() == null, method.getMethod().toString());
-				assertIf(method.getCFG() == null, isAbstractOrNative(flags), method.getMethod().toString());
+//				assertIf(isAbstractOrNative(flags), method.getCFG() == null, method.getMethod().toString());
+//				assertIf(method.getCFG() == null, isAbstractOrNative(flags), method.getMethod().toString());
+				assertEquals(isAbstractOrNative(flags), method.getCFG() == null, method.getMethod().toString());
 			} else {
 				assertNull(method.getCFG());
 			}

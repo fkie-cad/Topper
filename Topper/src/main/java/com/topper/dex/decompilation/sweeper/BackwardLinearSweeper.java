@@ -10,6 +10,7 @@ import org.jf.util.ExceptionWithContext;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.TopperConfig;
+import com.topper.dex.decompilation.DexHelper;
 import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
@@ -121,7 +122,7 @@ public class BackwardLinearSweeper extends Sweeper {
 						checkedGadgetSizes, depth, config).stream().map(l -> l.reverse()).iterator());
 
 			} catch (final ExceptionWithContext | ArrayIndexOutOfBoundsException e) {
-				throw new SweeperException("Failed to decompile pivot instruction.");
+				throw new SweeperException("Failed to decompile pivot instruction.", e);
 			}
 		}
 

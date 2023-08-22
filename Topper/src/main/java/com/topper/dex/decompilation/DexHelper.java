@@ -73,4 +73,19 @@ public final class DexHelper {
 
 		return builder.toString();
 	}
+	
+	@SuppressWarnings("null")
+	@NonNull
+	public static final String bytesToString(final byte @NonNull [] buffer) {
+		final StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < buffer.length; i++) {
+			final byte b = buffer[i];
+			builder.append(String.format("%02x", b));
+			
+			if (i < buffer.length - 1) {
+				builder.append(' ');
+			}
+		}
+		return builder.toString();
+	}
 }

@@ -38,7 +38,7 @@ public class TestConfigManager {
 	}
 	
 	@BeforeEach
-	private void unloadConfig() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public void unloadConfig() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		nullField(manager, "config");
 	}
 	

@@ -1,11 +1,16 @@
 package com.topper.tests.fuzzing.pipeline;
 
+
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcode;
@@ -30,6 +35,7 @@ import com.topper.dex.decompilation.staticanalyser.Gadget;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.pipeline.MissingStageInfoException;
+import com.topper.tests.dex.decompilation.staticanalyser.TestDefaultStaticAnalyser;
 
 public class TestFuzzPipeline {
 	
@@ -42,6 +48,27 @@ public class TestFuzzPipeline {
 		loaded.setAccessible(true);
 		loaded.setBoolean(config, true);
 		loaded.setAccessible(false);
+	}
+	
+	private static final void compareOpcodes(@NonNull final Opcodes a, @NonNull final Opcodes b) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		
+		final Field ops = a.getClass().getDeclaredField("opcodesByValue");
+		ops.setAccessible(true);
+		
+		final Opcode[] aOps = (Opcode[])ops.get(a);
+		final Opcode[] bOps = (Opcode[])ops.get(b);
+		
+		assertEquals(aOps.length, bOps.length);
+		assertArrayEquals(aOps, bOps);
+		
+		ops.setAccessible(false);
+		
+		assertEquals(a.api, b.api);
+		assertEquals(a.artVersion, b.artVersion);
+		for (int i = 0; i < aOps.length; i++) {
+			assertEquals(a.getOpcodeByValue(i), b.getOpcodeByValue(i));
+			assertEquals(a.getOpcodeValue(a.getOpcodeByValue(i)), b.getOpcodeValue(b.getOpcodeByValue(i)));
+		}
 	}
 
 	private static final TopperConfig configFromBytes(@NonNull final FuzzedDataProvider data) throws InvalidConfigException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
@@ -57,7 +84,16 @@ public class TestFuzzPipeline {
 		final SweeperConfig sweeper = new SweeperConfig();
 		enableConfig(sweeper);
 		sweeper.setMaxNumberInstructions(data.consumeInt(1, Integer.MAX_VALUE));
-		sweeper.setPivotOpcode("THROW");
+//		sweeper.setPivotOpcode("THROW");
+		
+		final int opcodeValue = (int)(data.consumeByte() & 0xff);
+		final Opcode op = Opcodes.forDexVersion(decompiler.getDexVersion()).getOpcodeByValue(opcodeValue);
+		
+		// It is not the goal to fuzz config construction!
+		if (op == null) {
+			throw new InvalidConfigException("");
+		}
+		sweeper.setPivotOpcode(op.name);
 		
 		// Static
 		final StaticAnalyserConfig sa = new StaticAnalyserConfig();
@@ -69,7 +105,6 @@ public class TestFuzzPipeline {
 		final GeneralConfig general = new GeneralConfig();
 		enableConfig(general);
 		general.setDefaultAmountThreads(data.consumeInt(1, Integer.MAX_VALUE));
-
 		
 		final TopperConfig config = new TopperConfig(general, sa, sweeper, decompiler);
 		return config;
@@ -86,6 +121,9 @@ public class TestFuzzPipeline {
 		// Decompiler
 		// Check opcodes -> dex version
 		final Opcodes opcodes = Opcodes.forDexVersion(config.getDecompilerConfig().getDexVersion());
+		assertDoesNotThrow(() -> compareOpcodes(opcodes, config.getDecompilerConfig().getOpcodes()));
+		final Opcode pivot = config.getSweeperConfig().getPivotOpcode();
+		
 		Opcode opcode;
 		for (@NonNull
 		final Gadget gadget : result.getContext().getStaticInfo(StaticInfo.class.getSimpleName()).getGadgets()) {
@@ -101,15 +139,32 @@ public class TestFuzzPipeline {
 			for (@NonNull
 			final DecompiledInstruction insn : gadget.getInstructions()) {
 
-				// TODO: COntinue heere
-				opcode = opcodes.getOpcodeByValue((int)insn.getByteCode()[0]);
+				// Without 0xff, this would be sign - extended!!!!
+				int opcodeValue = insn.getByteCode()[0] & 0xff;
+
+				if (opcodeValue == 0) {
+					opcodeValue = ByteBuffer.wrap(insn.getByteCode(), 0, 2).order(ByteOrder.LITTLE_ENDIAN).getShort();
+				}
+				
+				opcode = opcodes.getOpcodeByValue(opcodeValue);
 				if (opcode == null) {
-					//assertTrue(config.getDecompilerConfig().shouldNopUnknownInstruction(), insn.toString() + String.format("Opcode: %#02x", insn.getByteCode()[0]));
-					assertEquals(Opcode.NOP, insn.getInstruction().getOpcode());
+					assertTrue(
+							config.getDecompilerConfig().shouldNopUnknownInstruction(),
+							"Instruction: " + insn.toString() + System.lineSeparator() + 
+							String.format("Opcode: %#02x", insn.getByteCode()[0]) + System.lineSeparator() + 
+							"opcodes: " + opcodes
+					);
+					assertEquals(Opcode.NOP, insn.getInstruction().getOpcode(), insn.toString() + String.format("Opcode: %#02x", insn.getByteCode()[0]));
 				} else {
 					assertEquals(opcode, insn.getInstruction().getOpcode(), String.format("Opcode: %#02x", insn.getByteCode()[0]));
 				}
 			}
+			
+			// Verify correctness of CFG and thus static analyser stage
+			TestDefaultStaticAnalyser.verifyGadget(gadget, config, result.getContext());
+			
+			// Check that last instruction is a pivot instruction
+			assertEquals(pivot, gadget.getInstructions().get(gadget.getInstructions().size() - 1).getInstruction().getOpcode());
 		}
 
 		// Sweeper
@@ -130,7 +185,7 @@ public class TestFuzzPipeline {
 		defaultPipeline = Pipeline.createDefaultPipeline();
 	}
 
-	@FuzzTest
+	@FuzzTest(maxDuration = "10m")
 	public void Given_GeneratedConfig_When_ExecutingDefaultPipeline_Expect_NoErrors(final FuzzedDataProvider data) throws InvalidConfigException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		try {
