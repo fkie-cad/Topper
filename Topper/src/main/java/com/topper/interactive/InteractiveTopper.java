@@ -33,6 +33,7 @@ public final class InteractiveTopper {
 	 * @throws IOException If IO in interactive mode fails. This is a fatal error,
 	 *                     from which recovery is not possible (probably).
 	 */
+	// TODO: Use picocli and jline2 to handle interaction --> autocompletion, colors and more
 	public final void mainLoop(@NonNull final IOManager io, @NonNull final ScriptParser parser,
 			@NonNull final ScriptExecutor executor, @NonNull final ScriptContext context) throws IOException {
 

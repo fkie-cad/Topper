@@ -79,7 +79,7 @@ public final class FileCommandParser implements ScriptCommandParser {
 	 * */
 	@Override
 	public final String usage() {
-		return this.command() + " [raw|dex|vdex] [path to file]";
+		return this.command() + this.typePattern.toString() + " <path to file>";
 	}
 
 	@Override
