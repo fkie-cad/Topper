@@ -14,13 +14,14 @@ import com.topper.scengine.commands.ScriptCommand;
 public class TestFileCommandParser {
 	
 	private static final String COMMAND_FILE = "FILE";
+	private static final String FILE_TYPE = "RAW";
 	private static final String INVALID_FILE_PATH = "./src/test/java/resources/abcdefgh";
 	private static final String VALID_FILE_NAME = "base.vdex";
 	private static final String VALID_FILE_PATH = "./src/test/java/resources/" + VALID_FILE_NAME;
 	private static final String[] COMMAND_FILE_NO_ARG = { COMMAND_FILE };
-	private static final String[] COMMAND_FILE_TWO_ARGS = { COMMAND_FILE, VALID_FILE_PATH, INVALID_FILE_PATH };
-	private static final String[] COMMAND_FILE_INVALID_ARG = { COMMAND_FILE, INVALID_FILE_PATH };
-	private static final String[] COMMAND_FILE_VALID_ARG = { COMMAND_FILE, VALID_FILE_PATH };
+	private static final String[] COMMAND_FILE_INVALID_TYPE = { COMMAND_FILE, VALID_FILE_PATH, INVALID_FILE_PATH };
+	private static final String[] COMMAND_FILE_INVALID_ARG = { COMMAND_FILE, FILE_TYPE, INVALID_FILE_PATH };
+	private static final String[] COMMAND_FILE_VALID_ARG = { COMMAND_FILE, FILE_TYPE, VALID_FILE_PATH };
 
 	private static final FileCommandParser createFileParser() {
 		return new FileCommandParser();
@@ -88,7 +89,7 @@ public class TestFileCommandParser {
 		
 		assertThrowsExactly(
 				IllegalCommandException.class,
-				() -> parser.parse(COMMAND_FILE_TWO_ARGS)
+				() -> parser.parse(COMMAND_FILE_INVALID_ARG)
 		);
 	}
 }
