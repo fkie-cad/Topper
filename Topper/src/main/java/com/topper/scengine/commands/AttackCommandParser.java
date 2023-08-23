@@ -1,23 +1,16 @@
 package com.topper.scengine.commands;
 
+import java.util.Arrays;
+
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.exceptions.scripting.IllegalCommandException;
 import com.topper.scengine.ScriptParser;
-import com.topper.scengine.commands.attack.TOPExceptionHandlerAttackCommandParser;
 
 public final class AttackCommandParser implements ScriptCommandParser {
 
-	
 	@NonNull
-	private final ScriptParser subcommandParser;
-	
-	public AttackCommandParser() {
-		
-		// Register sub - commands
-		this.subcommandParser = new ScriptParser();
-		this.subcommandParser.registerParser(new TOPExceptionHandlerAttackCommandParser());
-	}
+	private static final ScriptParser subcommandParser = new ScriptParser();
 	
 	@Override
 	@NonNull
@@ -28,9 +21,15 @@ public final class AttackCommandParser implements ScriptCommandParser {
 			throw new IllegalCommandException("Invalid usage: " + this.usage());
 		}
 		
+		final ScriptCommandParser parser = subcommandParser.findParserByString(tokens[1]);
+		if (parser == null) {
+			throw new IllegalCommandException("Subcommand " + tokens[1] + " is unknown.");
+		}
 		
+		// Parse command from sub - command tokens
+		final ScriptCommand subcommand = parser.parse(Arrays.copyOfRange(tokens, 1, tokens.length));
 		
-		return new AttackCommand();
+		return subcommand;
 	}
 
 	@Override
@@ -43,5 +42,9 @@ public final class AttackCommandParser implements ScriptCommandParser {
 	@NonNull 
 	public final String command() {
 		return "attack";
+	}
+	
+	public static final void registerSubcommandParser(@NonNull final ScriptCommandParser parser) {
+		subcommandParser.registerParser(parser);
 	}
 }
