@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.topper.exceptions.scripting.IllegalCommandException;
+import com.topper.scengine.commands.CommandManager;
 import com.topper.scengine.commands.FileCommand;
 import com.topper.scengine.commands.FileCommandParser;
 import com.topper.scengine.commands.ScriptCommand;
@@ -23,6 +25,12 @@ public class TestFileCommandParser {
 	private static final String[] COMMAND_FILE_INVALID_ARG = { COMMAND_FILE, FILE_TYPE, INVALID_FILE_PATH };
 	private static final String[] COMMAND_FILE_VALID_ARG = { COMMAND_FILE, FILE_TYPE, VALID_FILE_PATH };
 
+	@BeforeAll
+	public static void init() {
+		// Calling new FileCommandParser triggers static block
+		CommandManager.get().clear();
+	}
+	
 	private static final FileCommandParser createFileParser() {
 		return new FileCommandParser();
 	}

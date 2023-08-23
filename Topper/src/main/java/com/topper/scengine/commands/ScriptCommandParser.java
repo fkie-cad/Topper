@@ -5,14 +5,27 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.topper.exceptions.scripting.IllegalCommandException;
 
 /**
- * 
- * 
  * This "workaround" is only used, because in Java it is not allowed
  * to create interfaces with abstract static methods... Otherwise
  * <code>ScriptCommand</code> would be given a
  * <code>static parse(String command);</code> method to be overwritten
  * by all implementing subclasses. This would require adding only
  * a single class to <code>scengine</code>, if a new command was needed.
+ * 
+ * All implementations of {@link ScriptCommandParser} must be located
+ * in the same (or sub-) package as <code>ScriptCommandParser</code>,
+ * because {@link CommandManager} loads all classes from this package.
+ * This enables adding commands and their parsers without having to
+ * modify multiple points in code. Hence, adding a new parser can
+ * be done by:
+ * <pre>
+ * static {
+ * 	CodeManager.get().registerCommandParser(new subclass of ScriptCommandParser);
+ * }
+ * </pre>
+ * 
+ * @author Pascal Kühnemann
+ * @since 23.08.2023
  * */
 public interface ScriptCommandParser {
 	

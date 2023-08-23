@@ -6,6 +6,10 @@ import com.topper.exceptions.scripting.IllegalCommandException;
 
 public final class SearchCommandParser implements ScriptCommandParser {
 
+	public SearchCommandParser() {
+		CommandManager.get().registerCommandParser(this);
+	}
+	
 	@Override
 	@NonNull 
 	public final ScriptCommand parse(@NonNull final String[] tokens) throws IllegalCommandException {

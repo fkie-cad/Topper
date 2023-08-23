@@ -4,6 +4,10 @@ import com.topper.exceptions.scripting.IllegalCommandException;
 
 public final class HelpCommandParser implements ScriptCommandParser {
 
+	static {
+		CommandManager.get().registerCommandParser(new HelpCommandParser());
+	}
+	
 	@Override
 	public final ScriptCommand parse(final String[] tokens) throws IllegalCommandException {
 		

@@ -17,6 +17,7 @@ import com.topper.exceptions.scripting.InvalidStateTransitionException;
 import com.topper.interactive.IOManager;
 import com.topper.scengine.ScriptExecutor;
 import com.topper.scengine.ScriptParser;
+import com.topper.scengine.commands.CommandManager;
 import com.topper.scengine.commands.ExitCommand;
 import com.topper.scengine.commands.ExitCommandParser;
 import com.topper.scengine.commands.HelpCommand;
@@ -43,6 +44,10 @@ public class TestScriptExecutor {
 	public static void clearStreams() {
 		IOHelper.get().clearOut();
 		IOHelper.get().clearErr();
+		
+		// Ensure classes are loaded and static blocks executed.
+		new HelpCommandParser();
+		new ExitCommandParser();
 	}
 	
 	@AfterAll
@@ -54,9 +59,15 @@ public class TestScriptExecutor {
 	@BeforeEach
 	public void init() throws FileNotFoundException, InvalidConfigException {
 		
-		final ScriptParser parser = new ScriptParser();
-		parser.registerParser(new HelpCommandParser());
-		parser.registerParser(new ExitCommandParser());
+		// Clear command manager
+		final CommandManager manager = CommandManager.get();
+		manager.clear();
+		manager.registerCommandParser(new HelpCommandParser());
+		manager.registerCommandParser(new ExitCommandParser());
+		
+		final ScriptParser parser = new ScriptParser(manager);
+//		parser.registerParser(new HelpCommandParser());
+//		parser.registerParser(new ExitCommandParser());
 		
 		VALID_CONTEXT = new ScriptContext(
 			TestConfig.getDefault(), //new TopperConfig(10, Opcode.THROW, 1, 0, 38, false),

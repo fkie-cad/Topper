@@ -12,9 +12,14 @@ import com.topper.file.FileUtil;
  * */
 public final class FileCommandParser implements ScriptCommandParser {
 
+	static {
+		CommandManager.get().registerCommandParser(new FileCommandParser());
+	}
+	
 	private final Pattern typePattern;
 	
 	public FileCommandParser() {
+		
 		final StringBuilder b = new StringBuilder();
 		b.append("(");
 		for (int i = 0; i < FileType.values().length; i++) {

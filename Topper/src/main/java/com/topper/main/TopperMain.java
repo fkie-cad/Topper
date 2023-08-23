@@ -16,11 +16,8 @@ import com.topper.interactive.IOManager;
 import com.topper.interactive.InteractiveTopper;
 import com.topper.scengine.ScriptExecutor;
 import com.topper.scengine.ScriptParser;
-import com.topper.scengine.commands.ExitCommandParser;
-import com.topper.scengine.commands.FileCommandParser;
-import com.topper.scengine.commands.HelpCommandParser;
+import com.topper.scengine.commands.CommandManager;
 import com.topper.scengine.commands.ScriptCommand;
-import com.topper.scengine.commands.SearchCommandParser;
 import com.topper.sstate.ScriptContext;
 
 import picocli.CommandLine;
@@ -67,17 +64,12 @@ public final class TopperMain implements Runnable {
 			final TopperConfig config = ConfigManager.get().getConfig();
 			
 			// Regardless of the mode, parsing needs to be performed.
-			final ScriptParser parser = new ScriptParser();
+			final CommandManager manager = CommandManager.get();
+			final ScriptParser parser = new ScriptParser(manager);
 
 			// Create context and executor
 			final ScriptContext context = new ScriptContext(config, io, parser);
 			final ScriptExecutor executor = new ScriptExecutor();
-
-			// Register commands with parser
-			parser.registerParser(new FileCommandParser());
-			parser.registerParser(new ExitCommandParser());
-			parser.registerParser(new HelpCommandParser());
-			parser.registerParser(new SearchCommandParser());
 			
 			// Check script file. Only used in non - interactive
 			if (this.scriptPath != null) {

@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.exceptions.scripting.IllegalCommandException;
+import com.topper.scengine.commands.CommandManager;
 import com.topper.scengine.commands.ScriptCommand;
 import com.topper.scengine.commands.ScriptCommandParser;
 
@@ -45,12 +47,16 @@ public final class ScriptParser {
 	 * */
 	private final Map<String, ScriptCommandParser> parserMap;
 	
+	private final CommandManager manager;
+	
 	/**
 	 * Creates a <code>ScriptParser</code> and its command to
 	 * <code>ScriptCommandParser</code> mapping.
 	 * */
-	public ScriptParser() {
+	public ScriptParser(@NonNull final CommandManager manager) {
 		this.parserMap = new HashMap<String, ScriptCommandParser>();
+		
+		this.manager = manager;
 	}
 	
 	/**
@@ -68,16 +74,16 @@ public final class ScriptParser {
 	 * 	registered with <code>command</code>.
 	 * @see ScriptCommandParser
 	 * */
-	public final void registerParser(final ScriptCommandParser parser) {
-		
-		final String command = parser.command();
-		
-		if (this.parserMap.containsKey(command.toUpperCase())) {
-			throw new IllegalArgumentException(String.format("%s is already registered.", command));
-		}
-		
-		this.parserMap.put(command.toUpperCase(), parser);
-	}
+//	public final void registerParser(final ScriptCommandParser parser) {
+//		
+//		final String command = parser.command();
+//		
+//		if (this.parserMap.containsKey(command.toUpperCase())) {
+//			throw new IllegalArgumentException(String.format("%s is already registered.", command));
+//		}
+//		
+//		this.parserMap.put(command.toUpperCase(), parser);
+//	}
 
 	/**
 	 * Tries to map the given <code>command</code> string to a respective
@@ -89,14 +95,14 @@ public final class ScriptParser {
 	 * 	<code>null</code>.
 	 * @see ScriptCommand
 	 * */
-	public final ScriptCommandParser findParserByString(final String command) {
-		
-		if (!this.parserMap.containsKey(command.toUpperCase())) {
-			return null;
-		}
-		
-		return this.parserMap.get(command.toUpperCase());
-	}
+//	public final ScriptCommandParser findParserByString(final String command) {
+//		
+//		if (!this.parserMap.containsKey(command.toUpperCase())) {
+//			return null;
+//		}
+//		
+//		return this.parserMap.get(command.toUpperCase());
+//	}
 	
 	/**
 	 * Parses <code>script</code> into a list of <code>ScriptCommand</code> objects.
@@ -115,6 +121,7 @@ public final class ScriptParser {
 	 * @throws IllegalCommandException If <code>script</code> contains at least one
 	 * 	invalid command.
 	 * */
+	@SuppressWarnings("null")	// ImmutableList.copyOf is not expected to return null
 	@NonNull
 	public final ImmutableList<@NonNull ScriptCommand> parse(final String script) throws IllegalCommandException {
 		
@@ -126,7 +133,8 @@ public final class ScriptParser {
 		
 		// Ensure that all commands are initially correct.
 		final List<ScriptCommand> scriptCommands = new ArrayList<ScriptCommand>(commands.length);
-		ScriptCommandParser parser;
+//		ScriptCommandParser parser;
+		Set<@NonNull ScriptCommandParser> parsers;
 		String command;
 		String[] tokens;
 		for (int i = 0; i < commands.length; i++) {
@@ -138,14 +146,21 @@ public final class ScriptParser {
 			tokens = command.split(" ");
 			
 			// Check command length and whether there is a registered parser.
-			parser = this.findParserByString(tokens[0].toUpperCase());
-			if (command.length() == 0 || parser == null) {
-				
+//			parser = this.findParserByString(tokens[0].toUpperCase());
+//			if (command.length() == 0 || parser == null) {
+//				
+//				throw new IllegalCommandException(String.format("Line %d contains illegal command: %s", i + 1, tokens[0]));
+//			}
+			parsers = this.manager.findParserByName(tokens[0]);
+			if (parsers.size() == 0) {
 				throw new IllegalCommandException(String.format("Line %d contains illegal command: %s", i + 1, tokens[0]));
+			} else if (parsers.size() >= 2) {
+				throw new IllegalCommandException(String.format("Line %d contains ambiguous command: %s", i + 1, tokens[0]));
 			}
 			
 			// Perform thorough parsing based on identified command.
-			scriptCommands.add(parser.parse(tokens));
+//			scriptCommands.add(parser.parse(tokens));
+			scriptCommands.add(parsers.stream().findFirst().get().parse(tokens));
 		}
 		
 		return ImmutableList.copyOf(scriptCommands);

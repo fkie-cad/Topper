@@ -4,13 +4,14 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.exceptions.scripting.IllegalCommandException;
 import com.topper.scengine.commands.AttackCommandParser;
+import com.topper.scengine.commands.CommandManager;
 import com.topper.scengine.commands.ScriptCommand;
 import com.topper.scengine.commands.ScriptCommandParser;
 
 public final class TOPExceptionHandlerAttackCommandParser implements ScriptCommandParser {
 
 	public TOPExceptionHandlerAttackCommandParser() {
-		AttackCommandParser.registerSubcommandParser(this);
+		CommandManager.get().registerCommandParser(AttackCommandParser.class, this);
 	}
 	
 	@Override

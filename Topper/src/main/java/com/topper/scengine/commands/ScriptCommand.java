@@ -7,6 +7,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.topper.exceptions.scripting.CommandException;
 import com.topper.sstate.ScriptContext;
 
+/**
+ * All implementations of {@link ScriptCommand} must be located
+ * in the same (or sub-) package as <code>ScriptCommandParser</code>,
+ * because {@link CommandManager} loads all classes from this package.
+ * This enables adding commands and their parsers without having to
+ * modify multiple points in code.
+ * */
 public interface ScriptCommand {
 
 	/**
