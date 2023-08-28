@@ -12,10 +12,6 @@ import com.topper.file.FileUtil;
  * */
 public final class FileCommandParser implements ScriptCommandParser {
 
-	static {
-		CommandManager.get().registerCommandParser(new FileCommandParser());
-	}
-	
 	private final Pattern typePattern;
 	
 	public FileCommandParser() {

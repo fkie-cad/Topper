@@ -6,17 +6,17 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.exceptions.scripting.IllegalCommandException;
+import com.topper.scengine.commands.attack.TOPExceptionHandlerAttackCommandParser;
 
+@TopperCommandParser
 public final class AttackCommandParser implements ScriptCommandParser {
 	
-	static {
-		CommandManager.get().registerCommandParser(new AttackCommandParser());
-	}
-
 	private final CommandManager manager;
 	
 	public AttackCommandParser() {
 		this.manager = CommandManager.get();
+		
+//		this.manager.registerCommandParser(this.getClass(), new TOPExceptionHandlerAttackCommandParser());
 	}
 	
 	@Override

@@ -2,9 +2,9 @@ package com.topper.dex.decompilation.staticanalyser;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jf.dexlib2.Opcode;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.configuration.ConfigManager;
 import com.topper.configuration.SweeperConfig;
 import com.topper.dex.decompilation.DexHelper;
 import com.topper.dex.decompilation.graphs.CFG;

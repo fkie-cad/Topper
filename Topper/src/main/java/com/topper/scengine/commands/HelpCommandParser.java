@@ -2,12 +2,9 @@ package com.topper.scengine.commands;
 
 import com.topper.exceptions.scripting.IllegalCommandException;
 
+@TopperCommandParser
 public final class HelpCommandParser implements ScriptCommandParser {
 
-	static {
-		CommandManager.get().registerCommandParser(new HelpCommandParser());
-	}
-	
 	@Override
 	public final ScriptCommand parse(final String[] tokens) throws IllegalCommandException {
 		
