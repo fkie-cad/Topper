@@ -3,8 +3,9 @@ package com.topper.scengine.commands;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.exceptions.scripting.IllegalCommandException;
+import com.topper.sstate.ExecutionState;
 
-@TopperCommandParser
+@TopperCommandParser(states = { ExecutionState.class })
 public final class SearchCommandParser implements ScriptCommandParser {
 
 	@Override
@@ -45,5 +46,11 @@ public final class SearchCommandParser implements ScriptCommandParser {
 	@NonNull
 	public final String command() {
 		return "search";
+	}
+
+	@Override
+	@NonNull 
+	public Class<? extends ScriptCommand> commandType() {
+		return SearchCommand.class;
 	}
 }

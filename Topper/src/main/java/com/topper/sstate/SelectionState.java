@@ -2,31 +2,22 @@ package com.topper.sstate;
 
 import java.io.IOException;
 
-import com.google.common.collect.ImmutableList;
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.topper.exceptions.scripting.CommandException;
 import com.topper.exceptions.scripting.InvalidStateTransitionException;
 import com.topper.scengine.commands.ExitCommand;
 import com.topper.scengine.commands.FileCommand;
-import com.topper.scengine.commands.HelpCommand;
 import com.topper.scengine.commands.ScriptCommand;
 
 public final class SelectionState extends CommandState {
 
-	public SelectionState(final ScriptContext context) {
+	public SelectionState(@NonNull final ScriptContext context) {
 		super(context);
-	}
-
-	@Override
-	public ImmutableList<Class<? extends ScriptCommand>> getAvailableCommands() {
-		return ImmutableList.of(
-				FileCommand.class,
-				ExitCommand.class,
-				HelpCommand.class
-		);
 	}
 	
 	@Override
-	public final void executeCommand(final ScriptCommand command) throws InvalidStateTransitionException, CommandException, IOException {
+	public final void executeCommand(@NonNull final ScriptCommand command) throws InvalidStateTransitionException, CommandException, IOException {
 
 		// Only available commands are "file", "exit" and "help"
 		command.execute(this.getContext());

@@ -1,12 +1,23 @@
 package com.topper.sstate;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
+import org.eclipse.jdt.annotation.NonNull;
+import org.reflections.Reflections;
+
+import com.google.common.collect.ImmutableSet;
 import com.topper.exceptions.scripting.CommandException;
 import com.topper.exceptions.scripting.InvalidStateTransitionException;
 import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.ScriptCommandParser;
+import com.topper.scengine.commands.TopperCommandParser;
 
+@SuppressWarnings("null")
 public abstract class CommandState {
 	
 	/**
@@ -14,12 +25,48 @@ public abstract class CommandState {
 	 * */
 	private final ScriptContext context;
 	
+	private static Map<@NonNull Class<? extends CommandState>, @NonNull Set<@NonNull Class<? extends ScriptCommand>>> stateCommandMap;
+	
+	static {
+		stateCommandMap = new HashMap<>();
+		
+		// Load state -> command mappings
+		final Reflections reflections = new Reflections("com.topper");
+		final Set<Class<?>> annos = reflections.getTypesAnnotatedWith(TopperCommandParser.class);
+		
+		ScriptCommandParser parser;
+		
+		for (final Class<?> anno : annos) {
+			
+			for (final Class<? extends CommandState> state : anno.getAnnotation(TopperCommandParser.class).states()) {
+				
+				if (!stateCommandMap.containsKey(state)) {
+					stateCommandMap.put(state, new HashSet<>());
+				}
+				
+				parser = null;
+				try {
+					parser = (ScriptCommandParser) anno.getDeclaredConstructor().newInstance();
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+					throw new IllegalArgumentException("Instantiating parser " + anno.getSimpleName() + " failed.", e);
+				}
+				
+				if (parser == null) {
+					continue;
+				}
+				
+				stateCommandMap.get(state).add(parser.commandType());
+			}
+		}
+	}
+	
 	/**
 	 * Initialize this state.
 	 * 
 	 * @param context Execution context to assign to this state.
 	 * */
-	public CommandState(final ScriptContext context) {
+	public CommandState(@NonNull final ScriptContext context) {
 		this.context = context;
 	}
 
@@ -35,7 +82,7 @@ public abstract class CommandState {
 	 * @throws IOException If IO - related errors occur. If they
 	 * 	make it until here they are fatal.
 	 * */
-	public final void execute(final ScriptCommand command) throws InvalidStateTransitionException, CommandException, IOException {
+	public final void execute(@NonNull final ScriptCommand command) throws InvalidStateTransitionException, CommandException, IOException {
 		
 		// Command must pass whitelist check
 		for (final Class<? extends ScriptCommand> allowed : this.getAvailableCommands()) {
@@ -56,6 +103,7 @@ public abstract class CommandState {
 	 * Gets execution context assigned to this state.
 	 * @see ScriptContext
 	 * */
+	@NonNull
 	public final ScriptContext getContext() {
 		return this.context;
 	}
@@ -70,10 +118,13 @@ public abstract class CommandState {
 	 * state machine without the need of implementing a method for
 	 * each possible subclass of <code>ScriptCommand</code>.
 	 * 
-	 * @return List of subclasses of <code>ScriptCommand</code> that are
+	 * @return Set of subclasses of <code>ScriptCommand</code> that are
 	 * 	allowed to be executed in this state.
 	 * */
-	public abstract ImmutableList<Class<? extends ScriptCommand>> getAvailableCommands();
+	@NonNull
+	public ImmutableSet<Class<? extends ScriptCommand>> getAvailableCommands() {
+		return ImmutableSet.copyOf(stateCommandMap.get(this.getClass()));
+	}
 	
 	/**
 	 * Actual execution of <code>command</code>. Its semantics
@@ -81,5 +132,5 @@ public abstract class CommandState {
 	 * 
 	 * @param command Command to execute in this state.
 	 * */
-	public abstract void executeCommand(final ScriptCommand command) throws InvalidStateTransitionException, CommandException, IOException;
+	public abstract void executeCommand(@NonNull final ScriptCommand command) throws InvalidStateTransitionException, CommandException, IOException;
 }

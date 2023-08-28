@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -39,6 +40,11 @@ public class TestScriptParser {
 		public String command() {
 			return "test";
 		}
+
+		@Override
+		public @NonNull Class<? extends ScriptCommand> commandType() {
+			return TestCommand.class;
+		}
 	}
 	
 	private static class OtherCommand implements ScriptCommand {
@@ -62,6 +68,11 @@ public class TestScriptParser {
 		@Override
 		public String command() {
 			return "other";
+		}
+
+		@Override
+		public @NonNull Class<? extends ScriptCommand> commandType() {
+			return OtherCommand.class;
 		}
 	}
 	

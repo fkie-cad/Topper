@@ -7,12 +7,13 @@ import com.topper.scengine.commands.AttackCommandParser;
 import com.topper.scengine.commands.ScriptCommand;
 import com.topper.scengine.commands.ScriptCommandParser;
 import com.topper.scengine.commands.TopperCommandParser;
+import com.topper.sstate.ExecutionState;
 
-@TopperCommandParser(parent = AttackCommandParser.class)
+@TopperCommandParser(parent = AttackCommandParser.class, states = { ExecutionState.class })
 public final class TOPExceptionHandlerAttackCommandParser implements ScriptCommandParser {
 
 	public TOPExceptionHandlerAttackCommandParser() {
-//		CommandManager.get().registerCommandParser(AttackCommandParser.class, this);
+		
 	}
 	
 	@Override
@@ -30,5 +31,11 @@ public final class TOPExceptionHandlerAttackCommandParser implements ScriptComma
 	@Override
 	public @NonNull String command() {
 		return "ctop";
+	}
+
+	@Override
+	@NonNull 
+	public Class<? extends ScriptCommand> commandType() {
+		return TOPExceptionHandlerAttackCommand.class;
 	}
 }

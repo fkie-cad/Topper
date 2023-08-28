@@ -53,7 +53,7 @@ public interface ScriptCommandParser {
 	String usage();
 	
 	/**
-	 * Fixed a user - readable (and writable) string representation
+	 * Fixes a user - readable (and writable) string representation
 	 * of the <code>ScriptCommand</code> parsed by this parser. 
 	 * 
 	 * @return String representation of <code>ScriptCommand</code> linked
@@ -61,4 +61,12 @@ public interface ScriptCommandParser {
 	 * */
 	@NonNull
 	String command();
+	
+	/**
+	 * Fixes the {@link ScriptCommand} type used by this parser.
+	 * 
+	 * @return Type to be managed by this parser.
+	 * */
+	@NonNull
+	Class<? extends ScriptCommand> commandType();
 }

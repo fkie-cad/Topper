@@ -62,8 +62,8 @@ public final class CommandManager {
 	 * For loading <code>ScriptCommandParser</code>s, it tries to derive the entire
 	 * command hierarchy using the <code>TopperCommandParser</code> annotation and
 	 * its {@link TopperCommandParser#parent()} parameter. If a sub - command is
-	 * considered before its parent is, the sub - command will be re - scheduled
-	 * to postpone processing it.
+	 * considered before its parent is, the sub - command will be re - scheduled to
+	 * postpone processing it.
 	 * 
 	 * @return Sole instance of <code>CommandManager</code>.
 	 * @throws IllegalArgumentException If registering a command annotated with
@@ -130,6 +130,10 @@ public final class CommandManager {
 				cycle += 1;
 				initQueue.add(parser);
 			}
+		}
+
+		if (!initQueue.isEmpty()) {
+			throw new IllegalArgumentException("Missing parent parsers to connect remaining sub - command parsers.");
 		}
 	}
 

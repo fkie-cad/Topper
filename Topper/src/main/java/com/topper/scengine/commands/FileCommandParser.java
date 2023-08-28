@@ -3,13 +3,18 @@ package com.topper.scengine.commands;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.topper.exceptions.scripting.IllegalCommandException;
 import com.topper.file.FileType;
 import com.topper.file.FileUtil;
+import com.topper.sstate.ExecutionState;
+import com.topper.sstate.SelectionState;
 
 /**
  * 
  * */
+@TopperCommandParser(states = { SelectionState.class, ExecutionState.class })
 public final class FileCommandParser implements ScriptCommandParser {
 
 	private final Pattern typePattern;
@@ -86,5 +91,12 @@ public final class FileCommandParser implements ScriptCommandParser {
 	@Override
 	public String command() {
 		return "file";
+	}
+
+
+	@Override
+	@NonNull 
+	public Class<? extends ScriptCommand> commandType() {
+		return FileCommand.class;
 	}
 }
