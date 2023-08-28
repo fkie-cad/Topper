@@ -1,16 +1,38 @@
 package com.topper.interactive;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.function.Supplier;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.fusesource.jansi.AnsiConsole;
+import org.jline.builtins.ConfigurationPath;
+import org.jline.console.SystemRegistry;
+import org.jline.console.impl.Builtins;
+import org.jline.console.impl.SystemRegistryImpl;
+import org.jline.keymap.KeyMap;
+import org.jline.reader.Binding;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.MaskingCallback;
+import org.jline.reader.Parser;
+import org.jline.reader.Reference;
+import org.jline.reader.UserInterruptException;
+import org.jline.reader.impl.DefaultParser;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.widget.TailTipWidgets;
 
-import com.google.common.collect.ImmutableList;
-import com.topper.exceptions.scripting.CommandException;
-import com.topper.exceptions.scripting.StateException;
 import com.topper.scengine.ScriptExecutor;
 import com.topper.scengine.ScriptParser;
-import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.PicoTopLevelCommand;
 import com.topper.sstate.ScriptContext;
+
+import picocli.CommandLine;
+import picocli.shell.jline3.PicocliCommands;
+import picocli.shell.jline3.PicocliCommands.PicocliCommandsFactory;
 
 /**
  * Manager that will run the main loop, if Topper is started in interactive
@@ -20,11 +42,26 @@ import com.topper.sstate.ScriptContext;
  */
 public final class InteractiveTopper {
 
+	private static InteractiveTopper instance;
+
+	private ScriptContext context;
+
 	/**
 	 * Format string to write before requesting user input.
 	 */
 	@NonNull
 	private static final String LINE_PREFIX = "%s> ";
+
+	private InteractiveTopper() {
+
+	}
+
+	public static final InteractiveTopper get() {
+		if (InteractiveTopper.instance == null) {
+			InteractiveTopper.instance = new InteractiveTopper();
+		}
+		return InteractiveTopper.instance;
+	}
 
 	/**
 	 * Main loop for an interactive session. It manages IO as well as command
@@ -33,48 +70,124 @@ public final class InteractiveTopper {
 	 * @throws IOException If IO in interactive mode fails. This is a fatal error,
 	 *                     from which recovery is not possible (probably).
 	 */
-	// TODO: Use picocli and jline2 to handle interaction --> autocompletion, colors and more
-	public final void mainLoop(@NonNull final IOManager io, @NonNull final ScriptParser parser,
+	// TODO: Use picocli and jline2 to handle interaction --> autocompletion, colors
+	// and more
+	public final void mainLoop(@NonNull final IOManager io, @NonNull final ScriptParser _parser,
 			@NonNull final ScriptExecutor executor, @NonNull final ScriptContext context) throws IOException {
 
+		this.context = context;
+
+//		try {
+//
+//			// Loop
+//			String command;
+//			ImmutableList<ScriptCommand> commands;
+//			while (!context.isTerminationState()) {
+//
+//				io.output(String.format(LINE_PREFIX, context.getSession().getSessionId()));
+//
+//				// Get input line
+//				command = io.inputLine();
+//
+//				// Ignore a user spamming enter
+//				if (command.length() > 0) {
+//
+//					try {
+//						// Parse command. Treat each line as a one - line script.
+//						commands = parser.parse(command);
+//
+//						// Execute commands. Results are made visible through io
+//						// and changes in the context.
+//						executor.execute(context, commands);
+//
+//					} catch (final CommandException | StateException e) {
+//						// Distinguishing between output and error allows for
+//						// discarding error messages in scripts etc.
+//						io.error(e.getMessage() + System.lineSeparator());
+//					}
+//
+//				}
+//
+//				// Eventually flush all output streams (output and error)
+//				io.flushAll();
+//			}
+//
+//		} finally {
+//			// Clean up
+//			io.close();
+//		}
+
+		AnsiConsole.systemInstall();
 		try {
+			final Supplier<Path> workDir = () -> Paths.get(System.getProperty("user.dir"));
+			
+			// set up JLine built-in commands
+			// No idea why configPath must be non-null, but setting all its
+			// params to null still works...
+			final Builtins builtins = new Builtins(workDir, new ConfigurationPath(null, null), null);
+			builtins.rename(Builtins.Command.TTOP, "top");
+			builtins.alias("zle", "widget");
+			builtins.alias("bindkey", "keymap");
 
-			// Loop
-			String command;
-			ImmutableList<ScriptCommand> commands;
-			while (!context.isTerminationState()) {
+			// set up picocli commands
+//            CliCommands commands = new CliCommands();
+			final PicoTopLevelCommand commands = new PicoTopLevelCommand(context);
 
-				io.output(String.format(LINE_PREFIX, context.getSession().getSessionId()));
+			final PicocliCommandsFactory factory = new PicocliCommandsFactory();
 
-				// Get input line
-				command = io.inputLine();
+			// Or, if you have your own factory, you can chain them like this:
+			// MyCustomFactory customFactory = createCustomFactory(); // your application
+			// custom factory
+			// PicocliCommandsFactory factory = new PicocliCommandsFactory(customFactory);
+			// // chain the factories
 
-				// Ignore a user spamming enter
-				if (command.length() > 0) {
+			final CommandLine cmd = new CommandLine(commands, factory);
+			final PicocliCommands picocliCommands = new PicocliCommands(cmd);
 
+			final Parser parser = new DefaultParser();
+			try (Terminal terminal = TerminalBuilder.builder().build()) {
+				final SystemRegistry systemRegistry = new SystemRegistryImpl(parser, terminal, workDir, null);
+				systemRegistry.setCommandRegistries(builtins, picocliCommands);
+				systemRegistry.register("help", picocliCommands);
+
+				final LineReader reader = LineReaderBuilder.builder().terminal(terminal)
+						.completer(systemRegistry.completer()).parser(parser).variable(LineReader.LIST_MAX, 50) // max
+																												// tab
+																												// completion
+																												// candidates
+						.build();
+				builtins.setLineReader(reader);
+				commands.setReader(reader);
+				factory.setTerminal(terminal);
+				TailTipWidgets widgets = new TailTipWidgets(reader, systemRegistry::commandDescription, 5,
+						TailTipWidgets.TipType.COMPLETER);
+				widgets.enable();
+				KeyMap<Binding> keyMap = reader.getKeyMaps().get("main");
+				keyMap.bind(new Reference("tailtip-toggle"), KeyMap.alt("s"));
+
+				final String rightPrompt = null;
+
+				// start the shell and process input until the user quits with Ctrl-D
+				String line;
+				while (true) {
 					try {
-						// Parse command. Treat each line as a one - line script.
-						commands = parser.parse(command);
-
-						// Execute commands. Results are made visible through io
-						// and changes in the context.
-						executor.execute(context, commands);
-
-					} catch (final CommandException | StateException e) {
-						// Distinguishing between output and error allows for
-						// discarding error messages in scripts etc.
-						io.error(e.getMessage() + System.lineSeparator());
+						systemRegistry.cleanUp();
+						line = reader.readLine(String.format(LINE_PREFIX, this.context.getSession().getSessionId()),
+								rightPrompt, (MaskingCallback) null, null);
+						systemRegistry.execute(line);
+					} catch (UserInterruptException e) {
+						// Ignore
+					} catch (EndOfFileException e) {
+						return;
+					} catch (Exception e) {
+						systemRegistry.trace(e);
 					}
-
 				}
-
-				// Eventually flush all output streams (output and error)
-				io.flushAll();
 			}
-
+		} catch (Throwable t) {
+			t.printStackTrace();
 		} finally {
-			// Clean up
-			io.close();
+			AnsiConsole.systemUninstall();
 		}
 	}
 }

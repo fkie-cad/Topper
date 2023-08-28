@@ -92,7 +92,7 @@ public final class TopperMain implements Runnable {
 			} else {
 				
 				// Interactive mode!
-				final InteractiveTopper interactive = new InteractiveTopper();
+				final InteractiveTopper interactive = InteractiveTopper.get();
 				interactive.mainLoop(io, parser, executor, context);
 			}
 		

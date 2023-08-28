@@ -13,6 +13,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.reflections.Reflections;
 
+import com.topper.sstate.CommandState;
+import com.topper.sstate.PicoState;
+
 /**
  * Manager that manages all {@link ScriptCommandParser}s and their related
  * {@link ScriptCommand}s. It stores the command hierarchy denoting what
@@ -43,7 +46,35 @@ public final class CommandManager {
 	 */
 	@NonNull
 	private final Class<TopLevelCommandParser> root;
-
+	
+	private static Map<@NonNull Class<? extends CommandState>, @NonNull Set<@NonNull Class<? extends PicoCommand>>> stateCommandMap;
+	
+	static {
+		stateCommandMap = new HashMap<>();
+		
+		// Load state -> command mappings
+		final Reflections reflections = new Reflections("com.topper");
+		final Set<Class<?>> annos = reflections.getTypesAnnotatedWith(PicoState.class);
+		
+		for (final Class<?> anno : annos) {
+			
+			System.out.println(anno.getAnnotation(PicoState.class));
+			
+			for (final Class<? extends CommandState> state : anno.getAnnotation(PicoState.class).states()) {
+				
+				if (!stateCommandMap.containsKey(state)) {
+					stateCommandMap.put(state, new HashSet<>());
+				}
+				
+				try {
+					stateCommandMap.get(state).add((Class<? extends PicoCommand>) anno);
+				} catch (final ClassCastException e) {
+					throw new IllegalArgumentException("Annotated class " + anno.getSimpleName() + " is not a " + PicoCommand.class.getSimpleName());
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Creates a {@link CommandManager} by setting up the
 	 * {@link ScriptCommandParser} hierarchy.
@@ -224,5 +255,10 @@ public final class CommandManager {
 	@NonNull
 	public final Class<TopLevelCommandParser> getRoot() {
 		return this.root;
+	}
+	
+	@NonNull
+	public static final Map<@NonNull Class<? extends CommandState>, @NonNull Set<@NonNull Class<? extends PicoCommand>>> getStateCommandMap() {
+		return CommandManager.stateCommandMap;
 	}
 }
