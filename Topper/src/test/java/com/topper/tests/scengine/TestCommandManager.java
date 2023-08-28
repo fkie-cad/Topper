@@ -12,10 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.topper.scengine.commands.CommandManager;
-import com.topper.scengine.commands.ExitCommandParser;
-import com.topper.scengine.commands.FileCommandParser;
-import com.topper.scengine.commands.HelpCommandParser;
 import com.topper.scengine.commands.ScriptCommandParser;
+import com.topper.scengine.commands.exit.ExitCommandParser;
+import com.topper.scengine.commands.file.FileCommandParser;
+import com.topper.scengine.commands.help.HelpCommandParser;
 
 public class TestCommandManager {
 

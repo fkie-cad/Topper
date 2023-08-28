@@ -6,9 +6,9 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.exceptions.scripting.CommandException;
 import com.topper.exceptions.scripting.InvalidStateTransitionException;
-import com.topper.scengine.commands.ExitCommand;
-import com.topper.scengine.commands.FileCommand;
 import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.exit.ExitCommand;
+import com.topper.scengine.commands.file.FileCommand;
 
 public final class SelectionState extends CommandState {
 

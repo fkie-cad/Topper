@@ -1,7 +1,8 @@
-package com.topper.scengine.commands;
+package com.topper.scengine.commands.exit;
 
 import java.io.IOException;
 
+import com.topper.scengine.commands.ScriptCommand;
 import com.topper.sstate.ScriptContext;
 
 public final class ExitCommand implements ScriptCommand {

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import org.junit.jupiter.api.Test;
 
 import com.topper.exceptions.scripting.IllegalCommandException;
-import com.topper.scengine.commands.HelpCommandParser;
+import com.topper.scengine.commands.help.HelpCommandParser;
 
 public class TestHelpCommandParser {
 

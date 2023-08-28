@@ -1,10 +1,14 @@
-package com.topper.scengine.commands;
+package com.topper.scengine.commands.attack;
 
 import java.util.Arrays;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.exceptions.scripting.IllegalCommandException;
+import com.topper.scengine.commands.CommandManager;
+import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.ScriptCommandParser;
+import com.topper.scengine.commands.TopperCommandParser;
 import com.topper.sstate.ExecutionState;
 
 @TopperCommandParser(states = { ExecutionState.class })
@@ -19,8 +23,6 @@ public final class AttackCommandParser implements ScriptCommandParser {
 	@Override
 	@NonNull
 	public final ScriptCommand parse(@NonNull final String[] tokens) throws IllegalCommandException {
-
-		// TODO: CONTINUE HERE: IMPLEMENT SUB COMMANDS AND WRITE TESTS FOR COMMANDS
 
 		// Check sub - command
 		if (tokens.length <= 1) {

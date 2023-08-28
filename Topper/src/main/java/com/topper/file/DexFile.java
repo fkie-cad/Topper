@@ -165,6 +165,7 @@ public class DexFile implements AugmentedFile {
 					// Extract control flow graph if requested. If an
 					// error occurs, skip cfg extraction
 					buffer = null;
+					offset = 0;
 					try {
 
 						offset = DexHelper.getMethodOffset(method);
@@ -176,7 +177,7 @@ public class DexFile implements AugmentedFile {
 							| IllegalAccessException | IndexOutOfBoundsException | ExceptionWithContext ignored) {
 					}
 
-					clsMethods.add(new DexMethod(this, method, buffer));
+					clsMethods.add(new DexMethod(this, method, buffer, offset));
 				}
 
 				return clsMethods;

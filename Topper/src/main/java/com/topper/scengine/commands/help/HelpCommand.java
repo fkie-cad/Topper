@@ -1,4 +1,4 @@
-package com.topper.scengine.commands;
+package com.topper.scengine.commands.help;
 
 import java.io.IOException;
 import java.util.Set;
@@ -6,6 +6,9 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.exceptions.scripting.CommandException;
+import com.topper.scengine.commands.CommandManager;
+import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.ScriptCommandParser;
 import com.topper.sstate.ScriptContext;
 
 public final class HelpCommand implements ScriptCommand {

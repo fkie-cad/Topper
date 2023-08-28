@@ -6,8 +6,8 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.exceptions.scripting.CommandException;
 import com.topper.exceptions.scripting.InvalidStateTransitionException;
-import com.topper.scengine.commands.ExitCommand;
 import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.exit.ExitCommand;
 
 public final class ExecutionState extends CommandState {
 

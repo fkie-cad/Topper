@@ -14,10 +14,13 @@ public class DexMethod {
 	
 	private final byte @Nullable [] buffer;
 	
-	public DexMethod(@NonNull final DexFile file, @NonNull final DexBackedMethod method, final byte @Nullable [] buffer) {
+	private final int offset;
+	
+	public DexMethod(@NonNull final DexFile file, @NonNull final DexBackedMethod method, final byte @Nullable [] buffer, final int offset) {
 		this.file = file;
 		this.method = method;
 		this.buffer = buffer;
+		this.offset = offset;
 	}
 	
 	@NonNull
@@ -32,5 +35,9 @@ public class DexMethod {
 	
 	public final byte[] getBuffer() {
 		return this.buffer;
+	}
+	
+	public final int getOffset() {
+		return this.offset;
 	}
 }

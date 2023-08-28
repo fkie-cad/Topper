@@ -1,7 +1,8 @@
-package com.topper.scengine.commands;
+package com.topper.scengine.commands.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -12,7 +13,6 @@ import com.topper.dex.decompilation.pipeline.PipelineArgs;
 import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.PipelineResult;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
-import com.topper.dex.decompilation.staticanalyser.Gadget;
 import com.topper.exceptions.pipeline.StageException;
 import com.topper.exceptions.scripting.CommandException;
 import com.topper.exceptions.scripting.IllegalCommandException;
@@ -23,6 +23,7 @@ import com.topper.file.FileType;
 import com.topper.file.FileUtil;
 import com.topper.file.RawFile;
 import com.topper.file.VDexFile;
+import com.topper.scengine.commands.ScriptCommand;
 import com.topper.sstate.ScriptContext;
 
 public final class FileCommand implements ScriptCommand {
@@ -83,12 +84,12 @@ public final class FileCommand implements ScriptCommand {
 			// For raw files, the entire file is analysed,
 			// whereas for .vdex and .dex, only methods are considered.
 			@NonNull
-			final ImmutableList<@NonNull Gadget> gadgets;
+			final ImmutableList<com.topper.scengine.commands.file.BasedGadget> gadgets;
 			if (this.type.equals(FileType.RAW)) {
-				gadgets = loadGadgetsFromRaw(context.getConfig(), content);
+				gadgets = loadGadgetsFromRaw(context.getConfig(), content, 0);
 			} else {
 
-				final ImmutableList.Builder<@NonNull Gadget> builder = new ImmutableList.Builder<>();
+				final ImmutableList.Builder<com.topper.scengine.commands.file.BasedGadget> builder = new ImmutableList.Builder<>();
 
 				for (@NonNull
 				final DexMethod method : methods) {
@@ -110,8 +111,8 @@ public final class FileCommand implements ScriptCommand {
 	}
 
 	@NonNull
-	private final ImmutableList<@NonNull Gadget> loadGadgetsFromRaw(@NonNull final TopperConfig config,
-			final byte @NonNull [] content) throws StageException {
+	private final ImmutableList<com.topper.scengine.commands.file.BasedGadget> loadGadgetsFromRaw(@NonNull final TopperConfig config,
+			final byte @NonNull [] content, final int offset) throws StageException {
 
 		try {
 			// Extract gadgets using a pipeline.
@@ -121,18 +122,19 @@ public final class FileCommand implements ScriptCommand {
 			final PipelineResult result = driver.decompile(args);
 			final PipelineContext pipelineContext = result.getContext();
 			final StaticInfo info = pipelineContext.getStaticInfo(StaticInfo.class.getSimpleName());
-			return info.getGadgets();
+			return ImmutableList.copyOf(info.getGadgets().stream().map(g -> new BasedGadget(g, offset)).collect(Collectors.toList()));
 		} catch (final StageException e) {
 			throw e;
 		}
 	}
 
 	@NonNull
-	private final ImmutableList<@NonNull Gadget> loadGadgetsFromMethod(@NonNull final TopperConfig config,
+	private final ImmutableList<com.topper.scengine.commands.file.BasedGadget> loadGadgetsFromMethod(@NonNull final TopperConfig config,
 			@NonNull final DexMethod method) throws StageException {
 
 		if (method.getBuffer() != null) {
-			return this.loadGadgetsFromRaw(config, method.getBuffer());
+			// Account for code item
+			return this.loadGadgetsFromRaw(config, method.getBuffer(), method.getOffset() + 0x10);
 		}
 		// Buffer will only be null, if method is abstract or native.
 		return ImmutableList.of();

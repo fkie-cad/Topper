@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import com.topper.exceptions.scripting.IllegalCommandException;
 import com.topper.scengine.commands.CommandManager;
-import com.topper.scengine.commands.FileCommand;
-import com.topper.scengine.commands.FileCommandParser;
 import com.topper.scengine.commands.ScriptCommand;
+import com.topper.scengine.commands.file.FileCommand;
+import com.topper.scengine.commands.file.FileCommandParser;
 
 public class TestFileCommandParser {
 	
