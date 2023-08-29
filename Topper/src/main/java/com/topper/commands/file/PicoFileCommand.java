@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.commands.PicoCommand;
@@ -47,8 +49,6 @@ public final class PicoFileCommand extends PicoCommand {
 			"--file" }, required = true, paramLabel = "FILE_PATH", description = "Path of the file to load.")
 	private String fileName;
 	
-	// TODO: Add flag that enables interpreting .dex or .vdex as raw, while also extracting methods!
-	
 	@ParentCommand
 	private PicoTopLevelCommand parent;
 	
@@ -75,19 +75,26 @@ public final class PicoFileCommand extends PicoCommand {
 		// of gadgets.
 		ImmutableList<@NonNull DexMethod> methods = null;
 		AugmentedFile aug;
+		DexFile current = null;
 		try {
 			switch (this.type) {
 			case DEX: {
-				aug = new DexFile(file, content, context.getConfig());
+				final DexFile dex = new DexFile(file.getName(), content, context.getConfig());
+				current = dex;
+				aug = dex;
 				break;
 			}
 			case VDEX: {
-				aug = new VDexFile(file, content, context.getConfig());
+				final VDexFile vdex = new VDexFile(file.getName(), content, context.getConfig());
+				if (!vdex.getDexFiles().isEmpty()) {
+					current = vdex.getDexFiles().get(0);
+				}
+				aug = vdex;
 				break;
 			}
 			default: {
 				// Raw should work regardless of the file type!
-				aug = new RawFile(file, content);
+				aug = new RawFile(file.getName(), content);
 				break;
 			}
 			}
@@ -100,28 +107,17 @@ public final class PicoFileCommand extends PicoCommand {
 		// For raw files, the entire file is analysed,
 		// whereas for .vdex and .dex, only methods are considered.
 		@NonNull
-		final ImmutableList<com.topper.commands.file.BasedGadget> gadgets;
+		final ImmutableList<@NonNull BasedGadget> gadgets;
 		try {
-			if (type.equals(FileType.RAW)) {
-				gadgets = this.loadGadgetsFromRaw(context.getConfig(), content, 0);
-			} else {
-
-				final ImmutableList.Builder<com.topper.commands.file.BasedGadget> builder = new ImmutableList.Builder<>();
-
-				for (@NonNull
-				final DexMethod method : methods) {
-					builder.addAll(this.loadGadgetsFromMethod(context.getConfig(), method));
-				}
-
-				gadgets = builder.build();
-			}
+			gadgets = this.loadGadgetsFromRaw(context.getConfig(), content, 0, (current != null) ? current.getDexFile() : null);
 		} catch (final StageException ignored) {
 			throw new InternalExecutionException("Decompilation of file " + file.getPath() + " failed.");
 		}
 
 		// 3. Adjust session info in script context.
-		context.getSession().setLoadedFile(file);
+		context.getSession().setLoadedFile(aug);
 		context.getSession().setGadgets(gadgets);
+		context.getSession().setCurrentDex(current);
 	}
 	
 	@Override
@@ -132,12 +128,12 @@ public final class PicoFileCommand extends PicoCommand {
 
 	@NonNull
 	private final ImmutableList<@NonNull BasedGadget> loadGadgetsFromRaw(
-			@NonNull final TopperConfig config, final byte @NonNull [] content, final int offset)
+			@NonNull final TopperConfig config, final byte @NonNull [] content, final int offset, @Nullable final DexBackedDexFile augmentation)
 			throws StageException {
 
 		try {
 			// Extract gadgets using a pipeline.
-			final PipelineArgs args = new PipelineArgs(config, content);
+			final PipelineArgs args = new PipelineArgs(config, content, augmentation);
 			final DecompilationDriver driver = new DecompilationDriver();
 
 			final PipelineResult result = driver.decompile(args);
@@ -148,18 +144,6 @@ public final class PicoFileCommand extends PicoCommand {
 		} catch (final StageException e) {
 			throw e;
 		}
-	}
-
-	@NonNull
-	private final ImmutableList<@NonNull BasedGadget> loadGadgetsFromMethod(
-			@NonNull final TopperConfig config, @NonNull final DexMethod method) throws StageException {
-
-		if (method.getBuffer() != null) {
-			// Account for code item
-			return this.loadGadgetsFromRaw(config, method.getBuffer(), method.getOffset() + 0x10);
-		}
-		// Buffer will only be null, if method is abstract or native.
-		return ImmutableList.of();
 	}
 
 	private final void println(@NonNull final ScriptContext context, @NonNull final String s) {

@@ -1,6 +1,5 @@
 package com.topper.file;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -8,6 +7,7 @@ import java.util.Arrays;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.configuration.DecompilerConfig;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
@@ -30,10 +30,10 @@ import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
 public class VDexFile implements AugmentedFile {
 
 	/**
-	 * File to augment. It may be related to {@code buffer}.
+	 * Id of the augmented file. It may be related to {@code buffer}.
 	 */
 	@NonNull
-	private final File file;
+	private final String id;
 
 	/**
 	 * Raw bytes that contain a valid .vdex file. It is used for parsing. Also it
@@ -48,7 +48,7 @@ public class VDexFile implements AugmentedFile {
 	private final ImmutableList<@NonNull DexFile> files;
 
 	/**
-	 * Creates a new .vdex file respresentation using a {@link File} and a
+	 * Creates a new .vdex file respresentation using a {@link String} - id and a
 	 * {@buffer}. Optionally, it uses a {@link Decompiler} and a {@link CFGAnalyser}
 	 * to extract Control Flow Graphs(CFG) for all methods of all .dex files.
 	 * 
@@ -68,7 +68,7 @@ public class VDexFile implements AugmentedFile {
 	 * files that may be irrelevant. 0 indicates to perform no analysis. A negative
 	 * value indicates to analyse all .dex files regardless of their size.
 	 * 
-	 * @param file       File to augment.
+	 * @param id         Id of the augmented file.
 	 * @param buffer     Raw bytes that represent a valid .vdex file.
 	 * @param decompiler A {@code Decompiler} used in conjunction with
 	 *                   {@code analyser} to decompile all methods.
@@ -79,12 +79,12 @@ public class VDexFile implements AugmentedFile {
 	 *                                  valid .vdex file. Also if the .vdex file
 	 *                                  contains a corrupted .dex file.
 	 */
-	public VDexFile(@NonNull final File file, final byte @NonNull [] buffer, @NonNull final TopperConfig config) {
+	public VDexFile(@NonNull final String id, final byte @NonNull [] buffer, @NonNull final TopperConfig config) {
 		if (buffer.length == 0) {
 			throw new IllegalArgumentException("buffer must not be empty.");
 		}
 
-		this.file = file;
+		this.id = id;
 		this.buffer = buffer;
 
 		final VDexFileHeader fileHeader = new VDexFileHeader(buffer, 0);
@@ -93,13 +93,13 @@ public class VDexFile implements AugmentedFile {
 			throw new IllegalArgumentException("buffer must contain a valid .vdex file.");
 		} else {
 			// Propagate IllegalArgumentExceptions to caller
-			this.files = this.loadFiles(fileHeader, file, buffer, config);
+			this.files = this.loadFiles(fileHeader, buffer, config);
 		}
 	}
 
 	@Override
-	public @NonNull File getFile() {
-		return this.file;
+	public @NonNull String getId() {
+		return this.id;
 	}
 
 	@Override
@@ -149,15 +149,14 @@ public class VDexFile implements AugmentedFile {
 	 * @throws IllegalArgumentException If {@code DexFile} construction fails.
 	 */
 	@NonNull
-	private final ImmutableList<@NonNull DexFile> loadFiles(@NonNull final VDexFileHeader fileHeader,
-			@NonNull final File file, final byte @NonNull [] buffer, 
-			@NonNull final TopperConfig config) {
+	private final ImmutableList<@NonNull DexFile> loadFiles(@NonNull final VDexFileHeader fileHeader, final byte @NonNull [] buffer, @NonNull final TopperConfig config) {
 
 		final int vdexThreshold = config.getDecompilerConfig().getDexSkipThreshold();
 		final ImmutableList.Builder<@NonNull DexFile> builder = new ImmutableList.Builder<>();
 
 		final int base = VDexFileHeader.getTotalSize();
 		VDexSectionHeader header;
+		int dexId = 0;
 		for (int i = 0; i < fileHeader.getNumberOfSections(); i++) {
 
 			// Skip headers that do not contain dex files
@@ -179,8 +178,9 @@ public class VDexFile implements AugmentedFile {
 				if (dexHeader.getFileSize() <= vdexThreshold || vdexThreshold < 0) {
 
 					// Parse dex file and store it into list
-					builder.add(new DexFile(file,
+					builder.add(new DexFile("classes" + Integer.toString(dexId) + ".dex",
 							Arrays.copyOfRange(buffer, dexStart, dexStart + dexHeader.getFileSize()), config));
+					dexId += 1;
 				}
 
 				// Move dexStart by size of current dex file

@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jf.dexlib2.Format;
+import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.util.ExceptionWithContext;
 
 import com.google.common.collect.ImmutableList;
@@ -85,6 +87,7 @@ public class BackwardLinearSweeper extends Sweeper {
 		final ImmutableList<Integer> offsets = seekerInfo.getPivotOffsets();
 		final byte[] buffer = args.getBuffer();
 		final TopperConfig config = args.getConfig();
+		final DexBackedDexFile augmentation = args.getAugmentation();
 
 		final ImmutableList.Builder<@NonNull ImmutableList<@NonNull DecompiledInstruction>> sequences = new ImmutableList.Builder<>();
 		for (final int offset : offsets) {
@@ -106,7 +109,7 @@ public class BackwardLinearSweeper extends Sweeper {
 			// Try to decompile pivot instruction pointed to by offset.
 			try {
 				final DecompilationResult result = decompiler
-						.decompile(Arrays.copyOfRange(buffer, offset, offset + currentSize), null, config);
+						.decompile(Arrays.copyOfRange(buffer, offset, offset + currentSize), augmentation, config);
 				final ImmutableList<@NonNull DecompiledInstruction> instructions = result.getInstructions();
 				final DecompiledInstruction instruction = instructions.get(0);
 
@@ -120,7 +123,7 @@ public class BackwardLinearSweeper extends Sweeper {
 				// Use pivot instruction as base for recursive sweep.
 				instructions.get(0).setOffset(offset);
 				sequences.addAll(this.recursiveSweepImpl(decompiler, buffer, offset, currentSize, instructions,
-						checkedGadgetSizes, depth, config).stream().map(l -> l.reverse()).iterator());
+						checkedGadgetSizes, depth, config, augmentation).stream().map(l -> l.reverse()).iterator());
 
 			} catch (final ExceptionWithContext | ArrayIndexOutOfBoundsException e) {
 				throw new SweeperException("Failed to decompile pivot instruction.", e);
@@ -185,6 +188,7 @@ public class BackwardLinearSweeper extends Sweeper {
 	 *                             allowed in a gadget. Initially 1, because it
 	 *                             includes the pivot instruction.
 	 * @param config               Configuration to be used by this sweeper.
+	 * @param augmentation		   Dex file representation to use for decompiling.
 	 * @return List of instruction sequences. In case the upper bound on the
 	 *         instructions is 1, only the pivot instruction is returned.
 	 */
@@ -193,7 +197,8 @@ public class BackwardLinearSweeper extends Sweeper {
 	private final ImmutableList<@NonNull ImmutableList<@NonNull DecompiledInstruction>> recursiveSweepImpl(
 			@NonNull final Decompiler decompiler, final byte @NonNull [] buffer, final int offset,
 			final int currentSize, @NonNull final List<DecompiledInstruction> previousInstructions,
-			@NonNull final List<Integer> checkedGadgetSizes, final int depth, @NonNull final TopperConfig config) {
+			@NonNull final List<Integer> checkedGadgetSizes, final int depth, @NonNull final TopperConfig config,
+			@Nullable final DexBackedDexFile augmentation) {
 
 		final ImmutableList.Builder<ImmutableList<DecompiledInstruction>> sequences = new ImmutableList.Builder<ImmutableList<DecompiledInstruction>>();
 
@@ -243,7 +248,7 @@ public class BackwardLinearSweeper extends Sweeper {
 
 				// Decompile instruction.
 				instructions = decompiler
-						.decompile(Arrays.copyOfRange(buffer, offset - instructionSize, offset), null, config)
+						.decompile(Arrays.copyOfRange(buffer, offset - instructionSize, offset), augmentation, config)
 						.getInstructions();
 
 				// Check instructions. If invalid, then this instruction can be ignored/is not
@@ -281,7 +286,7 @@ public class BackwardLinearSweeper extends Sweeper {
 				// Add resulting paths to this path.
 				sequences.addAll(recursiveSweepImpl(decompiler, Arrays.copyOfRange(buffer, 0, offset - instructionSize),
 						offset - instructionSize, // offset points behind last byte
-						totalSize, path, checkedGadgetSizes, depth + 1, config));
+						totalSize, path, checkedGadgetSizes, depth + 1, config, augmentation));
 
 			} catch (final ExceptionWithContext | IndexOutOfBoundsException e) {
 			}

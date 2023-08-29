@@ -1,7 +1,5 @@
 package com.topper.file;
 
-import java.io.File;
-
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
@@ -17,28 +15,29 @@ import com.google.common.collect.ImmutableList;
 public class RawFile implements AugmentedFile {
 
 	@NonNull
-	private final File file;
+	private final String id;
 
 	private final byte @NonNull [] buffer;
 
 	/**
-	 * Creates a raw binary file using only a {@link File} and a {@code buffer}.
+	 * Creates a raw binary file using only a {@link String} - id and a
+	 * {@code buffer}.
 	 * 
 	 * As this is a binary file, no assumptions are made on its structure. This
 	 * implies that {@link AugmentedFile.getMethods()} only provides an empty list.
 	 * 
-	 * @param file   File to augment.
+	 * @param id     Id of the augmented file.
 	 * @param buffer Raw bytes to link to {@code file}.
 	 */
-	public RawFile(@NonNull final File file, final byte @NonNull [] buffer) {
-		this.file = file;
+	public RawFile(@NonNull final String id, final byte @NonNull [] buffer) {
+		this.id = id;
 		this.buffer = buffer;
 	}
 
 	@Override
 	@NonNull
-	public final File getFile() {
-		return this.file;
+	public final String getId() {
+		return this.id;
 	}
 
 	@Override

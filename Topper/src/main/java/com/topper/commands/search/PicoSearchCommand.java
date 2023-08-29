@@ -23,31 +23,41 @@ import picocli.CommandLine.ParentCommand;
 @PicoState(states = { ExecutionState.class })
 public final class PicoSearchCommand extends PicoCommand {
 	
-	@Option(names = { "-r", "--regex" }, required = true, paramLabel = "REGEX", description = "Regular expression to use while searching through the gadgets.")
+	@Option(names = { "-r", "--regex" }, required = false, defaultValue = "", paramLabel = "REGEX", description = "Regular expression to use while searching through the gadgets.")
 	private String regex;
+	
+	@Option(names = { "-u", "--upper" }, required = false, defaultValue = "-1", paramLabel = "UPPER_BOUND", description = "Upper bound for gadget length matching given regex. Non - positive values are ignored.")
+	private int upper;
 
+	@Option(names = { "-l", "--lower" }, required = false, defaultValue = "-1", paramLabel = "LOWER_BOUND", description = "Lower bound for gadget length matching given regex. Negative values are ignored.")
+	private int lower;
+	
 	@ParentCommand
 	private PicoTopLevelCommand parent;
 	
 	@Override
 	public final void execute(@NonNull final ScriptContext context) throws IllegalCommandException {
 		
-		if (regex == null) {
-			throw new IllegalCommandException("Invalid regex expression.");
+		if (this.upper <= 0) {
+			this.upper = context.getConfig().getSweeperConfig().getMaxNumberInstructions();
+		}
+		
+		if (this.lower < 0) {
+			this.lower = 0;
+		}
+		
+		if (this.upper < this.lower) {
+			throw new IllegalCommandException("Upper bound must be at least as big as lower bound.");
 		}
 		
 		if (regex.length() == 0) {
-			// Print all gadgets
-			for (@NonNull final BasedGadget gadget : context.getSession().getGadgets()) {
-				parent.out().println(gadget.toString() + System.lineSeparator());
-			}
-			return;
+			regex = ".*";
 		}
 		
 		// Interpret expression as regex
 		final Pattern pattern;
 		try {
-			pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+			pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 		} catch (final PatternSyntaxException e) {
 			throw new IllegalCommandException("Given pattern " + regex + " is invalid.");
 		}
@@ -55,6 +65,10 @@ public final class PicoSearchCommand extends PicoCommand {
 		// Apply expression to each gadget's string representation
 		Matcher matcher;
 		for (@NonNull final BasedGadget gadget : context.getSession().getGadgets()) {
+			if (gadget.getGadget().getInstructions().size() > this.upper ||
+					gadget.getGadget().getInstructions().size() < this.lower) {
+				continue;
+			}
 			matcher = pattern.matcher(gadget.toString());
 			if (matcher.find()) {
 				parent.out().println(gadget.toString() + System.lineSeparator());

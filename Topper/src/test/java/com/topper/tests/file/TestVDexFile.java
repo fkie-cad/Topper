@@ -59,7 +59,7 @@ public class TestVDexFile {
 
 		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_VDEX_FILE_PATH);
-		final VDexFile vdex = new VDexFile(f, getFileContents(f), config);
+		final VDexFile vdex = new VDexFile(VALID_VDEX_FILE_PATH, getFileContents(f), config);
 		assertEquals(VALID_VDEX_AMOUNT_DEX_FILES, vdex.getDexFiles().size());
 	}
 
@@ -71,7 +71,7 @@ public class TestVDexFile {
 
 		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_VDEX_FILE_PATH);
-		final VDexFile vdex = new VDexFile(f, getFileContents(f), config);
+		final VDexFile vdex = new VDexFile(VALID_VDEX_FILE_PATH, getFileContents(f), config);
 		assertEquals(vdex.getDexFiles().size(), new HashSet<@NonNull DexFile>(vdex.getDexFiles()).size());
 	}
 
@@ -82,7 +82,7 @@ public class TestVDexFile {
 
 		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_VDEX_FILE_PATH);
-		final VDexFile vdex = new VDexFile(f, getFileContents(f), config);
+		final VDexFile vdex = new VDexFile(VALID_VDEX_FILE_PATH, getFileContents(f), config);
 		final ImmutableList<@NonNull DexMethod> methods = vdex.getMethods();
 
 		int total = 0;
@@ -110,7 +110,7 @@ public class TestVDexFile {
 
 		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_VDEX_FILE_PATH);
-		final VDexFile vdex = new VDexFile(f, getFileContents(f), config);
+		final VDexFile vdex = new VDexFile(VALID_DEX_FILE_PATH, getFileContents(f), config);
 		final ImmutableList<@NonNull DexMethod> methods = vdex.getMethods();
 
 		for (@NonNull
@@ -126,7 +126,7 @@ public class TestVDexFile {
 
 		final File f = new File(VALID_VDEX_FILE_PATH);
 		final int threshold = config.getDecompilerConfig().getDexSkipThreshold();
-		final VDexFile vdex = new VDexFile(f, getFileContents(f), config);
+		final VDexFile vdex = new VDexFile(VALID_VDEX_FILE_PATH, getFileContents(f), config);
 		final ImmutableList<@NonNull DexMethod> methods = vdex.getMethods();
 
 		int flags;
@@ -153,7 +153,7 @@ public class TestVDexFile {
 		
 		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_DEX_FILE_PATH);
-		assertThrowsExactly(IllegalArgumentException.class, () -> new VDexFile(f, getFileContents(f), config));
+		assertThrowsExactly(IllegalArgumentException.class, () -> new VDexFile(VALID_DEX_FILE_PATH, getFileContents(f), config));
 	}
 	
 	@Test
@@ -161,6 +161,6 @@ public class TestVDexFile {
 		
 		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(CORRUPTED_VDEX_FILE_PATH);
-		assertThrowsExactly(IllegalArgumentException.class, () -> new VDexFile(f, getFileContents(f), config));
+		assertThrowsExactly(IllegalArgumentException.class, () -> new VDexFile(CORRUPTED_VDEX_FILE_PATH, getFileContents(f), config));
 	}
 }

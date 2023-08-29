@@ -1,6 +1,5 @@
 package com.topper.file;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,11 +35,11 @@ import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 public class DexFile implements AugmentedFile {
 
 	/**
-	 * File to be augmented. It should refer to the .dex file, whose contents reside
+	 * Id of the augmented file. It should refer to the .dex file, whose contents reside
 	 * in {@code buffer}, but it is not mandatory.
 	 */
 	@NonNull
-	private final File file;
+	private final String id;
 
 	/**
 	 * Contents of this file. They may be based on the contents of {@link file}.
@@ -60,7 +59,7 @@ public class DexFile implements AugmentedFile {
 	private final ImmutableList<@NonNull DexMethod> methods;
 
 	/**
-	 * Creates a .dex file using a {@link File} and a {@code buffer}. If both
+	 * Creates a .dex file using a {@link String} - id and a {@code buffer}. If both
 	 * {@link Decompiler} and {@link CFGAnalyser} are valid, they will be used to
 	 * analyse all methods stored in the .dex file in {@code buffer}.
 	 * 
@@ -73,18 +72,18 @@ public class DexFile implements AugmentedFile {
 	 * configuration {@link Config.setDefaultAmountThreads} using
 	 * {@link ConfigManager} to change the number of threads used (at least 1).
 	 * 
-	 * @param file   File to be augmented.
+	 * @param id     Id of the augmented file.
 	 * @param buffer Raw bytes that represent a valid .dex file.
 	 * @param config Configuration to use during .dex file creation.
 	 * @throws IllegalArgumentException If the buffer is empty or does not contain a
 	 *                                  valid .dex file.
 	 */
-	public DexFile(@NonNull final File file, final byte @NonNull [] buffer, @NonNull final TopperConfig config) {
+	public DexFile(@NonNull final String id, final byte @NonNull [] buffer, @NonNull final TopperConfig config) {
 		if (buffer.length == 0) {
 			throw new IllegalArgumentException("buffer must not be empty");
 		}
 
-		this.file = file;
+		this.id = id;
 		this.buffer = buffer;
 
 		try {
@@ -97,8 +96,9 @@ public class DexFile implements AugmentedFile {
 	}
 
 	@Override
-	public @NonNull File getFile() {
-		return this.file;
+	@NonNull
+	public final String getId() {
+		return this.id;
 	}
 
 	@Override
@@ -109,6 +109,11 @@ public class DexFile implements AugmentedFile {
 	@Override
 	public @NonNull ImmutableList<@NonNull DexMethod> getMethods() {
 		return this.methods;
+	}
+
+	@NonNull
+	public final DexBackedDexFile getDexFile() {
+		return this.dexFile;
 	}
 
 	/**

@@ -1,7 +1,5 @@
 package com.topper.file;
 
-import java.io.File;
-
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
@@ -17,10 +15,10 @@ import com.google.common.collect.ImmutableList;
 public interface AugmentedFile {
 
 	/**
-	 * Gets the {@link File} to be augmented.
+	 * Gets the {@link String} - id of this file.
 	 * */
 	@NonNull
-	File getFile();
+	String getId();
 	
 	/**
 	 * Gets a buffer associated with this file. The buffer
