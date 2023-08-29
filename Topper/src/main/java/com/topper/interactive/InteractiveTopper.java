@@ -25,7 +25,7 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.widget.TailTipWidgets;
 
-import com.topper.scengine.commands.PicoTopLevelCommand;
+import com.topper.commands.PicoTopLevelCommand;
 import com.topper.sstate.ScriptContext;
 
 import picocli.CommandLine;

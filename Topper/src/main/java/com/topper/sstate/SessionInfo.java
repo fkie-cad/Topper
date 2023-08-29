@@ -5,8 +5,8 @@ import java.io.File;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.commands.file.BasedGadget;
 import com.topper.dex.decompilation.staticanalyser.Gadget;
-import com.topper.scengine.commands.file.BasedGadget;
 
 /**
  * Wrapper for holding all application - specific data like loaded files etc.
@@ -18,7 +18,7 @@ public final class SessionInfo {
 
 	private File loadedFile;
 	
-	private ImmutableList<com.topper.scengine.commands.file.BasedGadget> gadgets;
+	private ImmutableList<com.topper.commands.file.BasedGadget> gadgets;
 	
 	public final File getLoadedFile() {
 		return this.loadedFile;
@@ -28,11 +28,11 @@ public final class SessionInfo {
 		this.loadedFile = loadedFile;
 	}
 
-	public final ImmutableList<com.topper.scengine.commands.file.BasedGadget> getGadgets() {
+	public final ImmutableList<com.topper.commands.file.BasedGadget> getGadgets() {
 		return this.gadgets;
 	}
 
-	public final void setGadgets(@NonNull final ImmutableList<com.topper.scengine.commands.file.BasedGadget> gadgets) {
+	public final void setGadgets(@NonNull final ImmutableList<com.topper.commands.file.BasedGadget> gadgets) {
 		this.gadgets = gadgets;
 	}
 	

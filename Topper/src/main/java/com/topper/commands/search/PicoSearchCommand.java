@@ -1,4 +1,4 @@
-package com.topper.scengine.commands.search;
+package com.topper.commands.search;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,10 +6,10 @@ import java.util.regex.PatternSyntaxException;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.exceptions.scripting.IllegalCommandException;
-import com.topper.scengine.commands.PicoCommand;
-import com.topper.scengine.commands.PicoTopLevelCommand;
-import com.topper.scengine.commands.file.BasedGadget;
+import com.topper.commands.PicoCommand;
+import com.topper.commands.PicoTopLevelCommand;
+import com.topper.commands.file.BasedGadget;
+import com.topper.exceptions.commands.IllegalCommandException;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
 import com.topper.sstate.PicoState;

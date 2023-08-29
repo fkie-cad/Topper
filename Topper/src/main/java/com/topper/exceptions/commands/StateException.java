@@ -1,4 +1,4 @@
-package com.topper.exceptions.scripting;
+package com.topper.exceptions.commands;
 
 import com.topper.exceptions.TopperException;
 

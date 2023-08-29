@@ -1,14 +1,14 @@
-package com.topper.scengine.commands;
+package com.topper.commands;
 
 import java.io.PrintWriter;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jline.reader.LineReader;
 
-import com.topper.scengine.commands.attack.PicoAttackCommand;
-import com.topper.scengine.commands.exit.PicoExitCommand;
-import com.topper.scengine.commands.file.PicoFileCommand;
-import com.topper.scengine.commands.search.PicoSearchCommand;
+import com.topper.commands.attack.PicoAttackCommand;
+import com.topper.commands.exit.PicoExitCommand;
+import com.topper.commands.file.PicoFileCommand;
+import com.topper.commands.search.PicoSearchCommand;
 import com.topper.sstate.ScriptContext;
 
 import picocli.CommandLine;

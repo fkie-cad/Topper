@@ -1,4 +1,4 @@
-package com.topper.exceptions.scripting;
+package com.topper.exceptions.commands;
 
 public final class InternalExecutionException extends CommandException {
 

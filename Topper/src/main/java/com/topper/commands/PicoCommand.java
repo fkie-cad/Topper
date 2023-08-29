@@ -1,11 +1,11 @@
-package com.topper.scengine.commands;
+package com.topper.commands;
 
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.exceptions.scripting.CommandException;
+import com.topper.exceptions.commands.CommandException;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ScriptContext;
 

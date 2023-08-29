@@ -1,4 +1,4 @@
-package com.topper.exceptions.scripting;
+package com.topper.exceptions.commands;
 
 public class IllegalCommandException extends CommandException {
 	

@@ -1,9 +1,9 @@
-package com.topper.scengine.commands.exit;
+package com.topper.commands.exit;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.scengine.commands.PicoCommand;
-import com.topper.scengine.commands.PicoTopLevelCommand;
+import com.topper.commands.PicoCommand;
+import com.topper.commands.PicoTopLevelCommand;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
 import com.topper.sstate.PicoState;

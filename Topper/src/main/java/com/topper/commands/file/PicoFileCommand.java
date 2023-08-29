@@ -1,4 +1,4 @@
-package com.topper.scengine.commands.file;
+package com.topper.commands.file;
 
 import java.io.File;
 import java.util.stream.Collectors;
@@ -6,15 +6,17 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
+import com.topper.commands.PicoCommand;
+import com.topper.commands.PicoTopLevelCommand;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.pipeline.DecompilationDriver;
 import com.topper.dex.decompilation.pipeline.PipelineArgs;
 import com.topper.dex.decompilation.pipeline.PipelineContext;
 import com.topper.dex.decompilation.pipeline.PipelineResult;
 import com.topper.dex.decompilation.pipeline.StaticInfo;
+import com.topper.exceptions.commands.IllegalCommandException;
+import com.topper.exceptions.commands.InternalExecutionException;
 import com.topper.exceptions.pipeline.StageException;
-import com.topper.exceptions.scripting.IllegalCommandException;
-import com.topper.exceptions.scripting.InternalExecutionException;
 import com.topper.file.AugmentedFile;
 import com.topper.file.DexFile;
 import com.topper.file.DexMethod;
@@ -22,8 +24,6 @@ import com.topper.file.FileType;
 import com.topper.file.FileUtil;
 import com.topper.file.RawFile;
 import com.topper.file.VDexFile;
-import com.topper.scengine.commands.PicoCommand;
-import com.topper.scengine.commands.PicoTopLevelCommand;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
 import com.topper.sstate.PicoState;
@@ -98,13 +98,13 @@ public final class PicoFileCommand extends PicoCommand {
 		// For raw files, the entire file is analysed,
 		// whereas for .vdex and .dex, only methods are considered.
 		@NonNull
-		final ImmutableList<com.topper.scengine.commands.file.BasedGadget> gadgets;
+		final ImmutableList<com.topper.commands.file.BasedGadget> gadgets;
 		try {
 			if (type.equals(FileType.RAW)) {
 				gadgets = this.loadGadgetsFromRaw(context.getConfig(), content, 0);
 			} else {
 
-				final ImmutableList.Builder<com.topper.scengine.commands.file.BasedGadget> builder = new ImmutableList.Builder<>();
+				final ImmutableList.Builder<com.topper.commands.file.BasedGadget> builder = new ImmutableList.Builder<>();
 
 				for (@NonNull
 				final DexMethod method : methods) {
