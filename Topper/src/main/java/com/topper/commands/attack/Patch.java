@@ -2,6 +2,8 @@ package com.topper.commands.attack;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.topper.dex.decompilation.DexHelper;
+
 public final class Patch {
 
 	private final int offset;
@@ -23,5 +25,17 @@ public final class Patch {
 	
 	public final int getSize() {
 		return this.data.length;
+	}
+	
+	@Override
+	public final String toString() {
+		
+		final StringBuilder b = new StringBuilder();
+		
+		b.append("[" + Integer.toHexString(this.offset) + "] = ");
+		b.append(DexHelper.bytesToString(this.data));
+		b.append(System.lineSeparator());
+		
+		return b.toString();
 	}
 }

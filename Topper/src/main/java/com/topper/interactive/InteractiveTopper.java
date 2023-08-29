@@ -88,6 +88,7 @@ public final class InteractiveTopper {
 			final PicoTopLevelCommand commands = new PicoTopLevelCommand(context);
 			final PicocliCommandsFactory factory = new PicocliCommandsFactory();
 			final CommandLine cmd = new CommandLine(commands, factory);
+			cmd.setTrimQuotes(true);
 			final PicocliCommands picocliCommands = new PicocliCommands(cmd);
 
 			final Parser parser = new DefaultParser();

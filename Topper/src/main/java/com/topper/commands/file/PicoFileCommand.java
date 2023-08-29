@@ -75,7 +75,7 @@ public final class PicoFileCommand extends PicoCommand {
 		// of gadgets.
 		ImmutableList<@NonNull DexMethod> methods = null;
 		AugmentedFile aug;
-		DexFile current = null;
+		DexFile current = null;	// <- used for augmentation in decompilation
 		try {
 			switch (this.type) {
 			case DEX: {
