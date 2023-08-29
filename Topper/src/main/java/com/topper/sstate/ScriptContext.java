@@ -4,8 +4,6 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.configuration.Config;
 import com.topper.configuration.TopperConfig;
-import com.topper.interactive.IOManager;
-import com.topper.scengine.ScriptParser;
 
 public final class ScriptContext {
 
@@ -23,20 +21,6 @@ public final class ScriptContext {
 	private CommandState state;
 
 	/**
-	 * Input / Output manager providing commands the ability to e.g. write to and
-	 * read from console.
-	 */
-	@NonNull
-	private final IOManager io;
-
-	/**
-	 * Parser for multi - line scripts. The <code>HelpCommand</code> uses it to
-	 * extract command information.
-	 */
-	@NonNull
-	private final ScriptParser parser;
-
-	/**
 	 * Session - specific information including e.g. currently loaded file.
 	 */
 	@NonNull
@@ -46,14 +30,9 @@ public final class ScriptContext {
 	 * Initialize this context.
 	 * 
 	 * @param config Initial configuration used for this application run.
-	 * @param io     Input/Output manager used by commands to interact with user.
-	 * @param parser Parser used to extract information on commands.
 	 */
-	public ScriptContext(@NonNull final TopperConfig config, @NonNull final IOManager io,
-			@NonNull final ScriptParser parser) {
+	public ScriptContext(@NonNull final TopperConfig config) {
 		this.config = config;
-		this.io = io;
-		this.parser = parser;
 		this.state = new SelectionState(this);
 		this.session = new SessionInfo();
 	}
@@ -95,26 +74,6 @@ public final class ScriptContext {
 	@NonNull
 	public final TopperConfig getConfig() {
 		return this.config;
-	}
-
-	/**
-	 * Gets the Input/Output manager used for interacting with the user.
-	 * 
-	 * @see IOManager
-	 */
-	@NonNull
-	public final IOManager getIO() {
-		return this.io;
-	}
-
-	/**
-	 * Gets the parser used for extracting information on commands.
-	 * 
-	 * @see ScriptParser
-	 */
-	@NonNull
-	public final ScriptParser getParser() {
-		return this.parser;
 	}
 	
 	@NonNull

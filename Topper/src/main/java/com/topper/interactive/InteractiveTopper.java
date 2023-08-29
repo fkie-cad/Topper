@@ -25,8 +25,6 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.widget.TailTipWidgets;
 
-import com.topper.scengine.ScriptExecutor;
-import com.topper.scengine.ScriptParser;
 import com.topper.scengine.commands.PicoTopLevelCommand;
 import com.topper.sstate.ScriptContext;
 
@@ -70,52 +68,9 @@ public final class InteractiveTopper {
 	 * @throws IOException If IO in interactive mode fails. This is a fatal error,
 	 *                     from which recovery is not possible (probably).
 	 */
-	// TODO: Use picocli and jline2 to handle interaction --> autocompletion, colors
-	// and more
-	public final void mainLoop(@NonNull final IOManager io, @NonNull final ScriptParser _parser,
-			@NonNull final ScriptExecutor executor, @NonNull final ScriptContext context) throws IOException {
+	public final void mainLoop(@NonNull final ScriptContext context) throws IOException {
 
 		this.context = context;
-
-//		try {
-//
-//			// Loop
-//			String command;
-//			ImmutableList<ScriptCommand> commands;
-//			while (!context.isTerminationState()) {
-//
-//				io.output(String.format(LINE_PREFIX, context.getSession().getSessionId()));
-//
-//				// Get input line
-//				command = io.inputLine();
-//
-//				// Ignore a user spamming enter
-//				if (command.length() > 0) {
-//
-//					try {
-//						// Parse command. Treat each line as a one - line script.
-//						commands = parser.parse(command);
-//
-//						// Execute commands. Results are made visible through io
-//						// and changes in the context.
-//						executor.execute(context, commands);
-//
-//					} catch (final CommandException | StateException e) {
-//						// Distinguishing between output and error allows for
-//						// discarding error messages in scripts etc.
-//						io.error(e.getMessage() + System.lineSeparator());
-//					}
-//
-//				}
-//
-//				// Eventually flush all output streams (output and error)
-//				io.flushAll();
-//			}
-//
-//		} finally {
-//			// Clean up
-//			io.close();
-//		}
 
 		AnsiConsole.systemInstall();
 		try {
@@ -130,17 +85,8 @@ public final class InteractiveTopper {
 			builtins.alias("bindkey", "keymap");
 
 			// set up picocli commands
-//            CliCommands commands = new CliCommands();
 			final PicoTopLevelCommand commands = new PicoTopLevelCommand(context);
-
 			final PicocliCommandsFactory factory = new PicocliCommandsFactory();
-
-			// Or, if you have your own factory, you can chain them like this:
-			// MyCustomFactory customFactory = createCustomFactory(); // your application
-			// custom factory
-			// PicocliCommandsFactory factory = new PicocliCommandsFactory(customFactory);
-			// // chain the factories
-
 			final CommandLine cmd = new CommandLine(commands, factory);
 			final PicocliCommands picocliCommands = new PicocliCommands(cmd);
 
