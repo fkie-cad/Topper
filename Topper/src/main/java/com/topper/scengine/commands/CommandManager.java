@@ -58,8 +58,6 @@ public final class CommandManager {
 		
 		for (final Class<?> anno : annos) {
 			
-			System.out.println(anno.getAnnotation(PicoState.class));
-			
 			for (final Class<? extends CommandState> state : anno.getAnnotation(PicoState.class).states()) {
 				
 				if (!stateCommandMap.containsKey(state)) {
@@ -257,7 +255,6 @@ public final class CommandManager {
 		return this.root;
 	}
 	
-	@NonNull
 	public static final Map<@NonNull Class<? extends CommandState>, @NonNull Set<@NonNull Class<? extends PicoCommand>>> getStateCommandMap() {
 		return CommandManager.stateCommandMap;
 	}
