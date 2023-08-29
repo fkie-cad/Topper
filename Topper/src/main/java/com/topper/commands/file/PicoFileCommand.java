@@ -47,6 +47,8 @@ public final class PicoFileCommand extends PicoCommand {
 			"--file" }, required = true, paramLabel = "FILE_PATH", description = "Path of the file to load.")
 	private String fileName;
 	
+	// TODO: Add flag that enables interpreting .dex or .vdex as raw, while also extracting methods!
+	
 	@ParentCommand
 	private PicoTopLevelCommand parent;
 	
