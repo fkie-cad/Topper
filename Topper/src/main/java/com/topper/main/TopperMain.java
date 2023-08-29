@@ -1,6 +1,7 @@
 package com.topper.main;
 
 import java.nio.file.Paths;
+import java.util.logging.LogManager;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -32,6 +33,9 @@ public final class TopperMain implements Runnable {
 
 	@Override
 	public final void run() {
+		
+		// No logging on stdout/stderr!
+		LogManager.getLogManager().reset();
 		
 		try {
 			
