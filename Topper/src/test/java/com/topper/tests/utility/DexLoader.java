@@ -10,7 +10,7 @@ import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBackedMethod;
 
 import com.topper.exceptions.InvalidConfigException;
-import com.topper.file.DexHelper;
+import com.topper.file.DexFileHelper;
 
 public class DexLoader {
 
@@ -52,8 +52,8 @@ public class DexLoader {
 					continue;
 				}
 				
-				final int offset = DexHelper.getMethodOffset(method);
-				final int size = DexHelper.getMethodSize(method, offset);
+				final int offset = DexFileHelper.getMethodOffset(method);
+				final int size = DexFileHelper.getMethodSize(method, offset);
 				return file.getBuffer().readByteRange(offset + 0x10, size);
 			}
 		}

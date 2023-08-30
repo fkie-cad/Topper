@@ -45,6 +45,24 @@ public final class EncodedCatchHandler implements Bytable {
 		return Leb128.signedLeb128Size(this.size) + Leb128.unsignedLeb128Size(this.catchAllAddr)
 				+ this.handlers.stream().mapToInt(handler -> handler.getByteSize()).sum();
 	}
+	
+	@Override
+	public final String toString() {
+		final StringBuilder b = new StringBuilder();
+		final ByteBuffer buf = ByteBuffer.wrap(this.getBytes()).order(ByteOrder.LITTLE_ENDIAN);
+		
+		b.append("Encoded Catch Handler:" + System.lineSeparator());
+		b.append(String.format("- size: %#x", Leb128.readSignedLeb128(buf)) + System.lineSeparator());
+		int sum = 0;
+		for (@NonNull final EncodedTypeAddrPair handler : this.handlers) {
+			b.append(handler.toString());
+			sum += handler.getByteSize();
+		}
+		buf.position(buf.position() + sum);
+		b.append(String.format("- catch_all_addr: %#x", Leb128.readUnsignedLeb128(buf)) + System.lineSeparator());
+		
+		return b.toString();
+	}
 
 	public final int getSize() {
 		return this.size;

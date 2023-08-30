@@ -10,6 +10,9 @@ import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.Opcodes;
 
 import com.topper.configuration.ConfigManager;
+import com.topper.dex.decompilation.DexHelper;
+import com.topper.dex.decompilation.decompiler.Decompiler;
+import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.ehandling.Bytable;
 
 public final class PackedSwitchDispatcher implements Dispatcher {
@@ -86,7 +89,6 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 		final ByteBuffer table = ByteBuffer.allocate(this.gadgets.size() << 2).order(ByteOrder.LITTLE_ENDIAN);
 		for (final Integer gadget : this.gadgets) {
 			try {
-//				buf.writeBytes(toRelativeOffset(gadget, switchOffset));
 				table.put(toRelativeOffset(gadget, switchOffset));
 			} catch (final IllegalArgumentException e) {
 				throw new IllegalArgumentException(
@@ -113,11 +115,7 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 					"Distance of offset %#08x to base %#08x cannot be expressed in code units (not divisible by 2).",
 					off, base));
 		}
-		return intToByteArray((off - base) / 2);
-	}
-
-	private static final byte @NonNull [] intToByteArray(final int value) {
-		return new byte[] { (byte) (value >>> 0), (byte) (value >>> 8), (byte) (value >>> 16), (byte) (value >>> 24) };
+		return DexHelper.intToByteArray((off - base) / 2);
 	}
 
 	private static class NewInstance implements Bytable {

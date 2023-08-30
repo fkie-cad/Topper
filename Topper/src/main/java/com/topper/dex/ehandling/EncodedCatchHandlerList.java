@@ -36,6 +36,20 @@ public final class EncodedCatchHandlerList implements Bytable {
 		return Leb128.unsignedLeb128Size(this.size)
 				+ this.list.stream().mapToInt(handler -> handler.getByteSize()).sum();
 	}
+	
+	@Override
+	public final String toString() {
+		final StringBuilder b = new StringBuilder();
+		final ByteBuffer buf = ByteBuffer.wrap(this.getBytes());
+		
+		b.append("Encoded Handler List:" + System.lineSeparator());
+		b.append(String.format("- size: %#x", Leb128.readUnsignedLeb128(buf)) + System.lineSeparator());
+		for (@NonNull final EncodedCatchHandler handler : this.list) {
+			b.append(handler.toString());
+		}
+		
+		return b.toString();
+	}
 
 	public final int getSize() {
 		return this.size;

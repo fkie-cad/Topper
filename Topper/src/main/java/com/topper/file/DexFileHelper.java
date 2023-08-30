@@ -6,7 +6,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.dexbacked.DexBackedMethod;
 import org.jf.dexlib2.dexbacked.DexReader;
 
-public class DexHelper {
+public class DexFileHelper {
 
 	public static final int CODE_ITEM_SIZE = 0x10;
 	

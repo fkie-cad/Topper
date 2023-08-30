@@ -5,6 +5,8 @@ import java.nio.ByteOrder;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.topper.dex.decompilation.DexHelper;
+
 /**
  * Based on <a href="https://source.android.com/docs/core/runtime/dex-format#encoded-type-addr-pair">dex format specification</a>.
  * */
@@ -33,6 +35,18 @@ public final class EncodedTypeAddrPair implements Bytable {
 		Leb128.writeUnsignedLeb128(buffer, this.address);
 		
 		return buffer.array();
+	}
+	
+	@Override
+	public final String toString() {
+		final StringBuilder b = new StringBuilder();
+		final ByteBuffer buf = ByteBuffer.wrap(this.getBytes()).order(ByteOrder.LITTLE_ENDIAN);
+		
+		b.append("Type - Address - Pair:" + System.lineSeparator());
+		b.append(String.format("- type_idx: %#x", Leb128.readUnsignedLeb128(buf)) + System.lineSeparator());
+		b.append(String.format("- addr:     %#x", Leb128.readUnsignedLeb128(buf)) + System.lineSeparator());
+		
+		return b.toString();
 	}
 	
 	public final int getTypeIndex() {

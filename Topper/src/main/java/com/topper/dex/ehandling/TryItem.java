@@ -33,6 +33,16 @@ public final class TryItem implements Bytable {
 		return Integer.BYTES + Short.BYTES + Short.BYTES;
 	}
 	
+	@Override
+	public final String toString() {
+		final StringBuilder b = new StringBuilder();
+		b.append("Try Item:" + System.lineSeparator());
+		b.append(String.format("- start_addr:  %#x", this.startAddress) + System.lineSeparator());
+		b.append(String.format("- insn_count:  %#x", this.insnCount) + System.lineSeparator());
+		b.append(String.format("- handler_off: %#x", this.handlerOffset) + System.lineSeparator());
+		return b.toString();
+	}
+	
 	public final int getStartAddress() {
 		return this.startAddress;
 	}

@@ -32,9 +32,8 @@ public final class Patch {
 		
 		final StringBuilder b = new StringBuilder();
 		
-		b.append("[" + Integer.toHexString(this.offset) + "] = ");
-		b.append(DexHelper.bytesToString(this.data));
-		b.append(System.lineSeparator());
+		b.append(String.format("[%#x] = ", this.offset));
+		b.append(DexHelper.bytesToPythonString(this.data));
 		
 		return b.toString();
 	}

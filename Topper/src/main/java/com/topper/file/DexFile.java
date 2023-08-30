@@ -173,10 +173,10 @@ public class DexFile implements AugmentedFile {
 					offset = 0;
 					try {
 
-						offset = DexHelper.getMethodOffset(method);
+						offset = DexFileHelper.getMethodOffset(method);
 						if (offset != 0) {
-							size = DexHelper.getMethodSize(method, offset);
-							buffer = file.getBuffer().readByteRange(offset + DexHelper.CODE_ITEM_SIZE, size);
+							size = DexFileHelper.getMethodSize(method, offset);
+							buffer = file.getBuffer().readByteRange(offset + DexFileHelper.CODE_ITEM_SIZE, size);
 						}
 					} catch (NoSuchFieldException | SecurityException | IllegalArgumentException
 							| IllegalAccessException | IndexOutOfBoundsException | ExceptionWithContext ignored) {

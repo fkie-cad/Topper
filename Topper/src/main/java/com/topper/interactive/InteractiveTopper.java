@@ -89,6 +89,8 @@ public final class InteractiveTopper {
 			final PicocliCommandsFactory factory = new PicocliCommandsFactory();
 			final CommandLine cmd = new CommandLine(commands, factory);
 			cmd.setTrimQuotes(true);
+			cmd.registerConverter(Integer.class, Integer::decode);
+			cmd.registerConverter(Integer.TYPE, Integer::decode);
 			final PicocliCommands picocliCommands = new PicocliCommands(cmd);
 
 			final Parser parser = new DefaultParser();
