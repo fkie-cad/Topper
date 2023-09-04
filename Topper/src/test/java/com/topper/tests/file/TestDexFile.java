@@ -55,7 +55,7 @@ public class TestDexFile {
 		// Reason: All methods must be covered exactly once.
 
 		final File f = new File(VALID_DEX_FILE_PATH);
-		final DexFile file = new DexFile(VALID_DEX_FILE_PATH, getFileContents(f), config);
+		final DexFile file = new DexFile(VALID_DEX_FILE_PATH, getFileContents(f), 0, config);
 		final ImmutableList<@NonNull DexMethod> methods = file.getMethods();
 
 		// Check whether all methods are there
@@ -87,7 +87,7 @@ public class TestDexFile {
 		// Reason: Buffer is invalid, iff. method is abstract or native (i.e. nothing to decompile).
 		
 		final File f = new File(VALID_DEX_FILE_PATH);
-		final DexFile file = new DexFile(VALID_DEX_FILE_PATH, getFileContents(f), config);
+		final DexFile file = new DexFile(VALID_DEX_FILE_PATH, getFileContents(f), 0, config);
 		final ImmutableList<@NonNull DexMethod> methods = file.getMethods();
 		
 		int flags;
@@ -106,7 +106,7 @@ public class TestDexFile {
 		// Reason: Each method must reference the .dex file it comes from.
 		
 		final File f = new File(VALID_DEX_FILE_PATH);
-		final DexFile file = new DexFile(VALID_DEX_FILE_PATH, getFileContents(f), config);
+		final DexFile file = new DexFile(VALID_DEX_FILE_PATH, getFileContents(f), 0, config);
 		final ImmutableList<@NonNull DexMethod> methods = file.getMethods();
 		
 		for (@NonNull final DexMethod method : methods) {
@@ -118,13 +118,13 @@ public class TestDexFile {
 	public final void Given_ValidDexFile_When_BufferEmpty_Expect_IllegalArgumentException() {
 		
 		final File f = new File(VALID_DEX_FILE_PATH);
-		assertThrowsExactly(IllegalArgumentException.class, () -> new DexFile(VALID_DEX_FILE_PATH, new byte[0], config));
+		assertThrowsExactly(IllegalArgumentException.class, () -> new DexFile(VALID_DEX_FILE_PATH, new byte[0], 0, config));
 	}
 	
 	@Test
 	public final void Given_Input_When_NotValidDexFile_Expect_IllegalArgumentException() {
 		
 		final File f = new File(VALID_VDEX_FILE_PATH);
-		assertThrowsExactly(IllegalArgumentException.class, () -> new DexFile(VALID_DEX_FILE_PATH, getFileContents(f), config));
+		assertThrowsExactly(IllegalArgumentException.class, () -> new DexFile(VALID_DEX_FILE_PATH, getFileContents(f), 0, config));
 	}
 }

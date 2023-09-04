@@ -45,6 +45,11 @@ public class DexFile implements AugmentedFile {
 	 * Contents of this file. They may be based on the contents of {@link file}.
 	 */
 	private final byte @NonNull [] buffer;
+	
+	/**
+	 * Offset of this .dex file.
+	 * */
+	private final int offset;
 
 	/**
 	 * Parsed .dex file used to extract e.g. method information.
@@ -74,17 +79,19 @@ public class DexFile implements AugmentedFile {
 	 * 
 	 * @param id     Id of the augmented file.
 	 * @param buffer Raw bytes that represent a valid .dex file.
+	 * @param offset Offset of this .dex file relative to some other object (e.g. .vdex).
 	 * @param config Configuration to use during .dex file creation.
 	 * @throws IllegalArgumentException If the buffer is empty or does not contain a
 	 *                                  valid .dex file.
 	 */
-	public DexFile(@NonNull final String id, final byte @NonNull [] buffer, @NonNull final TopperConfig config) {
+	public DexFile(@NonNull final String id, final byte @NonNull [] buffer, final int offset, @NonNull final TopperConfig config) {
 		if (buffer.length == 0) {
 			throw new IllegalArgumentException("buffer must not be empty");
 		}
 
 		this.id = id;
 		this.buffer = buffer;
+		this.offset = offset;
 
 		try {
 			final Opcodes opcodes = Opcodes.forDexVersion(ConfigManager.get().getDecompilerConfig().getDexVersion());
@@ -109,6 +116,11 @@ public class DexFile implements AugmentedFile {
 	@Override
 	public @NonNull ImmutableList<@NonNull DexMethod> getMethods() {
 		return this.methods;
+	}
+	
+	@Override
+	public final int getOffset() {
+		return this.offset;
 	}
 
 	@NonNull

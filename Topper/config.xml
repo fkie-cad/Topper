@@ -12,7 +12,7 @@
 		<pivotOpcode>THROW</pivotOpcode>
 	</sweeper>
 	<decompiler>
-		<dexSkipThreshold>500000</dexSkipThreshold>
+		<dexSkipThreshold>-1</dexSkipThreshold>
 		<dexVersion>39</dexVersion>
 		<shouldNopUnknownInstruction>false</shouldNopUnknownInstruction>
 	</decompiler>

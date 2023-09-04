@@ -79,7 +79,7 @@ public final class PicoFileCommand extends PicoCommand {
 		try {
 			switch (this.type) {
 			case DEX: {
-				final DexFile dex = new DexFile(file.getName(), content, context.getConfig());
+				final DexFile dex = new DexFile(file.getName(), content, 0, context.getConfig());
 				current = dex;
 				aug = dex;
 				break;

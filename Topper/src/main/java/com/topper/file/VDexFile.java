@@ -118,6 +118,11 @@ public class VDexFile implements AugmentedFile {
 
 		return methods.build();
 	}
+	
+	@Override
+	public final int getOffset() {
+		return 0;
+	}
 
 	/**
 	 * Gets a list of all identified .dex files in this .vdex file.
@@ -179,7 +184,7 @@ public class VDexFile implements AugmentedFile {
 
 					// Parse dex file and store it into list
 					builder.add(new DexFile("classes" + Integer.toString(dexId) + ".dex",
-							Arrays.copyOfRange(buffer, dexStart, dexStart + dexHeader.getFileSize()), config));
+							Arrays.copyOfRange(buffer, dexStart, dexStart + dexHeader.getFileSize()), dexStart, config));
 					dexId += 1;
 				}
 

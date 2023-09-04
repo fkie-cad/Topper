@@ -53,4 +53,9 @@ public class RawFile implements AugmentedFile {
 	public @NonNull ImmutableList<@NonNull DexMethod> getMethods() {
 		return ImmutableList.of();
 	}
+	
+	@Override
+	public final int getOffset() {
+		return 0;
+	}
 }

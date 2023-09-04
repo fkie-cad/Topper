@@ -33,4 +33,6 @@ public interface AugmentedFile {
 	 * */
 	@NonNull
 	ImmutableList<@NonNull DexMethod> getMethods();
+	
+	int getOffset();
 }
