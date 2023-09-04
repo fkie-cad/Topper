@@ -90,7 +90,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		@NonNull
 		final List<@NonNull Patch> patches = this.computePatches();
 
-		printv("==============================================");
+		printvln("==============================================");
 		this.getTopLevel().out().println("Computed Patches:");
 		for (@NonNull
 		final Patch patch : patches) {
@@ -204,7 +204,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		@NonNull
 		final MethodCodeItem header = new MethodCodeItem(
 				Arrays.copyOfRange(buffer, this.methodOffset, this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE));
-		printv("==============================================");
+		printvln("==============================================");
 		this.printv(String.format("Method Offset: %#x, ", this.methodOffset) + header.toString());
 
 		// Compute offset of first handler. Handler starts at first 4-byte aligned
@@ -215,7 +215,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		firstHandlerOffset += this.methodHandlerPadding;
 
 		// Compute dispatcher offset.
-		int dispatcherOffset = firstHandlerOffset + MethodCodeItem.CODE_ITEM_SIZE;
+		int dispatcherOffset = firstHandlerOffset + CatchAllHandler.getByteSizeBound();
 		dispatcherOffset += this.handlerDispatcherPadding;
 
 		// Create dispatcher
@@ -227,23 +227,22 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		final Decompiler decompiler = new SmaliDecompiler();
 		try {
 			final DecompilationResult result = decompiler.decompile(payload, null, this.getContext().getConfig());
-			
-			printv("==============================================");
-			printv(String.format("Payload Offset: %#x", dispatcherOffset));
-			printv("Payload: " + DexHelper.bytesToString(payload));
+			printvln("==============================================");
+			printvln(String.format("Payload Offset: %#x", dispatcherOffset));
+			printvln("Payload: " + DexHelper.bytesToString(payload));
 			printv(result.getPrettyInstructions());
 		} catch (final Exception ignored) {
 			throw new InternalExecutionException("Generated payload does not consist of valid instructions (decompilation failed).");
 		}
 
 		// Patch in dispatcher payload
-		patches.add(this.alignedPatch(dispatcherOffset, dispatcher.payload()));
+		patches.add(this.alignedPatch(dispatcherOffset, payload));
 
 		// Create exception handler
 		final CatchAllHandler handler = new CatchAllHandler(this.methodOffset,
 				dispatcherOffset + dispatcher.dispatcherOffset());
-		printv("==============================================");
-		printv(String.format("Handler offset: %#x", firstHandlerOffset));
+		printvln("==============================================");
+		printvln(String.format("Handler offset: %#x", firstHandlerOffset));
 		printv(handler.toString());
 
 		// Patch in exception handler payload
@@ -298,10 +297,17 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		return new Patch(lower, total);
 	}
 
-	private final void printv(@NonNull final String message) {
+	private final void printvln(@NonNull final String message) {
 		if (!this.verbose) {
 			return;
 		}
 		this.getTopLevel().out().println(message);
+	}
+	
+	private final void printv(@NonNull final String message) {
+		if (!this.verbose) {
+			return;
+		}
+		this.getTopLevel().out().print(message);
 	}
 }

@@ -16,35 +16,41 @@ public final class CatchAllHandler implements Bytable {
 
 	private int targetMethodOffset;
 	private int dispatcherOffset;
-	
+
 	private EncodedCatchHandler encodedHandler;
-	
+
 	private EncodedCatchHandlerList handlerList;
-	
+
 	private TryItem tryItem;
-	
+
 	/**
 	 * Creates a new catch - all exception handler for .dex files.
 	 * 
+	 * @param targetMethodOffset Offset of the method to be augmented with this
+	 *                           handler. It must be relative to the beginning of
+	 *                           the .dex file.
+	 * @param dispatcherOffset   Offset of the {@link Dispatcher} relative to the
+	 *                           beginning of the .dex file.
 	 * @throws IllegalArgumentException If either of the parameters is negative, or
-	 * 	the relative offset of the dispatcher to the beginning of the method is not
-	 * 	divisible by two, i.e. cannot be expressed in code units.
-	 * */
+	 *                                  the relative offset of the dispatcher to the
+	 *                                  beginning of the method is not divisible by
+	 *                                  two, i.e. cannot be expressed in code units.
+	 */
 	public CatchAllHandler(final int targetMethodOffset, final int dispatcherOffset) {
-		
+
 		if (targetMethodOffset < 0) {
 			throw new IllegalArgumentException("Method offset must be non - negative.");
 		}
 		if (dispatcherOffset < 0) {
 			throw new IllegalArgumentException("Dispatcher offset must be non - negative.");
 		}
-		
+
 		this.targetMethodOffset = targetMethodOffset;
 		this.dispatcherOffset = dispatcherOffset;
-		
+
 		this.updateHandler();
 	}
-	
+
 	private final void updateHandler() {
 		// Create encoded catch handler
 		int handlerOffset = this.dispatcherOffset - (this.targetMethodOffset + 0x10);
@@ -53,47 +59,39 @@ public final class CatchAllHandler implements Bytable {
 		}
 		handlerOffset >>= 1;
 		this.encodedHandler = new EncodedCatchHandler(0, new LinkedList<>(), handlerOffset);
-		
+
 		// Create handler list
 		final List<@NonNull EncodedCatchHandler> list = new LinkedList<>();
 		list.add(this.encodedHandler);
 		this.handlerList = new EncodedCatchHandlerList(list);
-		
+
 		// Create try item
-		this.tryItem = new TryItem(0, (short)-1, (short)1);
+		this.tryItem = new TryItem(0, (short) -1, (short) 1);
 	}
 
+	/**
+	 * Gets the offset of the method to be augmented with this handler. The offset
+	 * is relative to a given .dex file.
+	 */
 	public final int getTargetMethodOffset() {
 		return this.targetMethodOffset;
 	}
-	
-	public final void setTargetMethodOffset(final int targetMethodOffset) {
-		if (targetMethodOffset < 0) {
-			throw new IllegalArgumentException("Method offset must be non - negative.");
-		}
-		this.targetMethodOffset = targetMethodOffset;
-		this.updateHandler();
-	}
 
+	/**
+	 * Gets the offset of the {@link Dispatcher} relative to the beginning of a
+	 * given .dex file.
+	 */
 	public final int getDispatcherOffset() {
 		return this.dispatcherOffset;
-	}
-	
-	public final void setDispatcherOffset(final int dispatcherOffset) {
-		if (dispatcherOffset < 0) {
-			throw new IllegalArgumentException("Dispatcher offset must be non - negative.");
-		}
-		this.dispatcherOffset = dispatcherOffset;
-		this.updateHandler();
 	}
 
 	@Override
 	public final byte @NonNull [] getBytes() {
 		final ByteBuffer buffer = ByteBuffer.allocate(this.getByteSize()).order(ByteOrder.LITTLE_ENDIAN);
-		
+
 		buffer.put(this.tryItem.getBytes());
 		buffer.put(this.handlerList.getBytes());
-		
+
 		return buffer.array();
 	}
 
@@ -101,7 +99,14 @@ public final class CatchAllHandler implements Bytable {
 	public final int getByteSize() {
 		return this.tryItem.getByteSize() + this.handlerList.getByteSize();
 	}
-	
+
+	/**
+	 * Gets an upper bound on the number of bytes required by this handler.
+	 */
+	public static final int getByteSizeBound() {
+		return 0x20;
+	}
+
 	@Override
 	public final String toString() {
 		final StringBuilder b = new StringBuilder();

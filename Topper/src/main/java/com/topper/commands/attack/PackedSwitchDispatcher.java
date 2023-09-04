@@ -11,8 +11,6 @@ import org.jf.dexlib2.Opcodes;
 
 import com.topper.configuration.ConfigManager;
 import com.topper.dex.decompilation.DexHelper;
-import com.topper.dex.decompilation.decompiler.Decompiler;
-import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.ehandling.Bytable;
 
 public final class PackedSwitchDispatcher implements Dispatcher {
@@ -26,12 +24,12 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 	private final int pcVregIndex;
 
 	@NonNull
-	private final List<Integer> gadgets;
+	private final List<@NonNull Integer> gadgets;
 	
 	private int dispatcherOffset;
 
 	public PackedSwitchDispatcher(final int offset, final int exceptionVregIndex, final int exceptionTypeIndex,
-			final int pcVregIndex, @NonNull final List<Integer> gadgets) {
+			final int pcVregIndex, @NonNull final List<@NonNull Integer> gadgets) {
 		if (offset < 0) {
 			throw new IllegalArgumentException("Offset of dispatcher must be non - negative.");
 		}
@@ -55,7 +53,7 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 	}
 
 	public PackedSwitchDispatcher(final int offset, final int exceptionTypeIndex,
-			@NonNull final List<Integer> gadgets) {
+			@NonNull final List<@NonNull Integer> gadgets) {
 		this(offset, 0, exceptionTypeIndex, 1, gadgets);
 	}
 
