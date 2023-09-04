@@ -6,10 +6,10 @@ import org.jf.dexlib2.Opcode;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.SweeperConfig;
-import com.topper.dex.decompilation.DexHelper;
 import com.topper.dex.decompilation.graphs.CFG;
 import com.topper.dex.decompilation.graphs.DFG;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.helpers.DexHelper;
 
 /**
  * Gadget extracted using a {@link StaticAnalyser}. It consists of a list of

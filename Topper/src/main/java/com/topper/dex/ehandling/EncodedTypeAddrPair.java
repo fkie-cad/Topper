@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.dex.decompilation.DexHelper;
+import com.topper.helpers.DexHelper;
 
 /**
  * Based on <a href="https://source.android.com/docs/core/runtime/dex-format#encoded-type-addr-pair">dex format specification</a>.

@@ -17,10 +17,13 @@ public final class CatchAllHandler implements Bytable {
 	private int targetMethodOffset;
 	private int dispatcherOffset;
 
+	@NonNull
 	private EncodedCatchHandler encodedHandler;
 
+	@NonNull
 	private EncodedCatchHandlerList handlerList;
 
+	@NonNull
 	private TryItem tryItem;
 
 	/**
@@ -48,10 +51,6 @@ public final class CatchAllHandler implements Bytable {
 		this.targetMethodOffset = targetMethodOffset;
 		this.dispatcherOffset = dispatcherOffset;
 
-		this.updateHandler();
-	}
-
-	private final void updateHandler() {
 		// Create encoded catch handler
 		int handlerOffset = this.dispatcherOffset - (this.targetMethodOffset + 0x10);
 		if (handlerOffset % 2 != 0) {
@@ -85,6 +84,7 @@ public final class CatchAllHandler implements Bytable {
 		return this.dispatcherOffset;
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	public final byte @NonNull [] getBytes() {
 		final ByteBuffer buffer = ByteBuffer.allocate(this.getByteSize()).order(ByteOrder.LITTLE_ENDIAN);
@@ -108,11 +108,12 @@ public final class CatchAllHandler implements Bytable {
 	}
 
 	@Override
+	@NonNull
 	public final String toString() {
 		final StringBuilder b = new StringBuilder();
 		b.append("Catch All Handler:" + System.lineSeparator());
 		b.append(this.tryItem.toString());
 		b.append(this.handlerList.toString());
-		return b.toString();
+		return "" + b.toString();
 	}
 }

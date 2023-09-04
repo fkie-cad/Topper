@@ -5,9 +5,9 @@ import org.jf.dexlib2.Opcode;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.graph.MutableGraph;
-import com.topper.dex.decompilation.DexHelper;
 import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.helpers.DexHelper;
 
 
 /**

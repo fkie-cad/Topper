@@ -12,7 +12,7 @@ import org.jline.reader.impl.DefaultParser;
 
 import com.google.common.io.Files;
 import com.topper.commands.PicoTopLevelCommand;
-import com.topper.file.FileUtil;
+import com.topper.helpers.FileUtil;
 import com.topper.sstate.ScriptContext;
 
 import picocli.CommandLine;

@@ -10,8 +10,8 @@ import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.Opcodes;
 
 import com.topper.configuration.ConfigManager;
-import com.topper.dex.decompilation.DexHelper;
 import com.topper.dex.ehandling.Bytable;
+import com.topper.helpers.BufferHelper;
 
 public final class PackedSwitchDispatcher implements Dispatcher {
 
@@ -57,6 +57,7 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 		this(offset, 0, exceptionTypeIndex, 1, gadgets);
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	public final byte @NonNull [] payload() {
 		final ByteArrayOutputStream buf = new ByteArrayOutputStream();
@@ -113,7 +114,7 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 					"Distance of offset %#08x to base %#08x cannot be expressed in code units (not divisible by 2).",
 					off, base));
 		}
-		return DexHelper.intToByteArray((off - base) / 2);
+		return BufferHelper.intToByteArray((off - base) / 2);
 	}
 
 	private static class NewInstance implements Bytable {
@@ -126,6 +127,7 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 			this.typeIndex = typeIndex;
 		}
 
+		@SuppressWarnings("null")
 		@Override
 		public byte @NonNull [] getBytes() {
 			return ByteBuffer.allocate(this.getByteSize()).order(ByteOrder.LITTLE_ENDIAN)
@@ -149,6 +151,7 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 			this.constant = (byte) (constant & 0xf);
 		}
 
+		@SuppressWarnings("null")
 		@Override
 		public byte @NonNull [] getBytes() {
 			return ByteBuffer.allocate(this.getByteSize()).order(ByteOrder.LITTLE_ENDIAN)
@@ -174,6 +177,7 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 			this.constant = constant;
 		}
 
+		@SuppressWarnings("null")
 		@Override
 		public byte @NonNull [] getBytes() {
 			return ByteBuffer.allocate(this.getByteSize()).order(ByteOrder.LITTLE_ENDIAN)
@@ -197,6 +201,7 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 			this.offset = offset;
 		}
 
+		@SuppressWarnings("null")
 		@Override
 		public byte @NonNull [] getBytes() {
 			return ByteBuffer.allocate(this.getByteSize()).order(ByteOrder.LITTLE_ENDIAN)
@@ -220,6 +225,7 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 			this.contents = contents;
 		}
 
+		@SuppressWarnings("null")
 		@Override
 		public byte @NonNull [] getBytes() {
 			return ByteBuffer.allocate(this.getByteSize()).order(ByteOrder.LITTLE_ENDIAN)

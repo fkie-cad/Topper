@@ -9,8 +9,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.DecompilerConfig;
 import com.topper.configuration.TopperConfig;
-import com.topper.dex.decompilation.decompiler.Decompiler;
-import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
+import com.topper.helpers.BufferHelper;
 
 /**
  * CAUTION: This is an experimental feature. The .vdex file format changes a
@@ -49,21 +48,14 @@ public class VDexFile implements AugmentedFile {
 
 	/**
 	 * Creates a new .vdex file respresentation using a {@link String} - id and a
-	 * {@buffer}. Optionally, it uses a {@link Decompiler} and a {@link CFGAnalyser}
-	 * to extract Control Flow Graphs(CFG) for all methods of all .dex files.
+	 * <code>buffer</code>.
 	 * 
-	 * If CFG extraction for a given method fails due to an internal error, or the
-	 * method is abstract or native, or either one of {@code decompiler} or
-	 * {@code analyser} is {@code null}, then the method will not be analysed.
-	 * Otherwise all methods are analysed, which may be time consuming.
-	 * 
-	 * Some coarse checks are performed to ensure {@code buffer} contains a .vdex
+	 * Some coarse checks are performed to ensure <code>buffer</code> contains a .vdex
 	 * file. However, as versions of .vdex files change, mainly the magic bytes are
 	 * verified.
 	 * 
-	 * 
 	 * A threshold for file sizes of .dex files in this .vdex file from
-	 * {@link DecompilerConfig} is used.. If a .dex exceeds this threshold, then its
+	 * {@link DecompilerConfig} is used. If a .dex exceeds this threshold, then its
 	 * methods will not be stored. This prevents being stuck on large library .dex
 	 * files that may be irrelevant. 0 indicates to perform no analysis. A negative
 	 * value indicates to analyse all .dex files regardless of their size.
@@ -72,9 +64,6 @@ public class VDexFile implements AugmentedFile {
 	 * @param buffer     Raw bytes that represent a valid .vdex file.
 	 * @param decompiler A {@code Decompiler} used in conjunction with
 	 *                   {@code analyser} to decompile all methods.
-	 * @param analyser   A {@code CFGAnalyser} used in conjunction with
-	 *                   {@code decompiler} to extract Control Flow Graphs for all
-	 *                   methods.
 	 * @throws IllegalArgumentException If the buffer is empty or does not contain a
 	 *                                  valid .vdex file. Also if the .vdex file
 	 *                                  contains a corrupted .dex file.
@@ -105,18 +94,6 @@ public class VDexFile implements AugmentedFile {
 	@Override
 	public byte @NonNull [] getBuffer() {
 		return this.buffer;
-	}
-
-	@Override
-	public @NonNull ImmutableList<@NonNull DexMethod> getMethods() {
-		final ImmutableList.Builder<@NonNull DexMethod> methods = new ImmutableList.Builder<>();
-
-		for (@NonNull
-		final DexFile file : this.files) {
-			methods.addAll(file.getMethods());
-		}
-
-		return methods.build();
 	}
 	
 	@Override
@@ -151,6 +128,7 @@ public class VDexFile implements AugmentedFile {
 	 * @return List of .dex file representations.
 	 * @throws IllegalArgumentException If {@code DexFile} construction fails.
 	 */
+	@SuppressWarnings("null")
 	@NonNull
 	private final ImmutableList<@NonNull DexFile> loadFiles(@NonNull final VDexFileHeader fileHeader, final byte @NonNull [] buffer, @NonNull final TopperConfig config) {
 
@@ -182,7 +160,7 @@ public class VDexFile implements AugmentedFile {
 
 					// Parse dex file and store it into list
 					builder.add(new DexFile("classes" + Integer.toString(dexId) + ".dex",
-							Arrays.copyOfRange(buffer, dexStart, dexStart + dexHeader.getFileSize()), dexStart, config));
+							BufferHelper.copyBuffer(buffer, dexStart, dexStart + dexHeader.getFileSize()), dexStart, config));
 					dexId += 1;
 				}
 
@@ -206,18 +184,20 @@ public class VDexFile implements AugmentedFile {
 			if (start + VDexFileHeader.getTotalSize() >= buffer.length) {
 				throw new IllegalArgumentException("buffer is too small");
 			}
-			this.magic = Arrays.copyOfRange(buffer, VDexFileHeaderStructure.MAGIC.getOffset() + start,
+			this.magic = BufferHelper.copyBuffer(buffer, VDexFileHeaderStructure.MAGIC.getOffset() + start,
 					VDexFileHeaderStructure.MAGIC.getEndOffset());
-			this.vdexVersion = Arrays.copyOfRange(buffer, VDexFileHeaderStructure.VDEX_VERSION.getOffset() + start,
+			this.vdexVersion = BufferHelper.copyBuffer(buffer, VDexFileHeaderStructure.VDEX_VERSION.getOffset() + start,
 					VDexFileHeaderStructure.VDEX_VERSION.getEndOffset());
 			this.numberOfSections = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
 					.getInt(VDexFileHeaderStructure.NUMBER_OF_SECTIONS.getOffset() + start);
 		}
 
+		@SuppressWarnings("unused")
 		public final byte @NonNull [] getMagic() {
 			return this.magic;
 		}
 
+		@SuppressWarnings("unused")
 		public final byte @NonNull [] getVDexVersion() {
 			return this.vdexVersion;
 		}
@@ -251,6 +231,7 @@ public class VDexFile implements AugmentedFile {
 			return this.offset;
 		}
 
+		@SuppressWarnings("unused")
 		public final int getSize() {
 			return this.size;
 		}
@@ -262,6 +243,7 @@ public class VDexFile implements AugmentedFile {
 
 	private static class VDexSectionHeader {
 
+		@NonNull
 		private final VDexSection sectionKind;
 		private final int sectionOffset;
 		private final int sectionSize;
@@ -272,8 +254,13 @@ public class VDexFile implements AugmentedFile {
 			}
 			final ByteBuffer buf = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN);
 
-			this.sectionKind = VDexSection
+			final VDexSection sec = VDexSection
 					.valueOf(buf.getInt(VDexSectionHeaderStructure.SECTION_KIND.getOffset() + start));
+			if (sec == null) {
+				this.sectionKind = VDexSection.ChecksumSection;
+			} else {
+				this.sectionKind = sec;
+			}
 			this.sectionOffset = buf.getInt(VDexSectionHeaderStructure.SECTION_OFFSET.getOffset() + start);
 			this.sectionSize = buf.getInt(VDexSectionHeaderStructure.SECTION_SIZE.getOffset() + start);
 		}
@@ -312,6 +299,7 @@ public class VDexFile implements AugmentedFile {
 			return this.offset;
 		}
 
+		@SuppressWarnings("unused")
 		public final int getSize() {
 			return this.size;
 		}
@@ -351,6 +339,7 @@ public class VDexFile implements AugmentedFile {
 		private final byte @NonNull [] signature;
 		private final int fileSize;
 
+		@SuppressWarnings("null")
 		public PartialDexHeader(final byte @NonNull [] buffer, final int start) {
 			final ByteBuffer buf = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN);
 			this.magic = buf.slice(PartialDexHeaderStructure.MAGIC.getOffset() + start,
@@ -361,14 +350,17 @@ public class VDexFile implements AugmentedFile {
 			this.fileSize = buf.getInt(PartialDexHeaderStructure.FILE_SIZE.getOffset() + start);
 		}
 
+		@SuppressWarnings("unused")
 		public final byte @NonNull [] getMagic() {
 			return this.magic;
 		}
 
+		@SuppressWarnings("unused")
 		public final int getChecksum() {
 			return this.checksum;
 		}
 
+		@SuppressWarnings("unused")
 		public final byte @NonNull [] getSignature() {
 			return this.signature;
 		}
@@ -377,6 +369,7 @@ public class VDexFile implements AugmentedFile {
 			return this.fileSize;
 		}
 
+		@SuppressWarnings("unused")
 		public static final int getTotalSize() {
 			return PartialDexHeaderStructure.values()[PartialDexHeaderStructure.values().length - 1].getEndOffset();
 		}

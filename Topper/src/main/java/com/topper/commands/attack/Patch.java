@@ -2,7 +2,7 @@ package com.topper.commands.attack;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.dex.decompilation.DexHelper;
+import com.topper.helpers.BufferHelper;
 
 public final class Patch {
 
@@ -33,7 +33,7 @@ public final class Patch {
 		final StringBuilder b = new StringBuilder();
 		
 		b.append(String.format("[%#x] = ", this.offset));
-		b.append(DexHelper.bytesToPythonString(this.data));
+		b.append(BufferHelper.bytesToPythonString(this.data));
 		
 		return b.toString();
 	}

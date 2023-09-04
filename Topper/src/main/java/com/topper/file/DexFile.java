@@ -1,19 +1,10 @@
 package com.topper.file;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcodes;
-import org.jf.dexlib2.dexbacked.DexBackedClassDef;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
-import org.jf.dexlib2.dexbacked.DexBackedMethod;
-import org.jf.util.ExceptionWithContext;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.Config;
@@ -21,7 +12,6 @@ import com.topper.configuration.ConfigManager;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
-import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 
 /**
  * Dex file representation base on dexlib2. It parses the contents of a given
@@ -56,12 +46,6 @@ public class DexFile implements AugmentedFile {
 	 */
 	@NonNull
 	private final DexBackedDexFile dexFile;
-
-	/**
-	 * List of all methods stored in this .dex file.
-	 */
-	@NonNull
-	private final ImmutableList<@NonNull DexMethod> methods;
 
 	/**
 	 * Creates a .dex file using a {@link String} - id and a {@code buffer}. If both
@@ -99,7 +83,6 @@ public class DexFile implements AugmentedFile {
 		} catch (final RuntimeException e) {
 			throw new IllegalArgumentException("buffer must represent a valid .dex file.", e);
 		}
-		this.methods = this.loadMethods(this.dexFile);
 	}
 
 	@Override
@@ -112,17 +95,13 @@ public class DexFile implements AugmentedFile {
 	public byte @NonNull [] getBuffer() {
 		return this.buffer;
 	}
-
-	@Override
-	public @NonNull ImmutableList<@NonNull DexMethod> getMethods() {
-		return this.methods;
-	}
 	
 	@Override
 	public final int getOffset() {
 		return this.offset;
 	}
 	
+	@SuppressWarnings("null")
 	@Override
 	@NonNull
 	public final ImmutableList<@NonNull DexFile> getDexFiles() {
@@ -132,89 +111,5 @@ public class DexFile implements AugmentedFile {
 	@NonNull
 	public final DexBackedDexFile getDexFile() {
 		return this.dexFile;
-	}
-
-	/**
-	 * Loads methods from a given {@link DexBackedDexFile}. Optionally, a
-	 * {@link Decompiler} and a {@link CFGAnalyser} are used to extract a Control
-	 * Flow Graph(CFG) from each method.
-	 * 
-	 * If CFG extraction for a given method fails due to an internal error, or the
-	 * method is abstract or native, or either one of {@code decompiler} or
-	 * {@code analyser} is {@code null}, then the method will not be analysed.
-	 * 
-	 * Loading methods of a .dex file uses an {@link ExecutorService} with a
-	 * configurable number of threads to speed up analysis. Adjust the global
-	 * configuration {@link Config.setDefaultAmountThreads} using
-	 * {@link ConfigManager} to change the number of threads used (at least 1).
-	 * 
-	 * @param file       Parsed .dex file used for method enumeration.
-	 * @param decompiler {@code Decompiler} to use for decompiling bytes into Smali.
-	 * @param analyser   {@code CFGAnalyser} to use for constructing CFGs for
-	 *                   decompiled methods.
-	 * @return List of decompiled methods.
-	 */
-	@NonNull
-	private final ImmutableList<@NonNull DexMethod> loadMethods(@NonNull final DexBackedDexFile file) {
-
-		ImmutableList.Builder<@NonNull DexMethod> methods = new ImmutableList.Builder<>();
-
-		// Use a thread pool to handle classes. This mainly helps
-		// in case of large .dex files.
-		final List<Future<List<@NonNull DexMethod>>> results = new ArrayList<>(file.getClasses().size());
-		final ExecutorService pool = Executors
-				.newFixedThreadPool(ConfigManager.get().getGeneralConfig().getDefaultAmountThreads());
-
-		// Iterate over methods
-		for (final DexBackedClassDef cls : file.getClasses()) {
-
-			if (cls == null) {
-				continue;
-			}
-
-			results.add((Future<List<@NonNull DexMethod>>) pool.submit(() -> {
-				int offset;
-				int size;
-				byte[] buffer;
-				ImmutableList<@NonNull DecompiledInstruction> instructions;
-
-				final List<@NonNull DexMethod> clsMethods = new LinkedList<>();
-				for (final DexBackedMethod method : cls.getMethods()) {
-
-					if (method == null) {
-						continue;
-					}
-
-					// Extract control flow graph if requested. If an
-					// error occurs, skip cfg extraction
-					buffer = null;
-					offset = 0;
-					try {
-
-						offset = DexFileHelper.getMethodOffset(method);
-						if (offset != 0) {
-							size = DexFileHelper.getMethodSize(method, offset);
-							buffer = file.getBuffer().readByteRange(offset + DexFileHelper.CODE_ITEM_SIZE, size);
-						}
-					} catch (NoSuchFieldException | SecurityException | IllegalArgumentException
-							| IllegalAccessException | IndexOutOfBoundsException | ExceptionWithContext ignored) {
-					}
-
-					clsMethods.add(new DexMethod(this, method, buffer, offset));
-				}
-
-				return clsMethods;
-			}));
-		}
-
-		// Gather all results
-		for (final Future<List<@NonNull DexMethod>> result : results) {
-			try {
-				methods.addAll(result.get());
-			} catch (InterruptedException | ExecutionException ignored) {
-			}
-		}
-
-		return methods.build();
 	}
 }

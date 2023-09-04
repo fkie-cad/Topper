@@ -27,14 +27,6 @@ public interface AugmentedFile {
 	byte @NonNull [] getBuffer();
 	
 	/**
-	 * Gets a list of methods associated with this file.
-	 * 
-	 * @see DexMethod
-	 * */
-	@NonNull
-	ImmutableList<@NonNull DexMethod> getMethods();
-	
-	/**
 	 * Gets the offset of this file relative to another object.
 	 * */
 	int getOffset();

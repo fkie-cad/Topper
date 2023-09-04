@@ -14,7 +14,6 @@ import org.jf.dexlib2.dexbacked.reference.DexBackedTypeReference;
 import com.google.common.collect.ImmutableList;
 import com.topper.commands.PicoCommand;
 import com.topper.commands.PicoTopLevelCommand;
-import com.topper.dex.decompilation.DexHelper;
 import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
@@ -25,7 +24,9 @@ import com.topper.exceptions.commands.IllegalCommandException;
 import com.topper.exceptions.commands.InternalExecutionException;
 import com.topper.file.AugmentedFile;
 import com.topper.file.DexFile;
-import com.topper.file.DexFileHelper;
+import com.topper.helpers.BufferHelper;
+import com.topper.helpers.DexFileHelper;
+import com.topper.helpers.DexHelper;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
 import com.topper.sstate.PicoState;
@@ -108,7 +109,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 			if (!tuple) {
 				this.getTopLevel().out().println(patch);
 			} else {
-				this.getTopLevel().out().println(String.format("    (%#x, b'", patch.getOffset()) + DexHelper.bytesToPythonString(patch.getData()) + "'),");
+				this.getTopLevel().out().println(String.format("    (%#x, b'", patch.getOffset()) + BufferHelper.bytesToPythonString(patch.getData()) + "'),");
 			}
 		}
 		
@@ -148,6 +149,9 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		}
 
 		// Check gadgets exist and point into the loaded file.
+		if (this.gadgets == null) {
+			throw new IllegalCommandException("List of gadgets does not exist.");
+		}
 		if (this.gadgets.isEmpty()) {
 			throw new IllegalCommandException("At least one gadget must be provided.");
 		}
@@ -270,7 +274,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		final byte @NonNull [] buffer = loaded.getBuffer();
 		@NonNull
 		final MethodCodeItem header = new MethodCodeItem(
-				Arrays.copyOfRange(buffer, this.methodOffset, this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE));
+				BufferHelper.copyBuffer(buffer, this.methodOffset, this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE));
 		printvln("==============================================");
 		this.printv(String.format("Method Offset: %#x, ", this.methodOffset) + header.toString());
 
@@ -295,8 +299,8 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		try {
 			final DecompilationResult result = decompiler.decompile(payload, null, context.getConfig());
 			printvln("==============================================");
-			printvln(String.format("Payload Offset: %#x", dispatcherOffset));
-			printvln("Payload: " + DexHelper.bytesToString(payload));
+			printvln("" + String.format("Payload Offset: %#x", dispatcherOffset));
+			printvln("Payload: " + BufferHelper.bytesToString(payload));
 			printv(result.getPrettyInstructions());
 		} catch (final Exception ignored) {
 			throw new InternalExecutionException("Generated payload does not consist of valid instructions (decompilation failed).");
@@ -309,7 +313,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		final CatchAllHandler handler = new CatchAllHandler(this.methodOffset,
 				dispatcherOffset + dispatcher.dispatcherOffset());
 		printvln("==============================================");
-		printvln(String.format("Handler offset: %#x", firstHandlerOffset));
+		printvln("" + String.format("Handler offset: %#x", firstHandlerOffset));
 		printv(handler.toString());
 
 		// Patch in exception handler payload
@@ -318,11 +322,11 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		// Account for padding between method and handler by increasing method size
 		if (this.methodHandlerPadding > 0) {
 			patches.add(this.alignedPatch(loaded, this.methodOffset + CodeItem.INSTRUCTION_COUNT_OFFSET,
-					DexHelper.intToByteArray((int) (header.getInsnsSize() + this.methodHandlerPadding / 2))));
+					BufferHelper.intToByteArray((int) (header.getInsnsSize() + this.methodHandlerPadding / 2))));
 		}
 		
 		// Ensure there is only a single handler: the catch all
-		patches.add(this.alignedPatch(loaded, this.methodOffset + 0x6, DexHelper.shortToByteArray((short) 1)));
+		patches.add(this.alignedPatch(loaded, this.methodOffset + 0x6, BufferHelper.shortToByteArray((short) 1)));
 		
 		// Perform method redirection into dispatcher using goto
 		int gotoOffset = dispatcherOffset - (this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE);

@@ -4,8 +4,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.dexbacked.DexBuffer;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.dex.decompilation.DexHelper;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
+import com.topper.helpers.DexHelper;
 
 /**
  * Output of a {@link Decompiler} after decompilation succeeded. It wraps, among

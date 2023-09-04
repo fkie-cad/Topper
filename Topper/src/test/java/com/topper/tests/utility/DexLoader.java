@@ -10,7 +10,7 @@ import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBackedMethod;
 
 import com.topper.exceptions.InvalidConfigException;
-import com.topper.file.DexFileHelper;
+import com.topper.helpers.DexFileHelper;
 
 public class DexLoader {
 

@@ -21,11 +21,10 @@ import com.topper.exceptions.commands.InternalExecutionException;
 import com.topper.exceptions.pipeline.StageException;
 import com.topper.file.AugmentedFile;
 import com.topper.file.DexFile;
-import com.topper.file.DexMethod;
 import com.topper.file.FileType;
-import com.topper.file.FileUtil;
 import com.topper.file.RawFile;
 import com.topper.file.VDexFile;
+import com.topper.helpers.FileUtil;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
 import com.topper.sstate.PicoState;
@@ -78,9 +77,8 @@ public final class PicoFileCommand extends PicoCommand {
 			throw new IllegalCommandException("File " + file.getPath() + " cannot be read.");
 		}
 
-		// 2. Identify file and load methods. Depending on the type, use a different set
+		// 2. Identify file. Depending on the type, use a different set
 		// of gadgets.
-		ImmutableList<@NonNull DexMethod> methods = null;
 		final DexBackedDexFile current;
 		AugmentedFile aug;
 		try {
@@ -110,8 +108,6 @@ public final class PicoFileCommand extends PicoCommand {
 		} catch (final IllegalArgumentException e) {
 			throw new IllegalCommandException("File type mismatch. Requested type " + type.name() + " does not match actual file type.");
 		}
-
-		methods = aug.getMethods();
 
 		// For raw files, the entire file is analysed,
 		// whereas for .vdex and .dex, only methods are considered.

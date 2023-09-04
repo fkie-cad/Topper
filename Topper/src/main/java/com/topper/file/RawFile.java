@@ -44,21 +44,13 @@ public class RawFile implements AugmentedFile {
 	public final byte @NonNull [] getBuffer() {
 		return this.buffer;
 	}
-
-	/**
-	 * Gets an empty list of {@link DexMethod}s, because this file does not have any
-	 * structure.
-	 */
-	@Override
-	public @NonNull ImmutableList<@NonNull DexMethod> getMethods() {
-		return ImmutableList.of();
-	}
 	
 	@Override
 	public final int getOffset() {
 		return 0;
 	}
 	
+	@SuppressWarnings("null")
 	@Override
 	@NonNull
 	public final ImmutableList<@NonNull DexFile> getDexFiles() {
