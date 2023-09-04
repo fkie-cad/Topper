@@ -36,6 +36,10 @@ public final class PicoTopLevelCommand implements Runnable {
 	public final void setReader(@NonNull final LineReader reader) {
 		this.out = reader.getTerminal().writer();
 	}
+	
+	public final void setOut(@NonNull final PrintWriter out) {
+		this.out = out;
+	}
 
 	public final PrintWriter out() {
 		return this.out;

@@ -42,8 +42,6 @@ public final class InteractiveTopper {
 
 	private static InteractiveTopper instance;
 
-	private ScriptContext context;
-
 	/**
 	 * Format string to write before requesting user input.
 	 */
@@ -69,8 +67,6 @@ public final class InteractiveTopper {
 	 *                     from which recovery is not possible (probably).
 	 */
 	public final void mainLoop(@NonNull final ScriptContext context) throws IOException {
-
-		this.context = context;
 
 		AnsiConsole.systemInstall();
 		try {
@@ -121,7 +117,7 @@ public final class InteractiveTopper {
 				while (true) {
 					try {
 						systemRegistry.cleanUp();
-						line = reader.readLine(String.format(LINE_PREFIX, this.context.getSession().getSessionId()),
+						line = reader.readLine(String.format(LINE_PREFIX, context.getSession().getSessionId()),
 								rightPrompt, (MaskingCallback) null, null);
 						systemRegistry.execute(line);
 					} catch (UserInterruptException e) {

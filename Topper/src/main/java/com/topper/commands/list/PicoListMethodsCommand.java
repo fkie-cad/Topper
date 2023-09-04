@@ -17,7 +17,6 @@ import com.topper.file.AugmentedFile;
 import com.topper.file.DexFile;
 import com.topper.file.DexFileHelper;
 import com.topper.file.RawFile;
-import com.topper.file.VDexFile;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
 import com.topper.sstate.PicoState;

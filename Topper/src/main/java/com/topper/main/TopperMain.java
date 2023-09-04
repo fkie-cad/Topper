@@ -10,6 +10,7 @@ import com.topper.configuration.TopperConfig;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.file.FileUtil;
 import com.topper.interactive.InteractiveTopper;
+import com.topper.noninteractive.NonInteractiveTopper;
 import com.topper.sstate.ScriptContext;
 
 import picocli.CommandLine;
@@ -59,22 +60,9 @@ public final class TopperMain implements Runnable {
 			// Check script file. Only used in non - interactive
 			if (this.scriptPath != null) {
 				
-				// TODO
-//				// This means non - interactive mode!
-//				try {
-//					final File scriptFile = FileUtil.openIfValid(this.scriptPath);
-//					
-//					// Run script file
-//					@NonNull
-//					final ImmutableList<@NonNull ScriptCommand> commands = parser.parse(new String(FileUtil.readContents(scriptFile)));
-//					executor.execute(context, commands);
-//					
-//				} catch (final IllegalArgumentException | IllegalCommandException e) {
-//					try {
-//						io.error("Script file " + this.scriptPath + " is invalid: " + e.getMessage());
-//					} catch (final IOException ignored) {}
-//					return;
-//				}
+				// Non - Interactive mode!
+				final NonInteractiveTopper non = NonInteractiveTopper.get();
+				non.run(context, this.scriptPath);
 			} else {
 				
 				// Interactive mode!

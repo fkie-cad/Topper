@@ -39,10 +39,10 @@ import picocli.CommandLine.ParentCommand;
 /**
  * For testing: 
  * > file -t VDEX -f ./src/test/java/resources/base.vdex
- * > attack ctop -m 0x580268 -t 0x29 -g 0x594094, 0x5941b4, 0x594390, 0x5945b4 -v
+ * > attack ctop -m 0x580268 -t 0x29 -g 0x594094, 0x5941b4, 0x594390, 0x5945b4 -v -x 0x100
  * 
  * */
-@Command(name = "ctop", mixinStandardHelpOptions = true, version = "1.0", description = "Computes a list of patches to apply to the loaded file to achieve gadget chain execution. It does not check whether the method offset actually points to a valid method code item!")
+@Command(name = "ctop", mixinStandardHelpOptions = true, version = "1.0", description = "Computes a list of patches to apply to the loaded file to achieve gadget chain execution.")
 @PicoState(states = { ExecutionState.class })
 public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 
@@ -82,6 +82,9 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 			"--verbose" }, defaultValue = "false", description = "Enables verbosity mode that shows details on current execution state of this command.")
 	private boolean verbose;
 
+	@Option(names = { "-u", "--tuple" }, defaultValue = "false", description = "Determines whether to write the patches in form of an offset-bytes tuple list usable in python.")
+	private boolean tuple;
+	
 	@ParentCommand
 	private PicoAttackCommand parent;
 
@@ -96,9 +99,21 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 
 		printvln("==============================================");
 		this.getTopLevel().out().println("Computed Patches:");
+		if (this.tuple) {
+			this.getTopLevel().out().println("patches = [");
+		}
+		
 		for (@NonNull
 		final Patch patch : patches) {
-			this.getTopLevel().out().println(patch);
+			if (!tuple) {
+				this.getTopLevel().out().println(patch);
+			} else {
+				this.getTopLevel().out().println(String.format("    (%#x, b'", patch.getOffset()) + DexHelper.bytesToPythonString(patch.getData()) + "'),");
+			}
+		}
+		
+		if (this.tuple) {
+			this.getTopLevel().out().println("]");
 		}
 	}
 

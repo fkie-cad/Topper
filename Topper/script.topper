@@ -1,0 +1,3 @@
+file -f ./src/test/java/resources/base.vdex -t VDEX
+# attack ctop -m 0x580268 -t 0x29 -g 0x594094, 0x5941b4, 0x594390, 0x5945b4 -v -x 0x100
+list types -r "damn"
