@@ -10,6 +10,7 @@ import org.jf.dexlib2.dexbacked.DexBackedClassDef;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.DexBackedMethod;
 import org.jf.dexlib2.dexbacked.DexReader;
+import org.jf.dexlib2.dexbacked.reference.DexBackedTypeReference;
 import org.jf.dexlib2.iface.MethodParameter;
 
 public class DexFileHelper {
@@ -37,7 +38,7 @@ public class DexFileHelper {
 	public static interface Callback<T> {
 		void run(@NonNull final T value);
 	}
-	public static final void iterateMethods(@NonNull final DexBackedDexFile file, @NonNull final Callback<DexBackedMethod> callback) {
+	public static final void iterateMethods(@NonNull final DexBackedDexFile file, @NonNull final Callback<@NonNull DexBackedMethod> callback) {
 		
 		for (final DexBackedClassDef cls : file.getClasses()) {
 			if (cls == null) {
@@ -53,13 +54,23 @@ public class DexFileHelper {
 		}
 	}
 	
-	public static final void iterateClasses(@NonNull final DexBackedDexFile file, @NonNull final Callback<DexBackedClassDef> callback) {
+	public static final void iterateClasses(@NonNull final DexBackedDexFile file, @NonNull final Callback<@NonNull DexBackedClassDef> callback) {
 		
 		for (final DexBackedClassDef cls : file.getClasses()) {
 			if (cls == null) {
 				continue;
 			}
 			callback.run(cls);
+		}
+	}
+	
+	public static final void iterateTypes(@NonNull final DexBackedDexFile file, @NonNull final Callback<@NonNull DexBackedTypeReference> callback) {
+		
+		for (final DexBackedTypeReference type : file.getTypeReferences()) {
+			if (type == null) {
+				continue;
+			}
+			callback.run(type);
 		}
 	}
 	
@@ -100,6 +111,11 @@ public class DexFileHelper {
 	}
 	
 	@NonNull
+	public static final String prettyType(@NonNull final DexBackedTypeReference type) {
+		return String.format("[Index = %#x]: ", type.typeIndex) + translateType(type.getType());
+	}
+	
+	@NonNull
 	private static final String unknown(@Nullable final String s) {
 		if (s == null) {
 			return "<unknown>";
@@ -107,29 +123,29 @@ public class DexFileHelper {
 		return s;
 	}
 	
-	private static final String translateType(String returnType) {
-		if (returnType == null) {
+	private static final String translateType(String type) {
+		if (type == null) {
 			return "<unknown>";
 		}
 		
 		final String suffix;
-		if (returnType.startsWith("[") ) {
+		if (type.startsWith("[") ) {
 			suffix = "[]";
-			returnType = returnType.substring(1);
+			type = type.substring(1);
 		} else {
 			suffix = "";
 		}
 		
-		if (returnType.endsWith(";")) {
-			returnType = returnType.substring(0, returnType.length() - 1);
+		if (type.endsWith(";")) {
+			type = type.substring(0, type.length() - 1);
 		}
 		
 		final String name;
-		if (returnType.startsWith("L")) {
+		if (type.startsWith("L")) {
 			// L<object>
-			name = returnType.substring(1);
+			name = type.substring(1);
 		} else {
-			name = translatePrimitive(returnType);
+			name = translatePrimitive(type);
 		}
 		return name + suffix;
 	}

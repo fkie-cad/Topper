@@ -17,7 +17,6 @@ import com.topper.file.AugmentedFile;
 import com.topper.file.DexFile;
 import com.topper.file.DexFileHelper;
 import com.topper.file.RawFile;
-import com.topper.file.VDexFile;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
 import com.topper.sstate.PicoState;
@@ -27,25 +26,21 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
-@Command(name = "methods", mixinStandardHelpOptions = true, version = "1.0", description = "Lists information on methods provided by loaded file(s).")
+@Command(name = "types", mixinStandardHelpOptions = true, version = "1.0", description = "Lists all types of the loaded file.")
 @PicoState(states = { ExecutionState.class })
-public final class PicoListMethodsCommand extends PicoCommand {
-	
-	@Option(names = { "-c", "--class" }, defaultValue = "", description = "Lists all available methods of the requested class.")
-	private String className;
-	
-	@Option(names = { "-r", "--regex" }, defaultValue = "", description = "Lists all methods matching the given regular expression.")
+public final class PicoListTypesCommand extends PicoCommand {
+
+	@Option(names = { "-r", "--regex" }, defaultValue = "", paramLabel = "REGEX", description = "Lists all types matching the given regular expression.")
 	private String regex;
 	
 	private Pattern pattern;
 	
 	@ParentCommand
 	private PicoListCommand parent;
-
+	
 	@Override
-	public final void execute(final @NonNull ScriptContext context) throws CommandException {
+	public final void execute(@NonNull final ScriptContext context) throws CommandException {
 		
-		// Check arguments.
 		this.checkArgs();
 		
 		// Get all file candidates.
@@ -55,31 +50,17 @@ public final class PicoListMethodsCommand extends PicoCommand {
 		}
 		final List<@NonNull DexFile> dexFiles = loaded.getDexFiles();
 		
-		// Make class name valid, if necessary.
-		if (!this.className.isEmpty()) {
-			if (!this.className.startsWith("L")) {
-				this.className = "L" + this.className;
-			}
-			if (!this.className.endsWith(";")) {
-				this.className += ";";
-			}
-		}
-		
-		// Iterate over all files and print methods based on pattern.
-		DexBackedDexFile dex;
+		// Iterate over all files and their types.
+		DexBackedDexFile current;
 		for (@NonNull final DexFile dexFile : dexFiles) {
 			
 			final StringBuilder b = new StringBuilder();
 			
-			dex = dexFile.getDexFile();
-			DexFileHelper.iterateMethods(dex, method -> {
+			current = dexFile.getDexFile();
+			
+			DexFileHelper.iterateTypes(current, type -> {
 				
-				// Skip non-matching classes, if a class name is defined.
-				if (this.className.length() > 0 && !this.className.equals(method.getDefiningClass())) {
-					return;
-				}
-				
-				final String name = DexFileHelper.prettyMethod(method);
+				final String name = DexFileHelper.prettyType(type);
 				final Matcher matcher = this.pattern.matcher(name);
 				if (matcher.find()) {
 					b.append("  " + name + System.lineSeparator());
@@ -89,7 +70,7 @@ public final class PicoListMethodsCommand extends PicoCommand {
 			if (b.length() > 0) {
 				b.insert(0, String.format("[Offset = %#x]: ", dexFile.getOffset()) + dexFile.getId() + System.lineSeparator());
 			}
-			print(b.toString());
+			this.getTopLevel().out().print(b.toString());
 		}
 	}
 
@@ -100,7 +81,7 @@ public final class PicoListMethodsCommand extends PicoCommand {
 	}
 
 	@Override
-	@NonNull 
+	@NonNull
 	public final PicoTopLevelCommand getTopLevel() {
 		if (this.parent == null) {
 			throw new UnsupportedOperationException("Cannot access parent before its initialized.");
@@ -109,8 +90,6 @@ public final class PicoListMethodsCommand extends PicoCommand {
 	}
 	
 	private final void checkArgs() throws CommandException {
-		
-		// Check regex, if available. Otherwise use all - matching pattern. 
 		if (this.regex.isEmpty()) {
 			this.regex = ".*";
 		}
@@ -124,9 +103,5 @@ public final class PicoListMethodsCommand extends PicoCommand {
 		if (this.getContext().getSession().getLoadedFile() instanceof RawFile) {
 			throw new IllegalCommandException("Currently no valid .dex file is loaded.");
 		}
-	}
-	
-	private final void print(@NonNull final String message) {
-		this.getTopLevel().out().print(message);
 	}
 }

@@ -14,7 +14,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
-@Command(name = "list", mixinStandardHelpOptions = true, version = "1.0", subcommands = { PicoListMethodsCommand.class }, description = "Lists requested, file-related resources.")
+@Command(name = "list", mixinStandardHelpOptions = true, version = "1.0", subcommands = { PicoListMethodsCommand.class, PicoListTypesCommand.class }, description = "Lists requested, file-related resources.")
 @PicoState(states =  { ExecutionState.class })
 public final class PicoListCommand extends PicoCommand {
 
