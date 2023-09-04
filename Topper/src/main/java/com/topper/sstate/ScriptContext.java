@@ -24,7 +24,7 @@ public final class ScriptContext {
 	 * Session - specific information including e.g. currently loaded file.
 	 */
 	@NonNull
-	private final SessionInfo session;
+	private final Session session;
 
 	/**
 	 * Initialize this context.
@@ -34,7 +34,7 @@ public final class ScriptContext {
 	public ScriptContext(@NonNull final TopperConfig config) {
 		this.config = config;
 		this.state = new SelectionState(this);
-		this.session = new SessionInfo();
+		this.session = new Session();
 	}
 
 	/**
@@ -77,7 +77,7 @@ public final class ScriptContext {
 	}
 	
 	@NonNull
-	public final SessionInfo getSession() {
+	public final Session getSession() {
 		return this.session;
 	}
 }

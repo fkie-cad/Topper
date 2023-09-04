@@ -30,7 +30,7 @@ import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
 import com.topper.sstate.PicoState;
 import com.topper.sstate.ScriptContext;
-import com.topper.sstate.SessionInfo;
+import com.topper.sstate.Session;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -134,7 +134,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 
 	private final void checkArgs() throws IllegalCommandException {
 
-		final SessionInfo session = this.getContext().getSession();
+		final Session session = this.getContext().getSession();
 		final AugmentedFile loaded = session.getLoadedFile();
 		final ImmutableList<@NonNull DexFile> files = session.getDexFiles();
 		
@@ -165,7 +165,6 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		if (this.methodOffset < 0) {
 			throw new IllegalCommandException("Method offset must be non - negative.");
 		}
-		// TODO: Also account for method header size and hander/dispatcher size
 		if (this.methodOffset >= loaded.getBuffer().length) {
 			throw new IllegalCommandException("Method offset exceeds currently loaded file size "
 					+ Integer.toHexString(loaded.getBuffer().length) + ".");
@@ -256,7 +255,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 	@NonNull
 	private final List<@NonNull Patch> computePatches() throws InternalExecutionException {
 
-		final SessionInfo session = this.getContext().getSession();
+		final Session session = this.getContext().getSession();
 		final AugmentedFile loaded = session.getLoadedFile();
 		if (loaded == null) {
 			throw new UnreachableException("Loaded file does not exist.");

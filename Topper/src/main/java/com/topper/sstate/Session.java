@@ -14,7 +14,7 @@ import com.topper.file.DexFile;
  * @author Pascal Kühnemann
  * @since 14.08.2023
  */
-public final class SessionInfo {
+public final class Session {
 
 	@Nullable
 	private AugmentedFile loadedFile;
