@@ -1,5 +1,6 @@
 package com.topper.commands.search;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -63,8 +64,13 @@ public final class PicoSearchCommand extends PicoCommand {
 		}
 		
 		// Apply expression to each gadget's string representation
+		final List<@NonNull BasedGadget> gadgets = context.getSession().getGadgets();
+		if (gadgets == null) {
+			throw new IllegalCommandException("List of gadgets does not exist.");
+		}
+		
 		Matcher matcher;
-		for (@NonNull final BasedGadget gadget : context.getSession().getGadgets()) {
+		for (@NonNull final BasedGadget gadget : gadgets) {
 			if (gadget.getGadget().getInstructions().size() > this.upper ||
 					gadget.getGadget().getInstructions().size() < this.lower) {
 				continue;

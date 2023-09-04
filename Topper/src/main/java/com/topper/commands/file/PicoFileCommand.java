@@ -49,6 +49,9 @@ public final class PicoFileCommand extends PicoCommand {
 			"--file" }, required = true, paramLabel = "FILE_PATH", description = "Path of the file to load.")
 	private String fileName;
 	
+	@Option(names = { "-i", "--index" }, defaultValue = "0", paramLabel = "INDEX", description = "Index of the dex file to use. Defaults to 0. Only Considered for .vdex files." )
+	private int index;
+	
 	@ParentCommand
 	private PicoTopLevelCommand parent;
 	
@@ -56,6 +59,10 @@ public final class PicoFileCommand extends PicoCommand {
 	public final void execute(@NonNull final ScriptContext context) throws IllegalCommandException, InternalExecutionException {
 
 		// Check inputs.
+		if (this.index < 0) {
+			throw new IllegalCommandException("Dex index must be non - negative.");
+		}
+		
 		final File file;
 		try {
 			file = FileUtil.openIfValid(this.fileName);
@@ -74,27 +81,29 @@ public final class PicoFileCommand extends PicoCommand {
 		// 2. Identify file and load methods. Depending on the type, use a different set
 		// of gadgets.
 		ImmutableList<@NonNull DexMethod> methods = null;
+		final DexBackedDexFile current;
 		AugmentedFile aug;
-		DexFile current = null;	// <- used for augmentation in decompilation
 		try {
 			switch (this.type) {
 			case DEX: {
 				final DexFile dex = new DexFile(file.getName(), content, 0, context.getConfig());
-				current = dex;
+				current = dex.getDexFile();
 				aug = dex;
 				break;
 			}
 			case VDEX: {
 				final VDexFile vdex = new VDexFile(file.getName(), content, context.getConfig());
-				if (!vdex.getDexFiles().isEmpty()) {
-					current = vdex.getDexFiles().get(0);
+				if (this.index >= vdex.getDexFiles().size()) {
+					throw new IllegalCommandException("Dex index exceeds total number of dex files in vdex (" + vdex.getDexFiles().size() + ").");
 				}
+				current = vdex.getDexFiles().get(this.index).getDexFile();
 				aug = vdex;
 				break;
 			}
 			default: {
 				// Raw should work regardless of the file type!
 				aug = new RawFile(file.getName(), content);
+				current = null;
 				break;
 			}
 			}
@@ -109,7 +118,7 @@ public final class PicoFileCommand extends PicoCommand {
 		@NonNull
 		final ImmutableList<@NonNull BasedGadget> gadgets;
 		try {
-			gadgets = this.loadGadgetsFromRaw(context.getConfig(), content, 0, (current != null) ? current.getDexFile() : null);
+			gadgets = this.loadGadgetsFromRaw(context.getConfig(), content, 0, current);
 		} catch (final StageException ignored) {
 			throw new InternalExecutionException("Decompilation of file " + file.getPath() + " failed.");
 		}
@@ -117,7 +126,6 @@ public final class PicoFileCommand extends PicoCommand {
 		// 3. Adjust session info in script context.
 		context.getSession().setLoadedFile(aug);
 		context.getSession().setGadgets(gadgets);
-		context.getSession().setCurrentDex(current);
 	}
 	
 	@Override

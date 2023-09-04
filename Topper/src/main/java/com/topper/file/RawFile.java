@@ -58,4 +58,10 @@ public class RawFile implements AugmentedFile {
 	public final int getOffset() {
 		return 0;
 	}
+	
+	@Override
+	@NonNull
+	public final ImmutableList<@NonNull DexFile> getDexFiles() {
+		return ImmutableList.of();
+	}
 }

@@ -60,6 +60,16 @@ public final class PicoListMethodsCommand extends PicoCommand {
 			throw new UnreachableException("Given file is a raw file.");
 		}
 		
+		// Make class name valid, if necessary.
+		if (!this.className.isEmpty()) {
+			if (!this.className.startsWith("L")) {
+				this.className = "L" + this.className;
+			}
+			if (!this.className.endsWith(";")) {
+				this.className += ";";
+			}
+		}
+		
 		// Iterate over all files and print methods based on pattern.
 		DexBackedDexFile dex;
 		for (@NonNull final DexFile dexFile : dexFiles) {
@@ -116,7 +126,7 @@ public final class PicoListMethodsCommand extends PicoCommand {
 		}
 		
 		// Check if there is at least a .dex file to use.
-		if (this.getContext().getSession().getCurrentDex() == null || this.getContext().getSession().getLoadedFile() instanceof RawFile) {
+		if (this.getContext().getSession().getLoadedFile() instanceof RawFile) {
 			throw new IllegalCommandException("Currently no valid .dex file is loaded.");
 		}
 	}

@@ -34,5 +34,11 @@ public interface AugmentedFile {
 	@NonNull
 	ImmutableList<@NonNull DexMethod> getMethods();
 	
+	/**
+	 * Gets the offset of this file relative to another object.
+	 * */
 	int getOffset();
+	
+	@NonNull
+	ImmutableList<@NonNull DexFile> getDexFiles();
 }

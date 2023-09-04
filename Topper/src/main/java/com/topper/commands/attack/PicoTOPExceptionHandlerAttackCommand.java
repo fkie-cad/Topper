@@ -11,6 +11,7 @@ import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.raw.CodeItem;
 import org.jf.dexlib2.dexbacked.reference.DexBackedTypeReference;
 
+import com.google.common.collect.ImmutableList;
 import com.topper.commands.PicoCommand;
 import com.topper.commands.PicoTopLevelCommand;
 import com.topper.dex.decompilation.DexHelper;
@@ -18,10 +19,13 @@ import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.ehandling.MethodCodeItem;
+import com.topper.exceptions.UnreachableException;
 import com.topper.exceptions.commands.CommandException;
 import com.topper.exceptions.commands.IllegalCommandException;
 import com.topper.exceptions.commands.InternalExecutionException;
+import com.topper.file.AugmentedFile;
 import com.topper.file.DexFile;
+import com.topper.file.DexFileHelper;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
 import com.topper.sstate.PicoState;
@@ -116,46 +120,89 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 	private final void checkArgs() throws IllegalCommandException {
 
 		final SessionInfo session = this.getContext().getSession();
-		final DexFile loaded = session.getCurrentDex();
+		final AugmentedFile loaded = session.getLoadedFile();
+		final ImmutableList<@NonNull DexFile> files = session.getDexFiles();
+		
+		// Avoid null warnings
+		if (loaded == null) {
+			throw new IllegalCommandException("Loaded file does not exist.");
+		}
+		
+		if (files == null) {
+			throw new IllegalCommandException("List of dex files in loaded file does not exist.");
+		}
 
-		// Check gadgets
+		// Check gadgets exist and point into the loaded file.
 		if (this.gadgets.isEmpty()) {
 			throw new IllegalCommandException("At least one gadget must be provided.");
 		}
 
 		for (@NonNull
 		final Integer offset : this.gadgets) {
-			if (offset < 0) {
-				throw new IllegalCommandException("Gadget offset must be non - negative.");
+			if (offset < loaded.getOffset()) {
+				throw new IllegalCommandException("Gadget offset must not point below loaded file.");
+			} else if (offset >= loaded.getOffset() + loaded.getBuffer().length) {
+				throw new IllegalCommandException("Gadget offset must not point above loaded file.");
 			}
 		}
 
-		// Check method offset. Also methodOffet = 0 does not make much sense...
+		// Check method offset.
 		if (this.methodOffset < 0) {
 			throw new IllegalCommandException("Method offset must be non - negative.");
 		}
 		// TODO: Also account for method header size and hander/dispatcher size
-		if (this.methodOffset >= session.getLoadedFile().getBuffer().length) {
+		if (this.methodOffset >= loaded.getBuffer().length) {
 			throw new IllegalCommandException("Method offset exceeds currently loaded file size "
-					+ Integer.toHexString(session.getLoadedFile().getBuffer().length));
+					+ Integer.toHexString(loaded.getBuffer().length) + ".");
 		}
-
+		
+		// Method offset must reference an actual method.
+		DexBackedDexFile referenced = null;
+		final boolean[] match = new boolean[1];	// Java stuff...
+		for (@NonNull final DexFile file : files) {
+			if (!(this.methodOffset >= file.getOffset() && this.methodOffset < file.getOffset() + file.getBuffer().length)) {
+				continue;
+			}
+			
+			match[0] = false;
+			DexFileHelper.iterateMethods(file.getDexFile(), method -> {
+				try {
+					if (file.getOffset() + DexFileHelper.getMethodOffset(method) == this.methodOffset) {
+						match[0] = true;
+						return;
+					}
+				} catch (NoSuchFieldException | SecurityException | IllegalArgumentException
+						| IllegalAccessException e) {}
+			});
+			
+			if (match[0]) {
+				referenced = file.getDexFile();
+				break;
+			}
+		}
+		if (referenced == null) {
+			throw new IllegalCommandException("Method offset does not refer to a valid method.");
+		}
+		
 		// Check type index
 		if (this.exceptionTypeIndex < 0) {
 			throw new IllegalCommandException("Exception type index must be non - negative.");
 		}
-		if (loaded != null) {
-			final DexBackedDexFile raw = loaded.getDexFile();
-			boolean exists = false;
-			for (final DexBackedTypeReference type : raw.getTypeReferences()) {
-				exists |= (type.typeIndex == this.exceptionTypeIndex);
+		
+		// There must exist a file containing the method referenced by methodOffset
+		// that also knows about the exception type.
+		boolean exists = false;
+		for (final DexBackedTypeReference type : referenced.getTypeReferences()) {
+			if (type == null) {
+				continue;
 			}
-
-			if (!exists) {
-				throw new IllegalCommandException("Exception type index is invalid in current .dex context.");
-			}
+			exists |= (type.typeIndex == this.exceptionTypeIndex);
 		}
 
+		if (!exists) {
+			throw new IllegalCommandException("Exception type index is invalid in .dex file pointed to by method offset.");
+		}
+		
 		// Check exception vreg index
 		if (this.exceptionVregIndex < 0) {
 			throw new IllegalCommandException("Exception vreg index must be non - negative.");
@@ -194,13 +241,19 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 	@NonNull
 	private final List<@NonNull Patch> computePatches() throws InternalExecutionException {
 
+		final SessionInfo session = this.getContext().getSession();
+		final AugmentedFile loaded = session.getLoadedFile();
+		if (loaded == null) {
+			throw new UnreachableException("Loaded file does not exist.");
+		}
+		
 		@NonNull
 		final List<@NonNull Patch> patches = new LinkedList<>();
 
 		// Grab method header.
 		@NonNull
 		final ScriptContext context = this.getContext();
-		final byte @NonNull [] buffer = context.getSession().getLoadedFile().getBuffer();
+		final byte @NonNull [] buffer = loaded.getBuffer();
 		@NonNull
 		final MethodCodeItem header = new MethodCodeItem(
 				Arrays.copyOfRange(buffer, this.methodOffset, this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE));
@@ -226,7 +279,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		// Check dispatcher code with decompiler
 		final Decompiler decompiler = new SmaliDecompiler();
 		try {
-			final DecompilationResult result = decompiler.decompile(payload, null, this.getContext().getConfig());
+			final DecompilationResult result = decompiler.decompile(payload, null, context.getConfig());
 			printvln("==============================================");
 			printvln(String.format("Payload Offset: %#x", dispatcherOffset));
 			printvln("Payload: " + DexHelper.bytesToString(payload));
@@ -236,7 +289,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		}
 
 		// Patch in dispatcher payload
-		patches.add(this.alignedPatch(dispatcherOffset, payload));
+		patches.add(this.alignedPatch(loaded, dispatcherOffset, payload));
 
 		// Create exception handler
 		final CatchAllHandler handler = new CatchAllHandler(this.methodOffset,
@@ -246,16 +299,16 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		printv(handler.toString());
 
 		// Patch in exception handler payload
-		patches.add(this.alignedPatch(firstHandlerOffset, handler.getBytes()));
+		patches.add(this.alignedPatch(loaded, firstHandlerOffset, handler.getBytes()));
 
 		// Account for padding between method and handler by increasing method size
 		if (this.methodHandlerPadding > 0) {
-			patches.add(this.alignedPatch(this.methodOffset + CodeItem.INSTRUCTION_COUNT_OFFSET,
+			patches.add(this.alignedPatch(loaded, this.methodOffset + CodeItem.INSTRUCTION_COUNT_OFFSET,
 					DexHelper.intToByteArray((int) (header.getInsnsSize() + this.methodHandlerPadding / 2))));
 		}
 		
 		// Ensure there is only a single handler: the catch all
-		patches.add(this.alignedPatch(this.methodOffset + 0x6, DexHelper.shortToByteArray((short) 1)));
+		patches.add(this.alignedPatch(loaded, this.methodOffset + 0x6, DexHelper.shortToByteArray((short) 1)));
 		
 		// Perform method redirection into dispatcher using goto
 		int gotoOffset = dispatcherOffset - (this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE);
@@ -266,15 +319,15 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		
 		final ByteBuffer gotoInsn = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
 				.put((byte)0x29).put((byte)0x0).putShort((short)gotoOffset);
-		patches.add(this.alignedPatch(this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE, gotoInsn.array()));
+		patches.add(this.alignedPatch(loaded, this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE, gotoInsn.array()));
 
 		return patches;
 	}
 
 	@NonNull
-	private final Patch alignedPatch(final int offset, final byte @NonNull [] data) throws InternalExecutionException {
+	private final Patch alignedPatch(@NonNull final AugmentedFile loaded, final int offset, final byte @NonNull [] data) throws InternalExecutionException {
 
-		final byte @NonNull [] buffer = this.getTopLevel().getContext().getSession().getLoadedFile().getBuffer();
+		final byte @NonNull [] buffer = loaded.getBuffer();
 		final int mask = ~(this.alignment - 1);
 
 		final int start = offset;

@@ -124,9 +124,7 @@ public class VDexFile implements AugmentedFile {
 		return 0;
 	}
 
-	/**
-	 * Gets a list of all identified .dex files in this .vdex file.
-	 */
+	@Override
 	@NonNull
 	public final ImmutableList<@NonNull DexFile> getDexFiles() {
 		return this.files;

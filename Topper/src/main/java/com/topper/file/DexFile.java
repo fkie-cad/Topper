@@ -122,6 +122,12 @@ public class DexFile implements AugmentedFile {
 	public final int getOffset() {
 		return this.offset;
 	}
+	
+	@Override
+	@NonNull
+	public final ImmutableList<@NonNull DexFile> getDexFiles() {
+		return ImmutableList.of(this);
+	}
 
 	@NonNull
 	public final DexBackedDexFile getDexFile() {
