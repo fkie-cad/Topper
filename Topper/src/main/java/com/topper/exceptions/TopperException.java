@@ -7,6 +7,7 @@ package com.topper.exceptions;
  * @author Pascal Kühnemann
  * @since 21.08.2023
  * */
+@SuppressWarnings("serial")
 public class TopperException extends Exception {
 
 	public TopperException(final String message) {

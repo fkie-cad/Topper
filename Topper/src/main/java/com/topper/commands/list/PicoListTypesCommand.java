@@ -10,17 +10,16 @@ import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 
 import com.topper.commands.PicoCommand;
 import com.topper.commands.PicoTopLevelCommand;
-import com.topper.exceptions.UnreachableException;
 import com.topper.exceptions.commands.CommandException;
 import com.topper.exceptions.commands.IllegalCommandException;
 import com.topper.file.ComposedFile;
 import com.topper.file.DexFile;
 import com.topper.file.RawFile;
 import com.topper.helpers.DexFileHelper;
+import com.topper.sstate.CommandContext;
+import com.topper.sstate.CommandLink;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
-import com.topper.sstate.CommandLink;
-import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -45,9 +44,6 @@ public final class PicoListTypesCommand extends PicoCommand {
 		
 		// Get all file candidates.
 		final ComposedFile loaded = this.getContext().getSession().getLoadedFile();
-		if (loaded == null) {
-			throw new UnreachableException("Loaded file does not exist.");
-		}
 		final List<@NonNull DexFile> dexFiles = loaded.getDexFiles();
 		
 		// Iterate over all files and their types.

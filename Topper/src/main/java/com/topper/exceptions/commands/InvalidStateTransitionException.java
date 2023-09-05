@@ -1,5 +1,6 @@
 package com.topper.exceptions.commands;
 
+@SuppressWarnings("serial")
 public class InvalidStateTransitionException extends StateException {
 	
 	private static final String PREFIX = "Invalid state transition: ";

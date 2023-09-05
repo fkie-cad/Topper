@@ -1,5 +1,6 @@
 package com.topper.exceptions.commands;
 
+@SuppressWarnings("serial")
 public final class InternalExecutionException extends CommandException {
 
 	private static final String PREFIX = "Command execution failed:";

@@ -7,6 +7,7 @@ package com.topper.exceptions;
  * @author Pascal Kühnemann
  * @since 21.08.2023
  * */
+@SuppressWarnings("serial")
 public class InvalidConfigException extends TopperException {
 	
 	private static final String PREFIX = "Config error: ";

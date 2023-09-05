@@ -10,17 +10,16 @@ import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 
 import com.topper.commands.PicoCommand;
 import com.topper.commands.PicoTopLevelCommand;
-import com.topper.exceptions.UnreachableException;
 import com.topper.exceptions.commands.CommandException;
 import com.topper.exceptions.commands.IllegalCommandException;
 import com.topper.file.ComposedFile;
 import com.topper.file.DexFile;
 import com.topper.file.RawFile;
 import com.topper.helpers.DexFileHelper;
+import com.topper.sstate.CommandContext;
+import com.topper.sstate.CommandLink;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
-import com.topper.sstate.CommandLink;
-import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -30,10 +29,10 @@ import picocli.CommandLine.ParentCommand;
 @CommandLink(states = { ExecutionState.class })
 public final class PicoListMethodsCommand extends PicoCommand {
 	
-	@Option(names = { "-c", "--class" }, defaultValue = "", description = "Lists all available methods of the requested class.")
+	@Option(names = { "-c", "--class" }, paramLabel = "CLASS", defaultValue = "", description = "Lists all available methods of the requested class.")
 	private String className;
 	
-	@Option(names = { "-r", "--regex" }, defaultValue = "", description = "Lists all methods matching the given regular expression.")
+	@Option(names = { "-r", "--regex" }, paramLabel = "REGEX", defaultValue = "", description = "Lists all methods matching the given regular expression.")
 	private String regex;
 	
 	private Pattern pattern;
@@ -49,9 +48,6 @@ public final class PicoListMethodsCommand extends PicoCommand {
 		
 		// Get all file candidates.
 		final ComposedFile loaded = this.getContext().getSession().getLoadedFile();
-		if (loaded == null) {
-			throw new UnreachableException("Loaded file does not exist.");
-		}
 		final List<@NonNull DexFile> dexFiles = loaded.getDexFiles();
 		
 		// Make class name valid, if necessary.
@@ -88,7 +84,7 @@ public final class PicoListMethodsCommand extends PicoCommand {
 			if (b.length() > 0) {
 				b.insert(0, String.format("[Offset = %#x]: ", dexFile.getOffset()) + dexFile.getId() + System.lineSeparator());
 			}
-			print(b.toString());
+			print("" + b.toString());
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.topper.exceptions.commands;
 
+@SuppressWarnings("serial")
 public final class IllegalSessionState extends CommandException {
 
 	private static final String PREFIX = "Session state is illegal: ";
