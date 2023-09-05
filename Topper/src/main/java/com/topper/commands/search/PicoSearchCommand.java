@@ -11,17 +11,18 @@ import com.topper.commands.PicoCommand;
 import com.topper.commands.PicoTopLevelCommand;
 import com.topper.commands.file.BasedGadget;
 import com.topper.exceptions.commands.IllegalCommandException;
+import com.topper.exceptions.commands.IllegalSessionState;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
-import com.topper.sstate.PicoState;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandLink;
+import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "search", mixinStandardHelpOptions = true, version = "1.0", description = "Searches for a regular expression in the string representation of all extracted gadgets.")
-@PicoState(states = { ExecutionState.class })
+@CommandLink(states = { ExecutionState.class })
 public final class PicoSearchCommand extends PicoCommand {
 	
 	@Option(names = { "-r", "--regex" }, required = false, defaultValue = "", paramLabel = "REGEX", description = "Regular expression to use while searching through the gadgets.")
@@ -37,7 +38,7 @@ public final class PicoSearchCommand extends PicoCommand {
 	private PicoTopLevelCommand parent;
 	
 	@Override
-	public final void execute(@NonNull final ScriptContext context) throws IllegalCommandException {
+	public final void execute(@NonNull final CommandContext context) throws IllegalCommandException, IllegalSessionState {
 		
 		if (this.upper <= 0) {
 			this.upper = context.getConfig().getSweeperConfig().getMaxNumberInstructions();
@@ -65,9 +66,6 @@ public final class PicoSearchCommand extends PicoCommand {
 		
 		// Apply expression to each gadget's string representation
 		final List<@NonNull BasedGadget> gadgets = context.getSession().getGadgets();
-		if (gadgets == null) {
-			throw new IllegalCommandException("List of gadgets does not exist.");
-		}
 		
 		Matcher matcher;
 		for (@NonNull final BasedGadget gadget : gadgets) {
@@ -88,13 +86,12 @@ public final class PicoSearchCommand extends PicoCommand {
 		return new ExecutionState(this.getContext());
 	}
 	
-	@SuppressWarnings("null")	// cannot be null
 	@Override
 	@NonNull 
 	public final PicoTopLevelCommand getTopLevel() {
-		if (this.parent == null) {
-			throw new UnsupportedOperationException("Cannot access parent before its initialized.");
+		if (this.parent != null) {
+			return this.parent;
 		}
-		return this.parent;
+		throw new UnsupportedOperationException("Cannot access parent before its initialized.");
 	}
 }

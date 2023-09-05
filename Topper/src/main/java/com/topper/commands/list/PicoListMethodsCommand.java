@@ -19,15 +19,15 @@ import com.topper.file.RawFile;
 import com.topper.helpers.DexFileHelper;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
-import com.topper.sstate.PicoState;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandLink;
+import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "methods", mixinStandardHelpOptions = true, version = "1.0", description = "Lists information on methods provided by loaded file(s).")
-@PicoState(states = { ExecutionState.class })
+@CommandLink(states = { ExecutionState.class })
 public final class PicoListMethodsCommand extends PicoCommand {
 	
 	@Option(names = { "-c", "--class" }, defaultValue = "", description = "Lists all available methods of the requested class.")
@@ -42,7 +42,7 @@ public final class PicoListMethodsCommand extends PicoCommand {
 	private PicoListCommand parent;
 
 	@Override
-	public final void execute(final @NonNull ScriptContext context) throws CommandException {
+	public final void execute(final @NonNull CommandContext context) throws CommandException {
 		
 		// Check arguments.
 		this.checkArgs();

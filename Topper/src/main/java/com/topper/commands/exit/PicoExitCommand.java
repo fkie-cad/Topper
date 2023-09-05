@@ -6,8 +6,8 @@ import com.topper.commands.PicoCommand;
 import com.topper.commands.PicoTopLevelCommand;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
-import com.topper.sstate.PicoState;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandLink;
+import com.topper.sstate.CommandContext;
 import com.topper.sstate.SelectionState;
 import com.topper.sstate.TerminationState;
 
@@ -15,14 +15,14 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "exit", description = "Terminates this process.")
-@PicoState(states = { SelectionState.class, ExecutionState.class })
+@CommandLink(states = { SelectionState.class, ExecutionState.class })
 public final class PicoExitCommand extends PicoCommand {
 
 	@ParentCommand
 	private PicoTopLevelCommand parent;
 
 	@Override
-	public void execute(@NonNull ScriptContext context) {
+	public void execute(@NonNull CommandContext context) {
 		parent.out().println("Thank you for traveling with Deutsche Bahn!\n");
 	}
 

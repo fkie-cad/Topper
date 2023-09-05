@@ -27,8 +27,8 @@ import com.topper.file.VDexFile;
 import com.topper.helpers.FileUtil;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
-import com.topper.sstate.PicoState;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandLink;
+import com.topper.sstate.CommandContext;
 import com.topper.sstate.SelectionState;
 
 import picocli.CommandLine.Command;
@@ -36,7 +36,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "file", mixinStandardHelpOptions = true, version = "1.0", description = "Loads a given file from file system and parses it.")
-@PicoState(states = { SelectionState.class, ExecutionState.class })
+@CommandLink(states = { SelectionState.class, ExecutionState.class })
 public final class PicoFileCommand extends PicoCommand {
 
 
@@ -55,7 +55,7 @@ public final class PicoFileCommand extends PicoCommand {
 	private PicoTopLevelCommand parent;
 	
 	@Override
-	public final void execute(@NonNull final ScriptContext context) throws IllegalCommandException, InternalExecutionException {
+	public final void execute(@NonNull final CommandContext context) throws IllegalCommandException, InternalExecutionException {
 
 		// Check inputs.
 		if (this.index < 0) {
@@ -150,7 +150,7 @@ public final class PicoFileCommand extends PicoCommand {
 		}
 	}
 
-	private final void println(@NonNull final ScriptContext context, @NonNull final String s) {
+	private final void println(@NonNull final CommandContext context, @NonNull final String s) {
 		parent.out().println(s);
 	}
 

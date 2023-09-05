@@ -2,10 +2,17 @@ package com.topper.sstate;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.configuration.Config;
+import com.topper.commands.PicoCommand;
 import com.topper.configuration.TopperConfig;
 
-public final class ScriptContext {
+/**
+ * Execution context of {@link PicoCommand}s. It provides access to resources
+ * like {@link TopperConfig} and the current execution {@link CommandState}.
+ * 
+ * @author Pascal Kühnemann
+ * @since 05.09.2023
+ */
+public final class CommandContext {
 
 	/**
 	 * Configuration assigned to this context. It can be used by specific states,
@@ -27,11 +34,13 @@ public final class ScriptContext {
 	private final Session session;
 
 	/**
-	 * Initialize this context.
+	 * Initialize this context. The initial {@link CommandState} is
+	 * {@link SelectionState}, requiring a user to select a file before executing
+	 * any analysis - related commands.
 	 * 
 	 * @param config Initial configuration used for this application run.
 	 */
-	public ScriptContext(@NonNull final TopperConfig config) {
+	public CommandContext(@NonNull final TopperConfig config) {
 		this.config = config;
 		this.state = new SelectionState(this);
 		this.session = new Session();
@@ -48,9 +57,7 @@ public final class ScriptContext {
 	}
 
 	/**
-	 * Gets the current state of the DFA.
-	 * 
-	 * @see CommandState
+	 * Gets the current {@link CommandState} of the DFA.
 	 */
 	@NonNull
 	public final CommandState getCurrentState() {
@@ -58,24 +65,16 @@ public final class ScriptContext {
 	}
 
 	/**
-	 * Determines whether current state is the <code>TerminationState</code> or not.
-	 * 
-	 * @return Whether DFA is in <code>TerminationState</code>.
-	 */
-	public final boolean isTerminationState() {
-		return this.state instanceof TerminationState;
-	}
-
-	/**
-	 * Gets the config assigned to this context.
-	 * 
-	 * @see Config
+	 * Gets the {@link TopperConfig} assigned to this context.
 	 */
 	@NonNull
 	public final TopperConfig getConfig() {
 		return this.config;
 	}
-	
+
+	/**
+	 * Gets the current {@link Session}.
+	 */
 	@NonNull
 	public final Session getSession() {
 		return this.session;

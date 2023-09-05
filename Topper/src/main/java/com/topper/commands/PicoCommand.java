@@ -7,7 +7,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.exceptions.commands.CommandException;
 import com.topper.sstate.CommandState;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandContext;
 
 public abstract class PicoCommand implements Runnable {
 
@@ -38,11 +38,11 @@ public abstract class PicoCommand implements Runnable {
 	}
 
 	@NonNull
-	public final ScriptContext getContext() {
+	public final CommandContext getContext() {
 		return this.getTopLevel().getContext();
 	}
 	
-	public abstract void execute(@NonNull final ScriptContext context) throws CommandException;
+	public abstract void execute(@NonNull final CommandContext context) throws CommandException;
 	
 	@NonNull
 	public abstract CommandState next();

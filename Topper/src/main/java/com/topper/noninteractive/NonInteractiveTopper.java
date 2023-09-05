@@ -13,7 +13,7 @@ import org.jline.reader.impl.DefaultParser;
 import com.google.common.io.Files;
 import com.topper.commands.PicoTopLevelCommand;
 import com.topper.helpers.FileUtil;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine;
 
@@ -39,7 +39,7 @@ public final class NonInteractiveTopper {
 	 * @param context    Execution context of this Topper run.
 	 * @param scriptPath Path of the script file, from which to fetch commands.
 	 */
-	public final void run(@NonNull final ScriptContext context, @NonNull final String scriptPath) {
+	public final void run(@NonNull final CommandContext context, @NonNull final String scriptPath) {
 
 		// Try opening the file. Performs thorough file checks.
 		final File file;

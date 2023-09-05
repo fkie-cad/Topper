@@ -19,15 +19,15 @@ import com.topper.file.RawFile;
 import com.topper.helpers.DexFileHelper;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
-import com.topper.sstate.PicoState;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandLink;
+import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "types", mixinStandardHelpOptions = true, version = "1.0", description = "Lists all types of the loaded file.")
-@PicoState(states = { ExecutionState.class })
+@CommandLink(states = { ExecutionState.class })
 public final class PicoListTypesCommand extends PicoCommand {
 
 	@Option(names = { "-r", "--regex" }, defaultValue = "", paramLabel = "REGEX", description = "Lists all types matching the given regular expression.")
@@ -39,7 +39,7 @@ public final class PicoListTypesCommand extends PicoCommand {
 	private PicoListCommand parent;
 	
 	@Override
-	public final void execute(@NonNull final ScriptContext context) throws CommandException {
+	public final void execute(@NonNull final CommandContext context) throws CommandException {
 		
 		this.checkArgs();
 		

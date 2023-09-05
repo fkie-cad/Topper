@@ -26,7 +26,7 @@ import org.jline.terminal.TerminalBuilder;
 import org.jline.widget.TailTipWidgets;
 
 import com.topper.commands.PicoTopLevelCommand;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine;
 import picocli.shell.jline3.PicocliCommands;
@@ -57,7 +57,7 @@ public final class InteractiveTopper {
 	 * @throws IOException If IO in interactive mode fails. This is a fatal error,
 	 *                     from which recovery is not possible (probably).
 	 */
-	public final void mainLoop(@NonNull final ScriptContext context) throws IOException {
+	public final void mainLoop(@NonNull final CommandContext context) throws IOException {
 
 		AnsiConsole.systemInstall();
 		try {

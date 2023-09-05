@@ -9,7 +9,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.reflections.Reflections;
 
 import com.topper.sstate.CommandState;
-import com.topper.sstate.PicoState;
+import com.topper.sstate.CommandLink;
 
 /**
  * Manager that manages all {@link ScriptCommandParser}s and their related
@@ -29,11 +29,11 @@ public final class CommandManager {
 		
 		// Load state -> command mappings
 		final Reflections reflections = new Reflections("com.topper");
-		final Set<Class<?>> annos = reflections.getTypesAnnotatedWith(PicoState.class);
+		final Set<Class<?>> annos = reflections.getTypesAnnotatedWith(CommandLink.class);
 		
 		for (final Class<?> anno : annos) {
 			
-			for (final Class<? extends CommandState> state : anno.getAnnotation(PicoState.class).states()) {
+			for (final Class<? extends CommandState> state : anno.getAnnotation(CommandLink.class).states()) {
 				
 				if (!stateCommandMap.containsKey(state)) {
 					stateCommandMap.put(state, new HashSet<>());

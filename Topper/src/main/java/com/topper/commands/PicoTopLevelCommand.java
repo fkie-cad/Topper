@@ -10,7 +10,7 @@ import com.topper.commands.exit.PicoExitCommand;
 import com.topper.commands.file.PicoFileCommand;
 import com.topper.commands.list.PicoListCommand;
 import com.topper.commands.search.PicoSearchCommand;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -22,9 +22,9 @@ public final class PicoTopLevelCommand implements Runnable {
 	private PrintWriter out;
 
 	@NonNull
-	private final ScriptContext context;
+	private final CommandContext context;
 
-	public PicoTopLevelCommand(@NonNull final ScriptContext context) {
+	public PicoTopLevelCommand(@NonNull final CommandContext context) {
 		this.context = context;
 	}
 
@@ -46,7 +46,7 @@ public final class PicoTopLevelCommand implements Runnable {
 	}
 
 	@NonNull
-	public final ScriptContext getContext() {
+	public final CommandContext getContext() {
 		return this.context;
 	}
 }

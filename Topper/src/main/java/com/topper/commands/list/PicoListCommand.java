@@ -7,22 +7,22 @@ import com.topper.commands.PicoTopLevelCommand;
 import com.topper.exceptions.commands.CommandException;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
-import com.topper.sstate.PicoState;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandLink;
+import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "list", mixinStandardHelpOptions = true, version = "1.0", subcommands = { PicoListMethodsCommand.class, PicoListTypesCommand.class }, description = "Lists requested, file-related resources.")
-@PicoState(states =  { ExecutionState.class })
+@CommandLink(states =  { ExecutionState.class })
 public final class PicoListCommand extends PicoCommand {
 
 	@ParentCommand
 	private PicoTopLevelCommand parent;
 	
 	@Override
-	public final void execute(@NonNull final ScriptContext context) throws CommandException {
+	public final void execute(@NonNull final CommandContext context) throws CommandException {
 		this.getTopLevel().out().println(new CommandLine(this).getUsageMessage());
 	}
 

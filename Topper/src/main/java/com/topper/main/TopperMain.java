@@ -11,7 +11,7 @@ import com.topper.exceptions.InvalidConfigException;
 import com.topper.helpers.FileUtil;
 import com.topper.interactive.InteractiveTopper;
 import com.topper.noninteractive.NonInteractiveTopper;
-import com.topper.sstate.ScriptContext;
+import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -55,7 +55,7 @@ public final class TopperMain implements Runnable {
 			final TopperConfig config = ConfigManager.get().getConfig();
 
 			// Create context and executor
-			final ScriptContext context = new ScriptContext(config);
+			final CommandContext context = new CommandContext(config);
 			
 			// Check script file. Only used in non - interactive
 			final String path = this.scriptPath;

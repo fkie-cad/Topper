@@ -2,7 +2,6 @@ package com.topper.commands.attack;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,19 +17,18 @@ import com.topper.dex.decompilation.decompiler.DecompilationResult;
 import com.topper.dex.decompilation.decompiler.Decompiler;
 import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
 import com.topper.dex.ehandling.MethodCodeItem;
-import com.topper.exceptions.UnreachableException;
 import com.topper.exceptions.commands.CommandException;
 import com.topper.exceptions.commands.IllegalCommandException;
+import com.topper.exceptions.commands.IllegalSessionState;
 import com.topper.exceptions.commands.InternalExecutionException;
 import com.topper.file.ComposedFile;
 import com.topper.file.DexFile;
 import com.topper.helpers.BufferHelper;
 import com.topper.helpers.DexFileHelper;
-import com.topper.helpers.DexHelper;
+import com.topper.sstate.CommandContext;
+import com.topper.sstate.CommandLink;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
-import com.topper.sstate.PicoState;
-import com.topper.sstate.ScriptContext;
 import com.topper.sstate.Session;
 
 import picocli.CommandLine.Command;
@@ -44,39 +42,39 @@ import picocli.CommandLine.ParentCommand;
  * 
  * */
 @Command(name = "ctop", mixinStandardHelpOptions = true, version = "1.0", description = "Computes a list of patches to apply to the loaded file to achieve gadget chain execution.")
-@PicoState(states = { ExecutionState.class })
+@CommandLink(states = { ExecutionState.class })
 public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 
 	@Option(names = { "-g",
-			"--gadgets" }, required = true, arity = "1..*", split = ",", description = "Ordered list of gadget offsets relative to the loaded file's base (often base.vdex).")
+			"--gadgets" }, paramLabel = "GADGETS", required = true, arity = "1..*", split = ",", description = "Ordered list of gadget offsets relative to the loaded file's base (often base.vdex).")
 	private List<@NonNull Integer> gadgets;
 
 	@Option(names = { "-m",
-			"--method-offset" }, required = true, description = "Offset of the method to patch relative to the loaded file's base (often base.vdex).")
+			"--method-offset" }, paramLabel = "METHOD_OFFSET", required = true, description = "Offset of the method to patch relative to the loaded file's base (often base.vdex).")
 	private int methodOffset;
 
 	@Option(names = { "-t",
-			"--exception-type-index" }, required = true, description = "Type index of the exception type to instantiate and use for throwing. The type is relative to the .dex file used to execute the hijacked method.")
+			"--exception-type-index" }, paramLabel = "EXCEPTION_TYPE_INDEX", required = true, description = "Type index of the exception type to instantiate and use for throwing. The type is relative to the .dex file used to execute the hijacked method.")
 	private int exceptionTypeIndex;
 
 	@Option(names = { "-e",
-			"--exception-vreg-index" }, defaultValue = "0", description = "Virtual register used for storing the exception object. E.g. \"v0\" needs \"-v 0\" etc. This dictates what gadgets are eligible for manipulating the control flow.")
+			"--exception-vreg-index" }, paramLabel = "EXCEPTION_VREG_INDEX", defaultValue = "0", description = "Virtual register used for storing the exception object. E.g. \"v0\" needs \"-v 0\" etc. This dictates what gadgets are eligible for manipulating the control flow.")
 	private int exceptionVregIndex;
 
 	@Option(names = { "-p",
-			"--pc-vreg-index" }, defaultValue = "1", description = "Virtual register used for storing the virtual program counter. It dictates what gadget is executed next using a dispatcher.")
+			"--pc-vreg-index" }, paramLabel = "PC_VREG_INDEX", defaultValue = "1", description = "Virtual register used for storing the virtual program counter. It dictates what gadget is executed next using a dispatcher.")
 	private int pcVregIndex;
 
 	@Option(names = { "-x",
-			"--method-handler-padding" }, defaultValue = "0", description = "Padding bytes to introduce between the end of the target method and the encoded exception handler (4-byte aligned).")
+			"--method-handler-padding" }, paramLabel = "METHOD_HANDLER_PADDING", defaultValue = "0", description = "Padding bytes to introduce between the end of the target method and the encoded exception handler (4-byte aligned).")
 	private int methodHandlerPadding;
 
 	@Option(names = { "-y",
-			"--handler-dispatcher-padding" }, defaultValue = "0", description = "Padding bytes to introduce between the encoded exception handler and the actual dispatcher code (4-byte aligned).")
+			"--handler-dispatcher-padding" }, paramLabel = "HANDLE_DISPATCHER_PADDING", defaultValue = "0", description = "Padding bytes to introduce between the encoded exception handler and the actual dispatcher code (4-byte aligned).")
 	private int handlerDispatcherPadding;
 
 	@Option(names = { "-a",
-			"--alignment" }, defaultValue = "8", description = "Determines the alignment to use for describing the patches. Patch data is always divisible by alignment and refers to an aligned offset. Useful for Write - What - Where conditions with fixed - sized writes (qword,...).")
+			"--alignment" }, paramLabel = "PADDING", defaultValue = "8", description = "Determines the alignment to use for describing the patches. Patch data is always divisible by alignment and refers to an aligned offset. Useful for Write - What - Where conditions with fixed - sized writes (qword,...).")
 	private int alignment;
 
 	@Option(names = { "-v",
@@ -90,7 +88,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 	private PicoAttackCommand parent;
 
 	@Override
-	public final void execute(@NonNull final ScriptContext context) throws CommandException {
+	public final void execute(@NonNull final CommandContext context) throws CommandException {
 
 		// Goal: Compute list of patches to apply in current dex context.
 		this.checkArgs();
@@ -133,20 +131,11 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		return this.parent.getTopLevel();
 	}
 
-	private final void checkArgs() throws IllegalCommandException {
+	private final void checkArgs() throws IllegalCommandException, IllegalSessionState {
 
-		final Session session = this.getContext().getSession();
-		final ComposedFile loaded = session.getLoadedFile();
-		final ImmutableList<@NonNull DexFile> files = session.getDexFiles();
-		
-		// Avoid null warnings
-		if (loaded == null) {
-			throw new IllegalCommandException("Loaded file does not exist.");
-		}
-		
-		if (files == null) {
-			throw new IllegalCommandException("List of dex files in loaded file does not exist.");
-		}
+		@NonNull final Session session = this.getContext().getSession();
+		@NonNull final ComposedFile loaded = session.getLoadedFile();
+		@NonNull final ImmutableList<@NonNull DexFile> files = session.getDexFiles();
 
 		// Check gadgets exist and point into the loaded file.
 		if (this.gadgets == null) {
@@ -257,23 +246,17 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 	}
 
 	@NonNull
-	private final List<@NonNull Patch> computePatches() throws InternalExecutionException {
+	private final List<@NonNull Patch> computePatches() throws IllegalCommandException, IllegalSessionState, InternalExecutionException {
 
-		final Session session = this.getContext().getSession();
-		final ComposedFile loaded = session.getLoadedFile();
-		if (loaded == null) {
-			throw new UnreachableException("Loaded file does not exist.");
-		}
+		@NonNull final Session session = this.getContext().getSession();
+		@NonNull final ComposedFile loaded = session.getLoadedFile();
 		
-		@NonNull
-		final List<@NonNull Patch> patches = new LinkedList<>();
+		@NonNull final List<@NonNull Patch> patches = new LinkedList<>();
 
 		// Grab method header.
-		@NonNull
-		final ScriptContext context = this.getContext();
+		@NonNull final CommandContext context = this.getContext();
 		final byte @NonNull [] buffer = loaded.getBuffer();
-		@NonNull
-		final MethodCodeItem header = new MethodCodeItem(
+		@NonNull final MethodCodeItem header = new MethodCodeItem(
 				BufferHelper.copyBuffer(buffer, this.methodOffset, this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE));
 		printvln("==============================================");
 		this.printv(String.format("Method Offset: %#x, ", this.methodOffset) + header.toString());
@@ -290,12 +273,12 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		dispatcherOffset += this.handlerDispatcherPadding;
 
 		// Create dispatcher
-		final Dispatcher dispatcher = new PackedSwitchDispatcher(dispatcherOffset, this.exceptionVregIndex,
-				this.exceptionTypeIndex, this.pcVregIndex, this.gadgets);
+		@NonNull final Dispatcher dispatcher = new PackedSwitchDispatcher(dispatcherOffset, this.exceptionVregIndex,
+				this.exceptionTypeIndex, this.pcVregIndex, this.getGadgets());
 		final byte @NonNull [] payload = dispatcher.payload();
 		
 		// Check dispatcher code with decompiler
-		final Decompiler decompiler = new SmaliDecompiler();
+		@NonNull final Decompiler decompiler = new SmaliDecompiler();
 		try {
 			final DecompilationResult result = decompiler.decompile(payload, null, context.getConfig());
 			printvln("==============================================");
@@ -310,7 +293,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		patches.add(this.alignedPatch(loaded, dispatcherOffset, payload));
 
 		// Create exception handler
-		final CatchAllHandler handler = new CatchAllHandler(this.methodOffset,
+		@NonNull final CatchAllHandler handler = new CatchAllHandler(this.methodOffset,
 				dispatcherOffset + dispatcher.dispatcherOffset());
 		printvln("==============================================");
 		printvln("" + String.format("Handler offset: %#x", firstHandlerOffset));
@@ -337,7 +320,11 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 		
 		final ByteBuffer gotoInsn = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
 				.put((byte)0x29).put((byte)0x0).putShort((short)gotoOffset);
-		patches.add(this.alignedPatch(loaded, this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE, gotoInsn.array()));
+		final byte[] gotoBuf = gotoInsn.array();
+		if (gotoBuf == null) {
+			throw new InternalExecutionException("Goto instruction buffer does not exist.");
+		}
+		patches.add(this.alignedPatch(loaded, this.methodOffset + MethodCodeItem.CODE_ITEM_SIZE, gotoBuf));
 
 		return patches;
 	}
@@ -380,5 +367,13 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 			return;
 		}
 		this.getTopLevel().out().print(message);
+	}
+	
+	@NonNull
+	private final List<@NonNull Integer> getGadgets() throws IllegalCommandException {
+		if (this.gadgets != null) {
+			return this.gadgets;
+		}
+		throw new IllegalCommandException("List of gadgets does not exist.");
 	}
 }
