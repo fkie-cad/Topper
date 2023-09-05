@@ -1,4 +1,4 @@
-package com.topper.tests.dex.decompilation.seeker;
+package com.topper.tests.dex.seeker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

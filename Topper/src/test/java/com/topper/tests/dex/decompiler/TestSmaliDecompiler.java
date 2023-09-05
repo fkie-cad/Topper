@@ -1,4 +1,4 @@
-package com.topper.tests.dex.decompilation.decompiler;
+package com.topper.tests.dex.decompiler;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;

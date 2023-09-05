@@ -1,4 +1,4 @@
-package com.topper.tests.dex.decompilation.staticanalyser;
+package com.topper.tests.dex.staticanalyser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

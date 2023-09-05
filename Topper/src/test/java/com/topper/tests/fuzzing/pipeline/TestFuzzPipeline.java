@@ -35,7 +35,7 @@ import com.topper.dex.pipeline.SweeperInfo;
 import com.topper.dex.staticanalyser.Gadget;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.pipeline.MissingStageInfoException;
-import com.topper.tests.dex.decompilation.staticanalyser.TestDefaultStaticAnalyser;
+import com.topper.tests.dex.staticanalyser.TestDefaultStaticAnalyser;
 
 public class TestFuzzPipeline {
 	
