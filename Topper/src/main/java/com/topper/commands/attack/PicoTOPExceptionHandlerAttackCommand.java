@@ -22,7 +22,7 @@ import com.topper.exceptions.UnreachableException;
 import com.topper.exceptions.commands.CommandException;
 import com.topper.exceptions.commands.IllegalCommandException;
 import com.topper.exceptions.commands.InternalExecutionException;
-import com.topper.file.AugmentedFile;
+import com.topper.file.ComposedFile;
 import com.topper.file.DexFile;
 import com.topper.helpers.BufferHelper;
 import com.topper.helpers.DexFileHelper;
@@ -136,7 +136,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 	private final void checkArgs() throws IllegalCommandException {
 
 		final Session session = this.getContext().getSession();
-		final AugmentedFile loaded = session.getLoadedFile();
+		final ComposedFile loaded = session.getLoadedFile();
 		final ImmutableList<@NonNull DexFile> files = session.getDexFiles();
 		
 		// Avoid null warnings
@@ -260,7 +260,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 	private final List<@NonNull Patch> computePatches() throws InternalExecutionException {
 
 		final Session session = this.getContext().getSession();
-		final AugmentedFile loaded = session.getLoadedFile();
+		final ComposedFile loaded = session.getLoadedFile();
 		if (loaded == null) {
 			throw new UnreachableException("Loaded file does not exist.");
 		}
@@ -343,7 +343,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 	}
 
 	@NonNull
-	private final Patch alignedPatch(@NonNull final AugmentedFile loaded, final int offset, final byte @NonNull [] data) throws InternalExecutionException {
+	private final Patch alignedPatch(@NonNull final ComposedFile loaded, final int offset, final byte @NonNull [] data) throws InternalExecutionException {
 
 		final byte @NonNull [] buffer = loaded.getBuffer();
 		final int mask = ~(this.alignment - 1);

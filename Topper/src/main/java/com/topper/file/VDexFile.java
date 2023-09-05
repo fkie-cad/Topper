@@ -26,7 +26,7 @@ import com.topper.helpers.BufferHelper;
  * @author Pascal Kühnemann
  * @since 09.08.2023
  */
-public class VDexFile implements AugmentedFile {
+public class VDexFile implements ComposedFile {
 
 	/**
 	 * Id of the augmented file. It may be related to {@code buffer}.
@@ -50,9 +50,9 @@ public class VDexFile implements AugmentedFile {
 	 * Creates a new .vdex file respresentation using a {@link String} - id and a
 	 * <code>buffer</code>.
 	 * 
-	 * Some coarse checks are performed to ensure <code>buffer</code> contains a .vdex
-	 * file. However, as versions of .vdex files change, mainly the magic bytes are
-	 * verified.
+	 * Some coarse checks are performed to ensure <code>buffer</code> contains a
+	 * .vdex file. However, as versions of .vdex files change, mainly the magic
+	 * bytes are verified.
 	 * 
 	 * A threshold for file sizes of .dex files in this .vdex file from
 	 * {@link DecompilerConfig} is used. If a .dex exceeds this threshold, then its
@@ -95,7 +95,7 @@ public class VDexFile implements AugmentedFile {
 	public byte @NonNull [] getBuffer() {
 		return this.buffer;
 	}
-	
+
 	@Override
 	public final int getOffset() {
 		return 0;
@@ -130,7 +130,8 @@ public class VDexFile implements AugmentedFile {
 	 */
 	@SuppressWarnings("null")
 	@NonNull
-	private final ImmutableList<@NonNull DexFile> loadFiles(@NonNull final VDexFileHeader fileHeader, final byte @NonNull [] buffer, @NonNull final TopperConfig config) {
+	private final ImmutableList<@NonNull DexFile> loadFiles(@NonNull final VDexFileHeader fileHeader,
+			final byte @NonNull [] buffer, @NonNull final TopperConfig config) {
 
 		final int vdexThreshold = config.getDecompilerConfig().getDexSkipThreshold();
 		final ImmutableList.Builder<@NonNull DexFile> builder = new ImmutableList.Builder<>();
@@ -160,7 +161,8 @@ public class VDexFile implements AugmentedFile {
 
 					// Parse dex file and store it into list
 					builder.add(new DexFile("classes" + Integer.toString(dexId) + ".dex",
-							BufferHelper.copyBuffer(buffer, dexStart, dexStart + dexHeader.getFileSize()), dexStart, config));
+							BufferHelper.copyBuffer(buffer, dexStart, dexStart + dexHeader.getFileSize()), dexStart,
+							config));
 					dexId += 1;
 				}
 

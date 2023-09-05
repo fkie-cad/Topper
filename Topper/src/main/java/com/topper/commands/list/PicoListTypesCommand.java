@@ -13,7 +13,7 @@ import com.topper.commands.PicoTopLevelCommand;
 import com.topper.exceptions.UnreachableException;
 import com.topper.exceptions.commands.CommandException;
 import com.topper.exceptions.commands.IllegalCommandException;
-import com.topper.file.AugmentedFile;
+import com.topper.file.ComposedFile;
 import com.topper.file.DexFile;
 import com.topper.file.RawFile;
 import com.topper.helpers.DexFileHelper;
@@ -44,7 +44,7 @@ public final class PicoListTypesCommand extends PicoCommand {
 		this.checkArgs();
 		
 		// Get all file candidates.
-		final AugmentedFile loaded = this.getContext().getSession().getLoadedFile();
+		final ComposedFile loaded = this.getContext().getSession().getLoadedFile();
 		if (loaded == null) {
 			throw new UnreachableException("Loaded file does not exist.");
 		}

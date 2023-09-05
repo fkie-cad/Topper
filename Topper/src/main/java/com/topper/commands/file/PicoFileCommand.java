@@ -19,7 +19,7 @@ import com.topper.dex.decompilation.pipeline.StaticInfo;
 import com.topper.exceptions.commands.IllegalCommandException;
 import com.topper.exceptions.commands.InternalExecutionException;
 import com.topper.exceptions.pipeline.StageException;
-import com.topper.file.AugmentedFile;
+import com.topper.file.ComposedFile;
 import com.topper.file.DexFile;
 import com.topper.file.FileType;
 import com.topper.file.RawFile;
@@ -80,7 +80,7 @@ public final class PicoFileCommand extends PicoCommand {
 		// 2. Identify file. Depending on the type, use a different set
 		// of gadgets.
 		final DexBackedDexFile current;
-		AugmentedFile aug;
+		ComposedFile aug;
 		try {
 			switch (this.type) {
 			case DEX: {

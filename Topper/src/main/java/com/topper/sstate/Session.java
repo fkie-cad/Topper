@@ -5,7 +5,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.commands.file.BasedGadget;
-import com.topper.file.AugmentedFile;
+import com.topper.file.ComposedFile;
 import com.topper.file.DexFile;
 
 /**
@@ -17,17 +17,17 @@ import com.topper.file.DexFile;
 public final class Session {
 
 	@Nullable
-	private AugmentedFile loadedFile;
+	private ComposedFile loadedFile;
 
 	@Nullable
 	private ImmutableList<@NonNull BasedGadget> gadgets;
 
 	@Nullable
-	public final AugmentedFile getLoadedFile() {
+	public final ComposedFile getLoadedFile() {
 		return this.loadedFile;
 	}
 
-	public final void setLoadedFile(@NonNull final AugmentedFile loadedFile) {
+	public final void setLoadedFile(@NonNull final ComposedFile loadedFile) {
 		this.loadedFile = loadedFile;
 	}
 
@@ -43,7 +43,7 @@ public final class Session {
 	@NonNull
 	public final String getSessionId() {
 
-		final AugmentedFile loaded = this.loadedFile;
+		final ComposedFile loaded = this.loadedFile;
 		if (loaded == null) {
 			return "";
 		}
