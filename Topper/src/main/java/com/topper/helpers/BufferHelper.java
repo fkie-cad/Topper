@@ -46,4 +46,8 @@ public class BufferHelper {
 		System.arraycopy(src, from, dst, 0, to  - from);
 		return dst;
 	}
+	
+	public static boolean isUnsignedInt(final long l) {
+		return (l >= 0 && l <= (1L << Integer.SIZE) - 1);
+	}
 }

@@ -125,7 +125,7 @@ public final class Leb128 {
      */
     public static long readSignedLeb128Long(@NonNull final ByteBuffer in) {
         long result = 0;
-        int cur;
+        long cur;
         int count = 0;
         int signBits = -1;
         do {
@@ -167,7 +167,7 @@ public final class Leb128 {
      */
     public static long readUnsignedLeb128Long(@NonNull final ByteBuffer in) {
         long result = 0;
-        int cur;
+        long cur;
         int count = 0;
         do {
             cur = in.get() & 0xff;

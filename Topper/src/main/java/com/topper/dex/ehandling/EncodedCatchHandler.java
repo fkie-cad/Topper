@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.topper.helpers.BufferHelper;
+
 /**
  * Catch handler mapped over a given buffer.
  * 
@@ -56,14 +58,16 @@ public final class EncodedCatchHandler implements Bytable {
 	 * @param Bytecode address of the catch - all handler. This element should only
 	 *                 be present if <code>size</code> is non-positive.
 	 * @throws IllegalArgumentException If <code>abs(size)</code> does not match
-	 *                                  <code>handlers.size()</code>.
+	 *                                  <code>handlers.size()</code>, or
+	 *                                  <code>catchAllAddr</code> exceeds unsigned
+	 *                                  integer bounds.
 	 */
 	public EncodedCatchHandler(final int size, @NonNull final List<@NonNull EncodedTypeAddrPair> handlers,
 			final long catchAllAddr) {
 		if (Math.abs(size) != handlers.size()) {
 			throw new IllegalArgumentException("abs(size) must match amount of handlers.");
 		}
-		if (!(catchAllAddr >= 0 && catchAllAddr <= (1L << Integer.SIZE) - 1)) {
+		if (!BufferHelper.isUnsignedInt(catchAllAddr)) {
 			throw new IllegalArgumentException("catchAllAddr exceeds 4-byte unsigned bounds.");
 		}
 		this.size = size;
@@ -111,7 +115,12 @@ public final class EncodedCatchHandler implements Bytable {
 			sum += handler.getByteSize();
 		}
 		buf.position(buf.position() + sum);
-		b.append(String.format("- catch_all_addr: %#x", Leb128.readUnsignedLeb128(buf)) + System.lineSeparator());
+		if (this.size <= 0) {
+			b.append(String.format("- catch_all_addr: %#x", Leb128.readUnsignedLeb128Long(buf))
+					+ System.lineSeparator());
+		} else {
+			b.append("- catch_all_addr: none" + System.lineSeparator());
+		}
 
 		return "" + b.toString();
 	}

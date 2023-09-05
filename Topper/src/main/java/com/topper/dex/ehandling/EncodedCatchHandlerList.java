@@ -6,13 +6,33 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+/**
+ * List of {@link EncodedCatchHandler}s that lies right after {@link TryItem}.
+ * 
+ * @author Pascal Kühnemann
+ * @since 05.09.2023
+ * */
 public final class EncodedCatchHandlerList implements Bytable {
 
-	private int size;
+	/**
+	 * Size of this list in entries. Notice that in the .dex specification,
+	 * this field is actually an unsigned int.
+	 * */
+	private final int size;
 
+	/**
+	 * List of {@link EncodedCatchHandler}s.
+	 * */
 	@NonNull
-	private List<@NonNull EncodedCatchHandler> list;
+	private final List<@NonNull EncodedCatchHandler> list;
 
+	/**
+	 * Creates a list of {@link EncodedCatchHandler}s.
+	 * 
+	 * @param List of {@link EncodedCatchHandler}s to wrap. Its size is a
+	 * 	signed value, whereas the specification states that the size must be unsigned.
+	 * 	This is a technical limitation.
+	 * */
 	public EncodedCatchHandlerList(@NonNull final List<@NonNull EncodedCatchHandler> list) {
 		this.size = list.size();
 		this.list = list;
@@ -51,20 +71,18 @@ public final class EncodedCatchHandlerList implements Bytable {
 		return b.toString();
 	}
 
+	/**
+	 * Gets the amount of entries in this list.
+	 * */
 	public final int getSize() {
 		return this.size;
 	}
 
-	public final void setSize(final int size) {
-		this.size = size;
-	}
-
+	/**
+	 * Gets the list of {@link EncodedCatchHandler}s wrapped.
+	 * */
 	@NonNull
 	public final List<@NonNull EncodedCatchHandler> getList() {
 		return this.list;
-	}
-
-	public final void setList(@NonNull List<@NonNull EncodedCatchHandler> list) {
-		this.list = list;
 	}
 }

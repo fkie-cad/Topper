@@ -47,7 +47,7 @@ public final class TestEncodedCatchHandler {
 		
 		if (expectedSize <= 0) {
 			// If catch - all is around, then it must be checked.
-			assertEquals((int)expectedAddr, Leb128.readUnsignedLeb128(buf.position(base + size)));
+			assertEquals(expectedAddr, Leb128.readUnsignedLeb128Long(buf.position(base + size)));
 		}
 		
 		assertEquals(h.getByteSize(), h.getBytes().length);
@@ -145,6 +145,6 @@ public final class TestEncodedCatchHandler {
 	
 	@Test
 	public void Given_LongAddr_When_CreatingHandler_Expect_IllegalArgumentException() {
-		assertThrowsExactly(IllegalArgumentException.class, () -> validate(CATCH_ALL, ImmutableList.of(), Long.MAX_VALUE));
+		assertThrowsExactly(IllegalArgumentException.class, () -> validate(CATCH_ALL, ImmutableList.of(), 1L << Integer.SIZE));
 	}
 }
