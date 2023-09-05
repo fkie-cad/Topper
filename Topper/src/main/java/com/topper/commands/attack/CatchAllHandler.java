@@ -65,7 +65,7 @@ public final class CatchAllHandler implements Bytable {
 		this.handlerList = new EncodedCatchHandlerList(list);
 
 		// Create try item
-		this.tryItem = new TryItem(0, (short) -1, (short) 1);
+		this.tryItem = new TryItem(Integer.toUnsignedLong(0), Short.toUnsignedInt((short) -1), Short.toUnsignedInt((short) 1));
 	}
 
 	/**
