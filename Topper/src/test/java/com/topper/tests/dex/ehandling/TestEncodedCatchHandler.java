@@ -32,7 +32,7 @@ public final class TestEncodedCatchHandler {
 	
 	private static final int CATCH_ALL_ADDR = 0x42;
 	
-	private void validate(final int expectedSize, final List<@NonNull EncodedTypeAddrPair> expectedList, final int expectedAddr) {
+	private void validate(final int expectedSize, final List<@NonNull EncodedTypeAddrPair> expectedList, final long expectedAddr) {
 		
 		final EncodedCatchHandler h = new EncodedCatchHandler(expectedSize, expectedList, expectedAddr);
 		final ByteBuffer buf = ByteBuffer.wrap(h.getBytes()).order(ByteOrder.LITTLE_ENDIAN);
@@ -47,7 +47,7 @@ public final class TestEncodedCatchHandler {
 		
 		if (expectedSize <= 0) {
 			// If catch - all is around, then it must be checked.
-			assertEquals(expectedAddr, Leb128.readUnsignedLeb128(buf.position(base + size)));
+			assertEquals((int)expectedAddr, Leb128.readUnsignedLeb128(buf.position(base + size)));
 		}
 		
 		assertEquals(h.getByteSize(), h.getBytes().length);
@@ -128,5 +128,23 @@ public final class TestEncodedCatchHandler {
 		final String s = h.toString();
 		assertNotNull(s);
 		assertTrue(s.length() > 0);
+	}
+	
+	// NOTE: Leb128.unsignedLeb128Size cannot handle negative values -> infinite loop
+	@Test
+	public void Given_MaxAddrAll_When_CreatingHandler_Expect_ValidHandler() {
+		
+		// -1_10 = 0xffffffff_16
+		validate(CATCH_ALL, ImmutableList.of(), Integer.toUnsignedLong(-1));
+	}
+	
+	@Test
+	public void Given_NegativeAddr_When_CreatingHandler_Expect_IllegalArgumentException() {
+		assertThrowsExactly(IllegalArgumentException.class, () -> validate(CATCH_ALL, ImmutableList.of(), -1));
+	}
+	
+	@Test
+	public void Given_LongAddr_When_CreatingHandler_Expect_IllegalArgumentException() {
+		assertThrowsExactly(IllegalArgumentException.class, () -> validate(CATCH_ALL, ImmutableList.of(), Long.MAX_VALUE));
 	}
 }

@@ -38,7 +38,7 @@ public final class EncodedCatchHandler implements Bytable {
 	 * Bytecode address of the catch - all handler.This element is only present if
 	 * {@link EncodedCatchHandler#size} is non-positive.
 	 */
-	private final int catchAllAddr;
+	private final long catchAllAddr;
 
 	/**
 	 * Creates a catch handler based on <code>size</code>, <code>handlers</code> and
@@ -59,9 +59,12 @@ public final class EncodedCatchHandler implements Bytable {
 	 *                                  <code>handlers.size()</code>.
 	 */
 	public EncodedCatchHandler(final int size, @NonNull final List<@NonNull EncodedTypeAddrPair> handlers,
-			final int catchAllAddr) {
+			final long catchAllAddr) {
 		if (Math.abs(size) != handlers.size()) {
 			throw new IllegalArgumentException("abs(size) must match amount of handlers.");
+		}
+		if (!(catchAllAddr >= 0 && catchAllAddr <= (1L << Integer.SIZE) - 1)) {
+			throw new IllegalArgumentException("catchAllAddr exceeds 4-byte unsigned bounds.");
 		}
 		this.size = size;
 		this.handlers = handlers;
@@ -122,7 +125,7 @@ public final class EncodedCatchHandler implements Bytable {
 		return this.handlers;
 	}
 
-	public final int getCatchAllAddr() {
+	public final long getCatchAllAddr() {
 		return this.catchAllAddr;
 	}
 }
