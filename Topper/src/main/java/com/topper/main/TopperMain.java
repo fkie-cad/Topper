@@ -58,15 +58,16 @@ public final class TopperMain implements Runnable {
 			final ScriptContext context = new ScriptContext(config);
 			
 			// Check script file. Only used in non - interactive
-			if (this.scriptPath != null) {
+			final String path = this.scriptPath;
+			if (path != null) {
 				
 				// Non - Interactive mode!
-				final NonInteractiveTopper non = NonInteractiveTopper.get();
-				non.run(context, this.scriptPath);
+				final NonInteractiveTopper non = new NonInteractiveTopper();
+				non.run(context, path);
 			} else {
 				
 				// Interactive mode!
-				final InteractiveTopper interactive = InteractiveTopper.get();
+				final InteractiveTopper interactive = new InteractiveTopper();
 				interactive.mainLoop(context);
 			}
 		

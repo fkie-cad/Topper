@@ -36,28 +36,19 @@ import picocli.shell.jline3.PicocliCommands.PicocliCommandsFactory;
  * Manager that will run the main loop, if Topper is started in interactive
  * mode.
  * 
+ * Based on <a href=
+ * "https://github.com/remkop/picocli/blob/main/picocli-shell-jline3/src/test/java/picocli/shell/jline3/example/Example.java#L132">Picocli
+ * and Jline3 example</a>.
+ * 
  * @author Pascal Kühnemann
  */
 public final class InteractiveTopper {
-
-	private static InteractiveTopper instance;
 
 	/**
 	 * Format string to write before requesting user input.
 	 */
 	@NonNull
 	private static final String LINE_PREFIX = "%s> ";
-
-	private InteractiveTopper() {
-
-	}
-
-	public static final InteractiveTopper get() {
-		if (InteractiveTopper.instance == null) {
-			InteractiveTopper.instance = new InteractiveTopper();
-		}
-		return InteractiveTopper.instance;
-	}
 
 	/**
 	 * Main loop for an interactive session. It manages IO as well as command
@@ -71,7 +62,7 @@ public final class InteractiveTopper {
 		AnsiConsole.systemInstall();
 		try {
 			final Supplier<Path> workDir = () -> Paths.get(System.getProperty("user.dir"));
-			
+
 			// set up JLine built-in commands
 			// No idea why configPath must be non-null, but setting all its
 			// params to null still works...
@@ -96,10 +87,7 @@ public final class InteractiveTopper {
 				systemRegistry.register("help", picocliCommands);
 
 				final LineReader reader = LineReaderBuilder.builder().terminal(terminal)
-						.completer(systemRegistry.completer()).parser(parser).variable(LineReader.LIST_MAX, 50) // max
-																												// tab
-																												// completion
-																												// candidates
+						.completer(systemRegistry.completer()).parser(parser).variable(LineReader.LIST_MAX, 50)
 						.build();
 				builtins.setLineReader(reader);
 				commands.setReader(reader);

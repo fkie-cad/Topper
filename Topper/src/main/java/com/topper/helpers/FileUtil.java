@@ -38,8 +38,9 @@ public final class FileUtil {
 	
 	public static final byte @NonNull [] readContents(@NonNull final File file) {
 		
+		FileInputStream in = null;
 		try {
-			final FileInputStream in = new FileInputStream(file);
+			in = new FileInputStream(file);
 			final byte[] content = in.readAllBytes();
 			if (content == null) {
 				throw new IOException();
@@ -47,6 +48,12 @@ public final class FileUtil {
 			return content;
 		} catch (final IOException e) {
 			throw new IllegalArgumentException("Reading " + file.getPath() + " failed.", e);
+		} finally {
+			try {
+				if (in != null) {
+					in.close();
+				}
+			} catch (final IOException ignored) {}
 		}
 	}
 }

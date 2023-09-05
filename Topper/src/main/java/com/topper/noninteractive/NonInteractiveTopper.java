@@ -17,20 +17,28 @@ import com.topper.sstate.ScriptContext;
 
 import picocli.CommandLine;
 
+/**
+ * Manager that handles non - interactive command execution in form of script
+ * files. This is a reduced version of {@link InteractiveTopper}, as non -
+ * interactive implies that features like auto - complete etc. can be omitted.
+ * 
+ * Based on <a href=
+ * "https://github.com/remkop/picocli/blob/main/picocli-shell-jline3/src/test/java/picocli/shell/jline3/example/Example.java#L132">Picocli
+ * and Jline3 example</a>.
+ * 
+ * @author Pascal Kühnemann
+ * @since 05.09.2023
+ */
 public final class NonInteractiveTopper {
 
-	private static NonInteractiveTopper instance;
-
-	private NonInteractiveTopper() {
-	}
-
-	public static final NonInteractiveTopper get() {
-		if (NonInteractiveTopper.instance == null) {
-			NonInteractiveTopper.instance = new NonInteractiveTopper();
-		}
-		return NonInteractiveTopper.instance;
-	}
-
+	/**
+	 * Interprets all lines in the file referenced by <code>scriptPath</code> as
+	 * commands. Lines starting with a <code>'#'</code> are interpreted as comments
+	 * and thus ignored.
+	 * 
+	 * @param context    Execution context of this Topper run.
+	 * @param scriptPath Path of the script file, from which to fetch commands.
+	 */
 	public final void run(@NonNull final ScriptContext context, @NonNull final String scriptPath) {
 
 		// Try opening the file. Performs thorough file checks.
