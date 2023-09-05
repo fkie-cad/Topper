@@ -6,7 +6,6 @@ import java.nio.ByteOrder;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.helpers.BufferHelper;
-import com.topper.helpers.DexHelper;
 
 /**
  * Pair of type and address. It describes the position of the handler
