@@ -50,7 +50,6 @@ public class TestVDexFile {
 	@Test
 	public void Given_ValidVDexFile_When_GettingFiles_Expect_CorrectAmount() throws IOException {
 		// Reason: All .dex files covered by a .vdex must be extracted.
-		// TODO
 
 		config.getDecompilerConfig().setDexSkipThreshold(-1);
 		final File f = new File(VALID_VDEX_FILE_PATH);

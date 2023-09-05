@@ -39,7 +39,10 @@ public class BufferHelper {
 	}
 	
 	public static final byte @NonNull [] copyBuffer(final byte @NonNull [] src, final int from, final int to) {
-		final byte @NonNull [] dst = new byte[src.length];
+		if (from > to) {
+			throw new IllegalArgumentException("from must not exceed to.");
+		}
+		final byte @NonNull [] dst = new byte[to - from];
 		System.arraycopy(src, from, dst, 0, to  - from);
 		return dst;
 	}
