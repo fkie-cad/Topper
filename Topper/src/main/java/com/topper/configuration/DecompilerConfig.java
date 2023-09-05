@@ -4,8 +4,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.Opcodes;
 
 import com.google.common.collect.ImmutableList;
-import com.topper.dex.decompilation.decompiler.Decompiler;
-import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
+import com.topper.dex.decompiler.Decompiler;
+import com.topper.dex.decompiler.SmaliDecompiler;
 import com.topper.exceptions.InvalidConfigException;
 
 /**

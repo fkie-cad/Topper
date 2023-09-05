@@ -2,8 +2,8 @@ package com.topper.commands.file;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.dex.decompilation.graphs.CFG;
-import com.topper.dex.decompilation.staticanalyser.Gadget;
+import com.topper.dex.graphs.CFG;
+import com.topper.dex.staticanalyser.Gadget;
 import com.topper.helpers.DexHelper;
 
 public final class BasedGadget {

@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.configuration.TopperConfig;
-import com.topper.dex.decompilation.pipeline.PipelineArgs;
-import com.topper.dex.decompilation.pipeline.PipelineContext;
-import com.topper.dex.decompilation.pipeline.SeekerInfo;
-import com.topper.dex.decompilation.pipeline.StaticInfo;
-import com.topper.dex.decompilation.pipeline.SweeperInfo;
+import com.topper.dex.pipeline.PipelineArgs;
+import com.topper.dex.pipeline.PipelineContext;
+import com.topper.dex.pipeline.SeekerInfo;
+import com.topper.dex.pipeline.StaticInfo;
+import com.topper.dex.pipeline.SweeperInfo;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.exceptions.pipeline.DuplicateInfoIdException;
 import com.topper.exceptions.pipeline.MissingStageInfoException;

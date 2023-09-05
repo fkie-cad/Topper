@@ -10,8 +10,8 @@ import com.google.common.collect.ImmutableList;
 import com.topper.configuration.Config;
 import com.topper.configuration.ConfigManager;
 import com.topper.configuration.TopperConfig;
-import com.topper.dex.decompilation.decompiler.Decompiler;
-import com.topper.dex.decompilation.staticanalyser.CFGAnalyser;
+import com.topper.dex.decompiler.Decompiler;
+import com.topper.dex.staticanalyser.CFGAnalyser;
 
 /**
  * Dex file representation based on dexlib2. It parses the contents of a given

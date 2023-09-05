@@ -8,9 +8,9 @@ import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.topper.dex.decompilation.decompiler.Decompiler;
-import com.topper.dex.decompilation.staticanalyser.StaticAnalyser;
-import com.topper.dex.decompilation.sweeper.Sweeper;
+import com.topper.dex.decompiler.Decompiler;
+import com.topper.dex.staticanalyser.StaticAnalyser;
+import com.topper.dex.sweeper.Sweeper;
 import com.topper.exceptions.InvalidConfigException;
 
 /**

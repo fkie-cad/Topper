@@ -21,9 +21,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.topper.configuration.TopperConfig;
-import com.topper.dex.decompilation.decompiler.DecompilationResult;
-import com.topper.dex.decompilation.decompiler.Decompiler;
-import com.topper.dex.decompilation.decompiler.SmaliDecompiler;
+import com.topper.dex.decompiler.DecompilationResult;
+import com.topper.dex.decompiler.Decompiler;
+import com.topper.dex.decompiler.SmaliDecompiler;
 import com.topper.dex.decompiler.instructions.DecompiledInstruction;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.tests.utility.DexLoader;

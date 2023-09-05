@@ -8,7 +8,7 @@ import org.jf.dexlib2.iface.instruction.SwitchElement;
 import org.jf.dexlib2.iface.reference.Reference;
 import org.jf.util.ExceptionWithContext;
 
-import com.topper.dex.decompilation.decompiler.Decompiler;
+import com.topper.dex.decompiler.Decompiler;
 import com.topper.dex.decompiler.references.CallSiteReference;
 import com.topper.dex.decompiler.references.FieldReference;
 import com.topper.dex.decompiler.references.MethodHandleReference;
