@@ -37,8 +37,6 @@ public final class PicoTopLevelCommand implements Runnable {
 		this.out = reader.getTerminal().writer();
 	}
 	
-	
-	// TODO: Also implement something like err. This allows for better distinguishing errors from successful fuzz runs!
 	public final void setOut(@NonNull final PrintWriter out) {
 		this.out = out;
 	}

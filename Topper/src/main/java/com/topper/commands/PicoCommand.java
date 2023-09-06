@@ -2,17 +2,21 @@ package com.topper.commands;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.exceptions.commands.CommandException;
-import com.topper.sstate.CommandState;
 import com.topper.sstate.CommandContext;
+import com.topper.sstate.CommandState;
 
-public abstract class PicoCommand implements Runnable {
+public abstract class PicoCommand implements Callable<Integer> {
+	
+	public static final int SUCCESS = 0;
+	public static final int ERROR = 1;
 
 	@Override
-	public final void run() {
+	public final Integer call() {
 
 		final Map<@NonNull Class<? extends CommandState>, @NonNull Set<@NonNull Class<? extends PicoCommand>>> map = CommandManager
 				.getStateCommandMap();
@@ -23,7 +27,7 @@ public abstract class PicoCommand implements Runnable {
 				|| !map.get(current.getClass()).contains(this.getClass())) {
 			parent.out().println("State error: Cannot run " + this.getClass().getSimpleName() + " in state "
 					+ this.getContext().getCurrentState().getClass().getSimpleName());
-			return;
+			return PicoCommand.ERROR;
 		}
 
 		try {
@@ -32,8 +36,10 @@ public abstract class PicoCommand implements Runnable {
 			
 			// Move to next state.
 			this.getContext().changeState(this.next());
-		} catch (final CommandException e) {
+			return PicoCommand.SUCCESS;
+		} catch (final CommandException | RuntimeException e) {
 			this.getTopLevel().out().println(e.getMessage());
+			return PicoCommand.ERROR;
 		}
 	}
 
