@@ -9,8 +9,6 @@ import com.topper.configuration.ConfigManager;
 import com.topper.configuration.TopperConfig;
 import com.topper.exceptions.InvalidConfigException;
 import com.topper.helpers.FileUtil;
-import com.topper.interactive.InteractiveTopper;
-import com.topper.noninteractive.NonInteractiveTopper;
 import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine;

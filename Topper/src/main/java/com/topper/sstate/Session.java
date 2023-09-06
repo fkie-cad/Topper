@@ -10,7 +10,7 @@ import com.topper.exceptions.commands.IllegalSessionState;
 import com.topper.exceptions.commands.InternalExecutionException;
 import com.topper.file.ComposedFile;
 import com.topper.file.DexFile;
-import com.topper.interactive.InteractiveTopper;
+import com.topper.main.InteractiveTopper;
 
 /**
  * Wrapper for holding all application - specific data like loaded files etc.
