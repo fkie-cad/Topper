@@ -24,7 +24,7 @@ import picocli.CommandLine.Option;
 @Command(name = "topper", version = "0", mixinStandardHelpOptions = true)
 public final class TopperMain implements Runnable {
 
-	@Option(names = { "-c", "--config" }, paramLabel = "CONFIG", description = "path to .xml configuration file to use")
+	@Option(names = { "-c", "--config" }, required = true, paramLabel = "CONFIG", description = "path to .xml configuration file to use")
 	private String configPath;
 	
 	@Option(names = { "-s", "--script" }, paramLabel = "SCRIPT", description = "path to script file to run in non-interactive mode")

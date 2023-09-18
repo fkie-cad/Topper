@@ -1,5 +1,7 @@
 # Topper
-Find TOP gadgets in Android Apps
 
+*Topper* aims to support performing bytecode - based attacks on Android. For now, *Topper* enables loading `.dex` and `.vdex` files, extracting *TOP gadgets* and performing *TOP attacks*. Also, a few information gathering commands are implemented to prevent tool - hopping.
 
-As of now, the project does not use *Gradle* or *Maven* to manage dependencies due to proxy issues.
+## Project Setup
+
+*Topper* is fully implemented using Java and Maven. As this repo is based on an Eclipse project, one may be able to directly import it as such.
