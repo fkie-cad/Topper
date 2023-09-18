@@ -14,7 +14,7 @@ import com.topper.sstate.TerminationState;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
-@Command(name = "exit", description = "Terminates this process.")
+@Command(name = "exit", mixinStandardHelpOptions = true, version = "1.0", description = "Terminates this process.")
 @CommandLink(states = { SelectionState.class, ExecutionState.class })
 public final class ExitCommand extends PicoCommand {
 

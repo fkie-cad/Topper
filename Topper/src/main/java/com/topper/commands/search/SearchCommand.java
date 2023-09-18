@@ -25,13 +25,13 @@ import picocli.CommandLine.ParentCommand;
 @CommandLink(states = { ExecutionState.class })
 public final class SearchCommand extends PicoCommand {
 	
-	@Option(names = { "-r", "--regex" }, required = false, defaultValue = "", paramLabel = "REGEX", description = "Regular expression to use while searching through the gadgets.")
+	@Option(names = { "-r", "--regex" }, defaultValue = "", paramLabel = "REGEX", description = "Regular expression to use while searching through the gadgets.")
 	private String regex;
 	
-	@Option(names = { "-u", "--upper" }, required = false, defaultValue = "-1", paramLabel = "UPPER_BOUND", description = "Upper bound for gadget length matching given regex. Non - positive values are ignored.")
+	@Option(names = { "-u", "--upper" }, defaultValue = "-1", paramLabel = "UPPER_BOUND", description = "Upper bound for gadget length matching given regex. Non - positive values are ignored.")
 	private int upper;
 
-	@Option(names = { "-l", "--lower" }, required = false, defaultValue = "-1", paramLabel = "LOWER_BOUND", description = "Lower bound for gadget length matching given regex. Negative values are ignored.")
+	@Option(names = { "-l", "--lower" }, defaultValue = "-1", paramLabel = "LOWER_BOUND", description = "Lower bound for gadget length matching given regex. Negative values are ignored.")
 	private int lower;
 	
 	@ParentCommand
