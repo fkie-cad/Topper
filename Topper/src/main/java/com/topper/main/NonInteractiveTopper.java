@@ -11,7 +11,7 @@ import org.jline.reader.SyntaxError;
 import org.jline.reader.impl.DefaultParser;
 
 import com.google.common.io.Files;
-import com.topper.commands.PicoTopLevelCommand;
+import com.topper.commands.TopLevelCommand;
 import com.topper.helpers.FileUtil;
 import com.topper.sstate.CommandContext;
 
@@ -50,7 +50,7 @@ public final class NonInteractiveTopper {
 			return;
 		}
 
-		final PicoTopLevelCommand commands = new PicoTopLevelCommand(context);
+		final TopLevelCommand commands = new TopLevelCommand(context);
 		final CommandLine cmd = new CommandLine(commands);
 		cmd.setTrimQuotes(true);
 		cmd.registerConverter(Integer.class, Integer::decode);

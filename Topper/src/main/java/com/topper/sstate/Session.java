@@ -5,7 +5,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.commands.file.BasedGadget;
-import com.topper.commands.file.PicoFileCommand;
+import com.topper.commands.file.FileCommand;
 import com.topper.exceptions.commands.IllegalSessionState;
 import com.topper.exceptions.commands.InternalExecutionException;
 import com.topper.file.ComposedFile;
@@ -21,7 +21,7 @@ import com.topper.main.InteractiveTopper;
 public final class Session {
 
 	/**
-	 * Dex - based file loaded via {@link PicoFileCommand}.
+	 * Dex - based file loaded via {@link FileCommand}.
 	 */
 	@Nullable
 	private ComposedFile loadedFile;
@@ -33,7 +33,7 @@ public final class Session {
 	private ImmutableList<@NonNull BasedGadget> gadgets;
 
 	/**
-	 * Gets current {@link ComposedFile} loaded via {@link PicoFileCommand}.
+	 * Gets current {@link ComposedFile} loaded via {@link FileCommand}.
 	 * 
 	 * @throws InternalExecutionException If loaded file is <code>null</code>.
 	 */

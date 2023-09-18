@@ -8,7 +8,7 @@ import java.util.regex.PatternSyntaxException;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.commands.PicoCommand;
-import com.topper.commands.PicoTopLevelCommand;
+import com.topper.commands.TopLevelCommand;
 import com.topper.commands.file.BasedGadget;
 import com.topper.exceptions.commands.IllegalCommandException;
 import com.topper.exceptions.commands.IllegalSessionState;
@@ -23,7 +23,7 @@ import picocli.CommandLine.ParentCommand;
 
 @Command(name = "search", mixinStandardHelpOptions = true, version = "1.0", description = "Searches for a regular expression in the string representation of all extracted gadgets.")
 @CommandLink(states = { ExecutionState.class })
-public final class PicoSearchCommand extends PicoCommand {
+public final class SearchCommand extends PicoCommand {
 	
 	@Option(names = { "-r", "--regex" }, required = false, defaultValue = "", paramLabel = "REGEX", description = "Regular expression to use while searching through the gadgets.")
 	private String regex;
@@ -35,7 +35,7 @@ public final class PicoSearchCommand extends PicoCommand {
 	private int lower;
 	
 	@ParentCommand
-	private PicoTopLevelCommand parent;
+	private TopLevelCommand parent;
 	
 	@Override
 	public final void execute(@NonNull final CommandContext context) throws IllegalCommandException, IllegalSessionState {
@@ -88,7 +88,7 @@ public final class PicoSearchCommand extends PicoCommand {
 	
 	@Override
 	@NonNull 
-	public final PicoTopLevelCommand getTopLevel() {
+	public final TopLevelCommand getTopLevel() {
 		if (this.parent != null) {
 			return this.parent;
 		}

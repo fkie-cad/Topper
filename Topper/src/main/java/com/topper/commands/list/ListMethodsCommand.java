@@ -9,7 +9,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 
 import com.topper.commands.PicoCommand;
-import com.topper.commands.PicoTopLevelCommand;
+import com.topper.commands.TopLevelCommand;
 import com.topper.exceptions.commands.CommandException;
 import com.topper.exceptions.commands.IllegalCommandException;
 import com.topper.file.ComposedFile;
@@ -27,7 +27,7 @@ import picocli.CommandLine.ParentCommand;
 
 @Command(name = "methods", mixinStandardHelpOptions = true, version = "1.0", description = "Lists information on methods provided by loaded file(s).")
 @CommandLink(states = { ExecutionState.class })
-public final class PicoListMethodsCommand extends PicoCommand {
+public final class ListMethodsCommand extends PicoCommand {
 	
 	@Option(names = { "-c", "--class" }, paramLabel = "CLASS", defaultValue = "", description = "Lists all available methods of the requested class.")
 	private String className;
@@ -38,7 +38,7 @@ public final class PicoListMethodsCommand extends PicoCommand {
 	private Pattern pattern;
 	
 	@ParentCommand
-	private PicoListCommand parent;
+	private ListCommand parent;
 
 	@Override
 	public final void execute(final @NonNull CommandContext context) throws CommandException {
@@ -96,7 +96,7 @@ public final class PicoListMethodsCommand extends PicoCommand {
 
 	@Override
 	@NonNull 
-	public final PicoTopLevelCommand getTopLevel() {
+	public final TopLevelCommand getTopLevel() {
 		if (this.parent == null) {
 			throw new UnsupportedOperationException("Cannot access parent before its initialized.");
 		}

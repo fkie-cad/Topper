@@ -21,7 +21,7 @@ public abstract class PicoCommand implements Callable<Integer> {
 		final Map<@NonNull Class<? extends CommandState>, @NonNull Set<@NonNull Class<? extends PicoCommand>>> map = CommandManager
 				.getStateCommandMap();
 
-		final PicoTopLevelCommand parent = this.getTopLevel();
+		final TopLevelCommand parent = this.getTopLevel();
 		final CommandState current = this.getContext().getCurrentState();
 		if (!map.containsKey(current.getClass())
 				|| !map.get(current.getClass()).contains(this.getClass())) {
@@ -54,5 +54,5 @@ public abstract class PicoCommand implements Callable<Integer> {
 	public abstract CommandState next();
 	
 	@NonNull
-	public abstract PicoTopLevelCommand getTopLevel();
+	public abstract TopLevelCommand getTopLevel();
 }

@@ -3,7 +3,7 @@ package com.topper.commands.list;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.commands.PicoCommand;
-import com.topper.commands.PicoTopLevelCommand;
+import com.topper.commands.TopLevelCommand;
 import com.topper.exceptions.commands.CommandException;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
@@ -14,12 +14,12 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
-@Command(name = "list", mixinStandardHelpOptions = true, version = "1.0", subcommands = { PicoListMethodsCommand.class, PicoListTypesCommand.class }, description = "Lists requested, file-related resources.")
+@Command(name = "list", mixinStandardHelpOptions = true, version = "1.0", subcommands = { ListMethodsCommand.class, ListTypesCommand.class }, description = "Lists requested, file-related resources.")
 @CommandLink(states =  { ExecutionState.class })
-public final class PicoListCommand extends PicoCommand {
+public final class ListCommand extends PicoCommand {
 
 	@ParentCommand
-	private PicoTopLevelCommand parent;
+	private TopLevelCommand parent;
 	
 	@Override
 	public final void execute(@NonNull final CommandContext context) throws CommandException {
@@ -35,7 +35,7 @@ public final class PicoListCommand extends PicoCommand {
 	@SuppressWarnings("null")	// cannot be null
 	@Override
 	@NonNull 
-	public final PicoTopLevelCommand getTopLevel() {
+	public final TopLevelCommand getTopLevel() {
 		if (this.parent == null) {
 			throw new UnsupportedOperationException("Cannot access parent before its initialized.");
 		}

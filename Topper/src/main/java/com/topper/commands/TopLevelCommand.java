@@ -5,26 +5,26 @@ import java.io.PrintWriter;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jline.reader.LineReader;
 
-import com.topper.commands.attack.PicoAttackCommand;
-import com.topper.commands.exit.PicoExitCommand;
-import com.topper.commands.file.PicoFileCommand;
-import com.topper.commands.list.PicoListCommand;
-import com.topper.commands.search.PicoSearchCommand;
+import com.topper.commands.attack.AttackCommand;
+import com.topper.commands.exit.ExitCommand;
+import com.topper.commands.file.FileCommand;
+import com.topper.commands.list.ListCommand;
+import com.topper.commands.search.SearchCommand;
 import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
-@Command(name = "", subcommands = { PicoFileCommand.class, PicoExitCommand.class, PicoSearchCommand.class,
-		PicoAttackCommand.class, PicoListCommand.class, CommandLine.HelpCommand.class }, description = "Top level command for grouping other commands.")
-public final class PicoTopLevelCommand implements Runnable {
+@Command(name = "", subcommands = { FileCommand.class, ExitCommand.class, SearchCommand.class,
+		AttackCommand.class, ListCommand.class, CommandLine.HelpCommand.class }, description = "Top level command for grouping other commands.")
+public final class TopLevelCommand implements Runnable {
 
 	private PrintWriter out;
 
 	@NonNull
 	private final CommandContext context;
 
-	public PicoTopLevelCommand(@NonNull final CommandContext context) {
+	public TopLevelCommand(@NonNull final CommandContext context) {
 		this.context = context;
 	}
 

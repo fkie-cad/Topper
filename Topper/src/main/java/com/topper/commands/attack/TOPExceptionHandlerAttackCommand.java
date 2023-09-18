@@ -12,7 +12,7 @@ import org.jf.dexlib2.dexbacked.reference.DexBackedTypeReference;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.commands.PicoCommand;
-import com.topper.commands.PicoTopLevelCommand;
+import com.topper.commands.TopLevelCommand;
 import com.topper.dex.decompiler.DecompilationResult;
 import com.topper.dex.decompiler.Decompiler;
 import com.topper.dex.decompiler.SmaliDecompiler;
@@ -43,7 +43,7 @@ import picocli.CommandLine.ParentCommand;
  * */
 @Command(name = "ctop", mixinStandardHelpOptions = true, version = "1.0", description = "Computes a list of patches to apply to the loaded file to achieve gadget chain execution.")
 @CommandLink(states = { ExecutionState.class })
-public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
+public final class TOPExceptionHandlerAttackCommand extends PicoCommand {
 
 	@Option(names = { "-g",
 			"--gadgets" }, paramLabel = "GADGETS", required = true, arity = "1..*", split = ",", description = "Ordered list of gadget offsets relative to the loaded file's base (often base.vdex).")
@@ -85,7 +85,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 	private boolean tuple;
 	
 	@ParentCommand
-	private PicoAttackCommand parent;
+	private AttackCommand parent;
 
 	@Override
 	public final void execute(@NonNull final CommandContext context) throws CommandException {
@@ -124,7 +124,7 @@ public final class PicoTOPExceptionHandlerAttackCommand extends PicoCommand {
 
 	@Override
 	@NonNull
-	public final PicoTopLevelCommand getTopLevel() {
+	public final TopLevelCommand getTopLevel() {
 		if (this.parent == null) {
 			throw new UnsupportedOperationException("Cannot access parent before its initialized.");
 		}

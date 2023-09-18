@@ -3,7 +3,7 @@ package com.topper.commands.attack;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.commands.PicoCommand;
-import com.topper.commands.PicoTopLevelCommand;
+import com.topper.commands.TopLevelCommand;
 import com.topper.exceptions.commands.CommandException;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
@@ -15,12 +15,12 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "attack", mixinStandardHelpOptions = true, version = "1.0", subcommands = {
-		PicoTOPExceptionHandlerAttackCommand.class }, description = "Computes an attack to use on the loaded file given special assumptions.")
+		TOPExceptionHandlerAttackCommand.class }, description = "Computes an attack to use on the loaded file given special assumptions.")
 @CommandLink(states = { ExecutionState.class })
-public final class PicoAttackCommand extends PicoCommand {
+public final class AttackCommand extends PicoCommand {
 
 	@ParentCommand
-	private PicoTopLevelCommand parent;
+	private TopLevelCommand parent;
 	
 	@Override
 	public final void execute(@NonNull final CommandContext context) throws CommandException {
@@ -36,7 +36,7 @@ public final class PicoAttackCommand extends PicoCommand {
 	@SuppressWarnings("null")	// cannot be null
 	@Override
 	@NonNull 
-	public final PicoTopLevelCommand getTopLevel() {
+	public final TopLevelCommand getTopLevel() {
 		if (this.parent == null) {
 			throw new UnsupportedOperationException("Cannot access parent before its initialized.");
 		}

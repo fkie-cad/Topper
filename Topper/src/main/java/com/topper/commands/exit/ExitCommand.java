@@ -3,7 +3,7 @@ package com.topper.commands.exit;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.topper.commands.PicoCommand;
-import com.topper.commands.PicoTopLevelCommand;
+import com.topper.commands.TopLevelCommand;
 import com.topper.sstate.CommandState;
 import com.topper.sstate.ExecutionState;
 import com.topper.sstate.CommandLink;
@@ -16,10 +16,10 @@ import picocli.CommandLine.ParentCommand;
 
 @Command(name = "exit", description = "Terminates this process.")
 @CommandLink(states = { SelectionState.class, ExecutionState.class })
-public final class PicoExitCommand extends PicoCommand {
+public final class ExitCommand extends PicoCommand {
 
 	@ParentCommand
-	private PicoTopLevelCommand parent;
+	private TopLevelCommand parent;
 
 	@Override
 	public void execute(@NonNull CommandContext context) {
@@ -35,7 +35,7 @@ public final class PicoExitCommand extends PicoCommand {
 	@SuppressWarnings("null")	// cannot be null
 	@Override
 	@NonNull 
-	public final PicoTopLevelCommand getTopLevel() {
+	public final TopLevelCommand getTopLevel() {
 		if (this.parent == null) {
 			throw new UnsupportedOperationException("Cannot access parent before its initialized.");
 		}

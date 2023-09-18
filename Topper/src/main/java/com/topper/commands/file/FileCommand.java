@@ -9,7 +9,7 @@ import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 
 import com.google.common.collect.ImmutableList;
 import com.topper.commands.PicoCommand;
-import com.topper.commands.PicoTopLevelCommand;
+import com.topper.commands.TopLevelCommand;
 import com.topper.configuration.TopperConfig;
 import com.topper.dex.pipeline.DecompilationDriver;
 import com.topper.dex.pipeline.PipelineArgs;
@@ -37,7 +37,7 @@ import picocli.CommandLine.ParentCommand;
 
 @Command(name = "file", mixinStandardHelpOptions = true, version = "1.0", description = "Loads a given file from file system and parses it.")
 @CommandLink(states = { SelectionState.class, ExecutionState.class })
-public final class PicoFileCommand extends PicoCommand {
+public final class FileCommand extends PicoCommand {
 
 
 	@Option(names = { "-t",
@@ -52,7 +52,7 @@ public final class PicoFileCommand extends PicoCommand {
 	private int index;
 	
 	@ParentCommand
-	private PicoTopLevelCommand parent;
+	private TopLevelCommand parent;
 	
 	@Override
 	public final void execute(@NonNull final CommandContext context) throws IllegalCommandException, InternalExecutionException {
@@ -157,7 +157,7 @@ public final class PicoFileCommand extends PicoCommand {
 	@SuppressWarnings("null")
 	@Override
 	@NonNull 
-	public final PicoTopLevelCommand getTopLevel() {
+	public final TopLevelCommand getTopLevel() {
 		if (this.parent == null) {
 			throw new UnsupportedOperationException("Cannot access parent before its initialized.");
 		}

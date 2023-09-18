@@ -25,7 +25,7 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.widget.TailTipWidgets;
 
-import com.topper.commands.PicoTopLevelCommand;
+import com.topper.commands.TopLevelCommand;
 import com.topper.sstate.CommandContext;
 
 import picocli.CommandLine;
@@ -72,7 +72,7 @@ public final class InteractiveTopper {
 			builtins.alias("bindkey", "keymap");
 
 			// set up picocli commands
-			final PicoTopLevelCommand commands = new PicoTopLevelCommand(context);
+			final TopLevelCommand commands = new TopLevelCommand(context);
 			final PicocliCommandsFactory factory = new PicocliCommandsFactory();
 			final CommandLine cmd = new CommandLine(commands, factory);
 			cmd.setTrimQuotes(true);
