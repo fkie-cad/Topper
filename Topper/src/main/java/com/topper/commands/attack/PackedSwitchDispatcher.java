@@ -30,6 +30,7 @@ public final class PackedSwitchDispatcher implements Dispatcher {
 
 	public PackedSwitchDispatcher(final int offset, final int exceptionVregIndex, final int exceptionTypeIndex,
 			final int pcVregIndex, @NonNull final List<@NonNull Integer> gadgets) {
+		// TODO: Check gadget offsets. I.e. throw instruction address must not be too far aways from dispatcher
 		if (offset < 0) {
 			throw new IllegalArgumentException("Offset of dispatcher must be non - negative.");
 		}

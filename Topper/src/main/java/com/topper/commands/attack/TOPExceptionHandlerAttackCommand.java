@@ -74,7 +74,7 @@ public final class TOPExceptionHandlerAttackCommand extends PicoCommand {
 	private int handlerDispatcherPadding;
 
 	@Option(names = { "-a",
-			"--alignment" }, paramLabel = "PADDING", defaultValue = "8", description = "Determines the alignment to use for describing the patches. Patch data is always divisible by alignment and refers to an aligned offset. Useful for Write - What - Where conditions with fixed - sized writes (qword,...).")
+			"--alignment" }, paramLabel = "ALIGNMENT", defaultValue = "8", description = "Determines the alignment to use for describing the patches. Patch data is always divisible by alignment and refers to an aligned offset. Useful for Write - What - Where conditions with fixed - sized writes (qword,...).")
 	private int alignment;
 
 	@Option(names = { "-v",

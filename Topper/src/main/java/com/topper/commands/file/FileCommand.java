@@ -92,6 +92,9 @@ public final class FileCommand extends PicoCommand {
 			case VDEX: {
 				final VDexFile vdex = new VDexFile(file.getName(), content, context.getConfig());
 				if (this.index >= vdex.getDexFiles().size()) {
+					if (vdex.getDexFiles().size() <= 0) {
+						throw new IllegalCommandException(".vdex file does not contain .dex section.");
+					}
 					throw new IllegalCommandException("Dex index exceeds total number of dex files in vdex (" + vdex.getDexFiles().size() + ").");
 				}
 				current = vdex.getDexFiles().get(this.index).getDexFile();
