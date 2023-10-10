@@ -6,11 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.jf.dexlib2.dexbacked.DexBackedDexFile;
 import org.jf.dexlib2.dexbacked.raw.CodeItem;
-import org.jf.dexlib2.dexbacked.reference.DexBackedTypeReference;
 
-import com.google.common.collect.ImmutableList;
 import com.topper.commands.PicoCommand;
 import com.topper.commands.TopLevelCommand;
 import com.topper.dex.decompiler.DecompilationResult;
@@ -22,9 +19,7 @@ import com.topper.exceptions.commands.IllegalCommandException;
 import com.topper.exceptions.commands.IllegalSessionState;
 import com.topper.exceptions.commands.InternalExecutionException;
 import com.topper.file.ComposedFile;
-import com.topper.file.DexFile;
 import com.topper.helpers.BufferHelper;
-import com.topper.helpers.DexFileHelper;
 import com.topper.sstate.CommandContext;
 import com.topper.sstate.CommandLink;
 import com.topper.sstate.CommandState;
@@ -135,7 +130,6 @@ public final class TOPExceptionHandlerAttackCommand extends PicoCommand {
 
 		@NonNull final Session session = this.getContext().getSession();
 		@NonNull final ComposedFile loaded = session.getLoadedFile();
-		@NonNull final ImmutableList<@NonNull DexFile> files = session.getDexFiles();
 
 		// Check gadgets exist and point into the loaded file.
 		if (this.gadgets == null) {
@@ -163,53 +157,11 @@ public final class TOPExceptionHandlerAttackCommand extends PicoCommand {
 					+ Integer.toHexString(loaded.getBuffer().length) + ".");
 		}
 		
-		// Method offset must reference an actual method.
-		DexBackedDexFile referenced = null;
-		final boolean[] match = new boolean[1];	// Java stuff...
-		for (@NonNull final DexFile file : files) {
-			if (!(this.methodOffset >= file.getOffset() && this.methodOffset < file.getOffset() + file.getBuffer().length)) {
-				continue;
-			}
-			
-			match[0] = false;
-			DexFileHelper.iterateMethods(file.getDexFile(), method -> {
-				try {
-					if (file.getOffset() + DexFileHelper.getMethodOffset(method) == this.methodOffset) {
-						match[0] = true;
-						return;
-					}
-				} catch (NoSuchFieldException | SecurityException | IllegalArgumentException
-						| IllegalAccessException e) {}
-			});
-			
-			if (match[0]) {
-				referenced = file.getDexFile();
-				break;
-			}
-		}
-		if (referenced == null) {
-			throw new IllegalCommandException("Method offset does not refer to a valid method.");
-		}
-		
 		// Check type index
 		if (this.exceptionTypeIndex < 0) {
 			throw new IllegalCommandException("Exception type index must be non - negative.");
 		}
-		
-		// There must exist a file containing the method referenced by methodOffset
-		// that also knows about the exception type.
-		boolean exists = false;
-		for (final DexBackedTypeReference type : referenced.getTypeReferences()) {
-			if (type == null) {
-				continue;
-			}
-			exists |= (type.typeIndex == this.exceptionTypeIndex);
-		}
 
-		if (!exists) {
-			throw new IllegalCommandException("Exception type index is invalid in .dex file pointed to by method offset.");
-		}
-		
 		// Check exception vreg index
 		if (this.exceptionVregIndex < 0) {
 			throw new IllegalCommandException("Exception vreg index must be non - negative.");
